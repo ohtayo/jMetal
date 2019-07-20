@@ -303,7 +303,7 @@ public class FAME<S extends Solution<?>> extends SteadyStateNSGAII<S> {
   }
 
   @Override
-  protected List<S> createInitialPopulation() {
+  public List<S> createInitialPopulation() {
     SpatialSpreadDeviation distancia = new SpatialSpreadDeviation();
     List<S> population = new ArrayList<>(getMaxPopulationSize());
     for (int i = 0; i < getMaxPopulationSize(); i++) {
