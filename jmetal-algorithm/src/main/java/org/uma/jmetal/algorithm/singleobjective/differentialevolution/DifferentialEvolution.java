@@ -7,6 +7,9 @@ import org.uma.jmetal.problem.DoubleProblem;
 import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.util.comparator.ObjectiveComparator;
 import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
+import org.uma.jmetal.util.fileoutput.ConstraintListOutput;
+import org.uma.jmetal.util.fileoutput.SolutionListOutput;
+import org.uma.jmetal.util.fileoutput.impl.DefaultFileOutputContext;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,6 +28,8 @@ public class DifferentialEvolution extends AbstractDifferentialEvolution<DoubleS
   private Comparator<DoubleSolution> comparator;
 
   private int evaluations;
+  private int currentGeneration;
+  protected List<DoubleSolution> initialPopulation;
 
   /**
    * Constructor
@@ -39,7 +44,7 @@ public class DifferentialEvolution extends AbstractDifferentialEvolution<DoubleS
   public DifferentialEvolution(DoubleProblem problem, int maxEvaluations, int populationSize,
       DifferentialEvolutionCrossover crossoverOperator,
       DifferentialEvolutionSelection selectionOperator, SolutionListEvaluator<DoubleSolution> evaluator) {
-    setProblem(problem); ;
+    setProblem(problem);
     this.maxEvaluations = maxEvaluations;
     this.populationSize = populationSize;
     this.crossoverOperator = crossoverOperator;
@@ -47,8 +52,26 @@ public class DifferentialEvolution extends AbstractDifferentialEvolution<DoubleS
     this.evaluator = evaluator;
 
     comparator = new ObjectiveComparator<DoubleSolution>(0);
+    this.initialPopulation = null;
   }
-  
+
+  public DifferentialEvolution(DoubleProblem problem, int maxEvaluations, int populationSize,
+                               DifferentialEvolutionCrossover crossoverOperator,
+                               DifferentialEvolutionSelection selectionOperator,
+                               SolutionListEvaluator<DoubleSolution> evaluator,
+                               Comparator<DoubleSolution> comparator) {
+    setProblem(problem);
+    this.maxEvaluations = maxEvaluations;
+    this.populationSize = populationSize;
+    this.crossoverOperator = crossoverOperator;
+    this.selectionOperator = selectionOperator;
+    this.evaluator = evaluator;
+
+    this.comparator = comparator;
+    this.initialPopulation = null;
+  }
+
+
   public int getEvaluations() {
     return evaluations;
   }
@@ -59,21 +82,47 @@ public class DifferentialEvolution extends AbstractDifferentialEvolution<DoubleS
 
   @Override protected void initProgress() {
     evaluations = populationSize;
+    currentGeneration = 1;
+    dump();
   }
 
   @Override protected void updateProgress() {
     evaluations += populationSize;
+    currentGeneration += 1;
+    dump();
+  }
+
+  protected void dump(){
+    // dump solution list in the searching
+    List<DoubleSolution> population = getPopulation();
+    new SolutionListOutput(population)
+            .setVarFileOutputContext(new DefaultFileOutputContext("./result/variable" + currentGeneration + ".csv"))
+            .setFunFileOutputContext(new DefaultFileOutputContext("./result/fitness" + currentGeneration + ".csv"))
+            .setSeparator(",")
+            .print();
+    new ConstraintListOutput<DoubleSolution>(population)
+            .setConFileOutputContext(new DefaultFileOutputContext("./result/constraint" + currentGeneration + ".csv"))
+            .setSeparator(",")
+            .print();
   }
 
   @Override protected boolean isStoppingConditionReached() {
     return evaluations >= maxEvaluations;
   }
 
-  @Override protected List<DoubleSolution> createInitialPopulation() {
+  public void setInitialPopulation(List<DoubleSolution> initialPopulation) {
+    this.initialPopulation = initialPopulation;
+  }
+  @Override
+  public List<DoubleSolution> createInitialPopulation(){
     List<DoubleSolution> population = new ArrayList<>(populationSize);
-    for (int i = 0; i < populationSize; i++) {
-      DoubleSolution newIndividual = getProblem().createSolution();
-      population.add(newIndividual);
+    if(this.initialPopulation == null){
+      for (int i = 0; i < populationSize; i++) {
+        DoubleSolution newIndividual = getProblem().createSolution();
+        population.add(newIndividual);
+      }
+    }else{
+      population = this.initialPopulation;
     }
     return population;
   }
