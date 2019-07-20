@@ -7,6 +7,8 @@ import org.uma.jmetal.operator.impl.mutation.PolynomialMutation;
 import org.uma.jmetal.problem.Problem;
 import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.util.AlgorithmBuilder;
+import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
+import org.uma.jmetal.util.evaluator.impl.SequentialSolutionListEvaluator;
 
 /**
  * Builder class for algorithm MOEA/D and variants
@@ -15,7 +17,7 @@ import org.uma.jmetal.util.AlgorithmBuilder;
  * @version 1.0
  */
 public class MOEADBuilder implements AlgorithmBuilder<AbstractMOEAD<DoubleSolution>> {
-  public enum Variant {MOEAD, ConstraintMOEAD, MOEADDRA, MOEADSTM, MOEADD} ;
+  public enum Variant {MOEAD, ConstraintMOEAD, MOEADDRA, MOEADSTM, MOEADD, ParallelConstraintMOEAD} ;
 
   protected Problem<DoubleSolution> problem ;
 
@@ -41,6 +43,8 @@ public class MOEADBuilder implements AlgorithmBuilder<AbstractMOEAD<DoubleSoluti
 
   protected Variant moeadVariant ;
 
+  protected SolutionListEvaluator<DoubleSolution> evaluator;
+
   /** Constructor */
   public MOEADBuilder(Problem<DoubleSolution> problem, Variant variant) {
     this.problem = problem ;
@@ -56,6 +60,7 @@ public class MOEADBuilder implements AlgorithmBuilder<AbstractMOEAD<DoubleSoluti
     neighborSize = 20 ;
     numberOfThreads = 1 ;
     moeadVariant = variant ;
+    evaluator = new SequentialSolutionListEvaluator<DoubleSolution>();
   }
 
   /* Getters/Setters */
@@ -102,6 +107,8 @@ public class MOEADBuilder implements AlgorithmBuilder<AbstractMOEAD<DoubleSoluti
   public int getNumberOfThreads() {
     return numberOfThreads ;
   }
+
+  public SolutionListEvaluator<DoubleSolution> getEvaluator() { return evaluator; }
 
   public MOEADBuilder setPopulationSize(int populationSize) {
     this.populationSize = populationSize;
@@ -169,6 +176,12 @@ public class MOEADBuilder implements AlgorithmBuilder<AbstractMOEAD<DoubleSoluti
     return this ;
   }
 
+  public MOEADBuilder setEvaluator(SolutionListEvaluator<DoubleSolution> evaluator){
+    this.evaluator = evaluator;
+
+    return this;
+  }
+
   public AbstractMOEAD<DoubleSolution> build() {
     AbstractMOEAD<DoubleSolution> algorithm = null ;
     if (moeadVariant.equals(Variant.MOEAD)) {
@@ -191,6 +204,10 @@ public class MOEADBuilder implements AlgorithmBuilder<AbstractMOEAD<DoubleSoluti
       algorithm = new MOEADD<>(problem, populationSize, resultPopulationSize, maxEvaluations, crossover, mutation,
               functionType, dataDirectory, neighborhoodSelectionProbability,
               maximumNumberOfReplacedSolutions, neighborSize);
+    }else if (moeadVariant.equals(Variant.ParallelConstraintMOEAD)) {
+      algorithm =  new ParallelConstraintMOEAD(problem, populationSize, resultPopulationSize, maxEvaluations, mutation,
+              crossover, functionType, dataDirectory, neighborhoodSelectionProbability,
+              maximumNumberOfReplacedSolutions, neighborSize, evaluator);
     }
     return algorithm ;
   }
