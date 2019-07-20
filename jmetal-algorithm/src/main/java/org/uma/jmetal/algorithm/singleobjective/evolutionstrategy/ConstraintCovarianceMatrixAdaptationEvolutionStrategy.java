@@ -584,11 +584,11 @@ public class ConstraintCovarianceMatrixAdaptationEvolutionStrategy
   }
 
   @Override public String getName() {
-    return "CMAES" ;
+    return "Constraint CMAES" ;
   }
 
   @Override public String getDescription() {
-    return "Covariance Matrix Adaptation Evolution Strategy" ;
+    return "Covariance Matrix Adaptation Evolution Strategy supports constraints" ;
   }
 
 }
