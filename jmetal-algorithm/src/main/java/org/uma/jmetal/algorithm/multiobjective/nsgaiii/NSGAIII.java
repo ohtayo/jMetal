@@ -7,6 +7,9 @@ import org.uma.jmetal.solution.Solution;
 import org.uma.jmetal.util.JMetalLogger;
 import org.uma.jmetal.util.SolutionListUtils;
 import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
+import org.uma.jmetal.util.fileoutput.ConstraintListOutput;
+import org.uma.jmetal.util.fileoutput.SolutionListOutput;
+import org.uma.jmetal.util.fileoutput.impl.DefaultFileOutputContext;
 import org.uma.jmetal.util.solutionattribute.Ranking;
 import org.uma.jmetal.util.solutionattribute.impl.DominanceRanking;
 
@@ -31,6 +34,8 @@ public class NSGAIII<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, 
   protected Vector<Integer> numberOfDivisions  ;
   protected List<ReferencePoint<S>> referencePoints = new Vector<>() ;
 
+  protected List<S> initialPopulation;
+
   /** Constructor */
   public NSGAIII(NSGAIIIBuilder<S> builder) { // can be created from the NSGAIIIBuilder within the same package
     super(builder.getProblem()) ;
@@ -44,7 +49,8 @@ public class NSGAIII<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, 
 
     /// NSGAIII
     numberOfDivisions = new Vector<>(1) ;
-    numberOfDivisions.add(12) ; // Default value for 3D problems
+    //numberOfDivisions.add(12) ; // Default value for 3D problems
+    numberOfDivisions.add(47) ; // 仮設定
 
     (new ReferencePoint<S>()).generateReferencePoints(referencePoints,getProblem().getNumberOfObjectives() , numberOfDivisions);
 
@@ -58,14 +64,59 @@ public class NSGAIII<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, 
     JMetalLogger.logger.info("rpssize: " + referencePoints.size()); ;
   }
 
+  public void setInitialPopulation(List<S> initialPopulation) {
+    this.initialPopulation = initialPopulation;
+  }
+  @Override
+  public List<S> createInitialPopulation(){
+    List<S> population = new ArrayList<>(getMaxPopulationSize());
+    if(this.initialPopulation == null){
+      for (int i = 0; i < getMaxPopulationSize(); i++) {
+        S newIndividual = getProblem().createSolution();
+        population.add(newIndividual);
+      }
+    }else{
+      for (int i = 0; i < getMaxPopulationSize(); i++) {
+        population.add(this.initialPopulation.get(i));
+      }
+    }
+    return population;
+  }
+
   @Override
   protected void initProgress() {
     iterations = 1 ;
+    dump();
   }
 
   @Override
   protected void updateProgress() {
     iterations++ ;
+    dump();
+  }
+
+  protected void dump(){
+    // dump solution list in the searching
+    List<S> result = getResult();
+    new SolutionListOutput(result)
+            .setVarFileOutputContext(new DefaultFileOutputContext("./result/variable" + iterations + ".csv"))
+            .setFunFileOutputContext(new DefaultFileOutputContext("./result/fitness" + iterations + ".csv"))
+            .setSeparator(",")
+            .print();
+    new ConstraintListOutput<S>(result)
+            .setConFileOutputContext(new DefaultFileOutputContext("./result/constraint" + iterations + ".csv"))
+            .setSeparator(",")
+            .print();
+    List<S> allPopulation = getPopulation();
+    new SolutionListOutput(allPopulation)
+            .setVarFileOutputContext(new DefaultFileOutputContext("./result/variableall" + iterations + ".csv"))
+            .setFunFileOutputContext(new DefaultFileOutputContext("./result/fitnessall" + iterations + ".csv"))
+            .setSeparator(",")
+            .print();
+    new ConstraintListOutput<S>(result)
+            .setConFileOutputContext(new DefaultFileOutputContext("./result/constraintall" + iterations + ".csv"))
+            .setSeparator(",")
+            .print();
   }
 
   @Override

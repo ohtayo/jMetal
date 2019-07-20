@@ -16,6 +16,7 @@ public class OMOPSOBuilder implements AlgorithmBuilder<OMOPSO> {
   private int swarmSize = 100 ;
   private int archiveSize = 100 ;
   private int maxIterations = 25000 ;
+  private double eta = 0.0075;
 
   private UniformMutation uniformMutation ;
   private NonUniformMutation nonUniformMutation ;
@@ -39,6 +40,12 @@ public class OMOPSOBuilder implements AlgorithmBuilder<OMOPSO> {
 
   public OMOPSOBuilder setMaxIterations(int maxIterations) {
     this.maxIterations = maxIterations ;
+
+    return this ;
+  }
+
+  public OMOPSOBuilder setEta(double eta) {
+    this.eta = eta ;
 
     return this ;
   }
@@ -68,6 +75,10 @@ public class OMOPSOBuilder implements AlgorithmBuilder<OMOPSO> {
     return maxIterations;
   }
 
+  public double getEta() {
+    return eta;
+  }
+
   public UniformMutation getUniformMutation() {
     return uniformMutation;
   }
@@ -76,8 +87,10 @@ public class OMOPSOBuilder implements AlgorithmBuilder<OMOPSO> {
     return nonUniformMutation;
   }
 
+  public SolutionListEvaluator<DoubleSolution> getSolutionListEvaluator() { return evaluator; }
+
   public OMOPSO build() {
     return new OMOPSO(problem, evaluator, swarmSize, maxIterations, archiveSize, uniformMutation,
-        nonUniformMutation) ;
+        nonUniformMutation, eta) ;
   }
 }

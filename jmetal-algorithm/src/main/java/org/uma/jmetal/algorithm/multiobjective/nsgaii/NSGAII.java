@@ -10,6 +10,9 @@ import org.uma.jmetal.solution.Solution;
 import org.uma.jmetal.util.SolutionListUtils;
 import org.uma.jmetal.util.comparator.DominanceComparator;
 import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
+import org.uma.jmetal.util.fileoutput.ConstraintListOutput;
+import org.uma.jmetal.util.fileoutput.SolutionListOutput;
+import org.uma.jmetal.util.fileoutput.impl.DefaultFileOutputContext;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -25,10 +28,13 @@ public class NSGAII<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, L
   protected final SolutionListEvaluator<S> evaluator;
 
   protected int evaluations;
+  private int currentGeneration;
   protected Comparator<S> dominanceComparator ;
 
   protected int matingPoolSize;
   protected int offspringPopulationSize ;
+
+  protected List<S> initialPopulation;
 
   /**
    * Constructor
@@ -61,14 +67,50 @@ public class NSGAII<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, L
 
     this.matingPoolSize = matingPoolSize ;
     this.offspringPopulationSize = offspringPopulationSize ;
+
+    this.initialPopulation = null;
+  }
+
+  public void setInitialPopulation(List<S> initialPopulation) {
+    this.initialPopulation = initialPopulation;
+  }
+  @Override
+  public List<S> createInitialPopulation(){
+    List<S> population = new ArrayList<>(getMaxPopulationSize());
+    if(this.initialPopulation == null){
+      for (int i = 0; i < getMaxPopulationSize(); i++) {
+        S newIndividual = getProblem().createSolution();
+        population.add(newIndividual);
+      }
+    }else{
+      population = this.initialPopulation;
+    }
+    return population;
   }
 
   @Override protected void initProgress() {
+    currentGeneration = 1;
     evaluations = getMaxPopulationSize();
+    dump();
   }
 
   @Override protected void updateProgress() {
+    currentGeneration += 1;
     evaluations += offspringPopulationSize ;
+    dump();
+  }
+
+  protected void dump(){
+    List<S> population = getResult();
+    new SolutionListOutput(population)
+            .setVarFileOutputContext(new DefaultFileOutputContext("./result/variable" + currentGeneration + ".csv"))
+            .setFunFileOutputContext(new DefaultFileOutputContext("./result/fitness" + currentGeneration + ".csv"))
+            .setSeparator(",")
+            .print();
+    new ConstraintListOutput<S>(population)
+            .setConFileOutputContext(new DefaultFileOutputContext("./result/constraint" + currentGeneration + ".csv"))
+            .setSeparator(",")
+            .print();
   }
 
   @Override protected boolean isStoppingConditionReached() {

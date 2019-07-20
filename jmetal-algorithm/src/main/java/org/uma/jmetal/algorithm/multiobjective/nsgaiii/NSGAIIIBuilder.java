@@ -96,6 +96,8 @@ public class NSGAIIIBuilder<S extends Solution<?>> implements AlgorithmBuilder<N
     return selectionOperator;
   }
 
+  public SolutionListEvaluator<S> getSolutionListEvaluator() { return evaluator; }
+
   public NSGAIII<S> build() {
     return new NSGAIII<>(this) ;
   }

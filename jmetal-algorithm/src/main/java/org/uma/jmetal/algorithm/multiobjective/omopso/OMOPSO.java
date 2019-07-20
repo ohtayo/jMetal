@@ -10,6 +10,9 @@ import org.uma.jmetal.util.archive.impl.NonDominatedSolutionListArchive;
 import org.uma.jmetal.util.comparator.CrowdingDistanceComparator;
 import org.uma.jmetal.util.comparator.DominanceComparator;
 import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
+import org.uma.jmetal.util.fileoutput.ConstraintListOutput;
+import org.uma.jmetal.util.fileoutput.SolutionListOutput;
+import org.uma.jmetal.util.fileoutput.impl.DefaultFileOutputContext;
 import org.uma.jmetal.util.pseudorandom.JMetalRandom;
 import org.uma.jmetal.util.solutionattribute.impl.CrowdingDistance;
 
@@ -42,15 +45,15 @@ public class OMOPSO extends AbstractParticleSwarmOptimization<DoubleSolution, Li
   private UniformMutation uniformMutation;
   private NonUniformMutation nonUniformMutation;
 
-  private double eta = 0.0075;
-
   private JMetalRandom randomGenerator;
   private CrowdingDistance<DoubleSolution> crowdingDistance;
+
+  private List<DoubleSolution> initialSwarm;
 
   /** Constructor */
   public OMOPSO(DoubleProblem problem, SolutionListEvaluator<DoubleSolution> evaluator,
       int swarmSize, int maxIterations, int archiveSize, UniformMutation uniformMutation,
-      NonUniformMutation nonUniformMutation) {
+      NonUniformMutation nonUniformMutation, double eta) {
     this.problem = problem ;
     this.evaluator = evaluator ;
 
@@ -72,33 +75,65 @@ public class OMOPSO extends AbstractParticleSwarmOptimization<DoubleSolution, Li
 
     randomGenerator = JMetalRandom.getInstance() ;
     crowdingDistance = new CrowdingDistance<DoubleSolution>();
+
+    this.initialSwarm = null;
   }
 
 
   @Override protected void initProgress() {
     currentIteration = 1;
     crowdingDistance.computeDensityEstimator(leaderArchive.getSolutionList());
+    dump();
   }
 
   @Override protected void updateProgress() {
     currentIteration += 1;
     crowdingDistance.computeDensityEstimator(leaderArchive.getSolutionList());
+    dump();
+  }
+
+  protected void dump(){
+    // dump solution list in the searching
+    List<DoubleSolution> epsilon = getResult();
+    new SolutionListOutput(epsilon)
+            .setVarFileOutputContext(new DefaultFileOutputContext("./result/epsilonPosition" + currentIteration + ".csv"))
+            .setFunFileOutputContext(new DefaultFileOutputContext("./result/epsilonFitness" + currentIteration + ".csv"))
+            .setSeparator(",")
+            .print();
+    new ConstraintListOutput<DoubleSolution>(epsilon)
+            .setConFileOutputContext(new DefaultFileOutputContext("./result/epsilonConstraint" + currentIteration + ".csv"))
+            .setSeparator(",")
+            .print();
+    List<DoubleSolution> leader = this.leaderArchive.getSolutionList();
+    new SolutionListOutput(leader)
+            .setVarFileOutputContext(new DefaultFileOutputContext("./result/leaderPosition" + currentIteration + ".csv"))
+            .setFunFileOutputContext(new DefaultFileOutputContext("./result/leaderFitness" + currentIteration + ".csv"))
+            .setSeparator(",")
+            .print();
+    new ConstraintListOutput<DoubleSolution>(leader)
+            .setConFileOutputContext(new DefaultFileOutputContext("./result/leaderConstraint" + currentIteration + ".csv"))
+            .setSeparator(",")
+            .print();
   }
 
   @Override protected boolean isStoppingConditionReached() {
     return currentIteration >= maxIterations;
   }
 
+  public void setInitialSwarm(List<DoubleSolution> initialSwarm) {
+    this.initialSwarm = initialSwarm;
+  }
   @Override
-  protected List<DoubleSolution> createInitialSwarm() {
+  public List<DoubleSolution> createInitialSwarm(){
     List<DoubleSolution> swarm = new ArrayList<>(swarmSize);
-
-    DoubleSolution newSolution;
-    for (int i = 0; i < swarmSize; i++) {
-      newSolution = problem.createSolution();
-      swarm.add(newSolution);
+    if(this.initialSwarm == null){
+      for (int i = 0; i < swarmSize; i++) {
+        DoubleSolution newIndividual = problem.createSolution();
+        swarm.add(newIndividual);
+      }
+    }else{
+      swarm = this.initialSwarm;
     }
-
     return swarm;
   }
 
