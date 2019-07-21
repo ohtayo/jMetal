@@ -24,6 +24,8 @@ public class ZEBRefModel2ObjDiffConPMV extends AbstractDoubleProblem {
   public OverallConstraintViolation<DoubleSolution> overallConstraintViolationDegree ;
   public NumberOfViolatedConstraints<DoubleSolution> numberOfViolatedConstraints ;
   public double[] constraintViolation ;
+  public List<Double> minValue;
+  public List<Double> maxValue;
   /**
    * Constructor.
    */
@@ -34,16 +36,25 @@ public class ZEBRefModel2ObjDiffConPMV extends AbstractDoubleProblem {
     setNumberOfConstraints(1);
     setName("ZEBRefModel2ObjDiffConPMV") ;
 
+    // set limit of variables
     List<Double> lowerLimit = new ArrayList<>(getNumberOfVariables()) ;
     List<Double> upperLimit = new ArrayList<>(getNumberOfVariables()) ;
-
     for (int i = 0; i < getNumberOfVariables(); i++) {
       lowerLimit.add(0.0);
       upperLimit.add(1.0);
     }
-
     setLowerLimit(lowerLimit);
     setUpperLimit(upperLimit);
+
+    // set limit of objectives
+    minValue = new ArrayList<>(getNumberOfObjectives());
+    maxValue = new ArrayList<>(getNumberOfObjectives());
+    // objective1
+    minValue.add(0.0);
+    maxValue.add(2.0);
+    // objective2
+    minValue.add(2.0e9);
+    maxValue.add(9.0e9);
 
     constraintViolation = new double[getNumberOfConstraints()];
     for(int i=0; i< getNumberOfConstraints(); i++){
@@ -66,15 +77,24 @@ public class ZEBRefModel2ObjDiffConPMV extends AbstractDoubleProblem {
     JMetalLogger.logger.info("energy plus execution at thread:"+threadName);
 
     // 快適度に制約がある問題を計算
+    double[] fitness = new double[getNumberOfObjectives()];
+    double[] constraints = new double[getNumberOfConstraints()];
     EnergyPlusObjectives energyPlusObjectives = new EnergyPlusObjectives(variables);
-    double comfortLevel = energyPlusObjectives.calculateAveragePMV();
-    double totalElectricEnergy = energyPlusObjectives.calculateTotalElectricEnergy();
-    double constraintOfPMV = energyPlusObjectives.countConstraintExceededTimesOfPMV();
+    fitness[0] = Math.abs( energyPlusObjectives.calculateAveragePMV() );
+    fitness[1] = energyPlusObjectives.calculateTotalElectricEnergy();
+    constraints[0] = energyPlusObjectives.countConstraintExceededTimesOfPMV();
+
+    // Normalize objective values
+    double[] normalizedFitness = new double[getNumberOfObjectives()];
+    for(int o=0; o<getNumberOfObjectives(); o++) {
+      normalizedFitness[o] = (fitness[o] - minValue.get(o)) / (maxValue.get(o) - minValue.get(o));
+    }
 
     // 評価値と制約違反量を格納
-    solution.setObjective(0, Math.abs(comfortLevel));
-    solution.setObjective(1, totalElectricEnergy);
-    constraintViolation[0] = constraintOfPMV;
+    for(int o=0; o<getNumberOfObjectives(); o++) {
+      solution.setObjective(o, normalizedFitness[o]);
+    }
+    constraintViolation = constraints;
 
     this.evaluateConstraints(solution);
   }
