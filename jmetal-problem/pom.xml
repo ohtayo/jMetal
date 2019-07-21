@@ -68,5 +68,19 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
         </dependency>
+        <dependency>
+            <groupId>jp.ohtayo</groupId>
+            <artifactId>building-java</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/building-java.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>jp.ohtayo</groupId>
+            <artifactId>commons-java</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/commons-java.jar</systemPath>
+        </dependency>
     </dependencies>
 </project>
