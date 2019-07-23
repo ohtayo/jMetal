@@ -31,7 +31,7 @@ public class ZEBRefModel2ObjDiffConPMV extends AbstractDoubleProblem {
    */
   public ZEBRefModel2ObjDiffConPMV() {
 
-    setNumberOfVariables(20);
+    setNumberOfVariables(19);
     setNumberOfObjectives(2);
     setNumberOfConstraints(1);
     setName("ZEBRefModel2ObjDiffConPMV") ;
