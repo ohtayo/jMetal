@@ -25,7 +25,8 @@ import jp.ohtayo.commons.util.StringUtility;
 
 /**
  * Class for configuring and running the OMOPSO algorithm (parallel version)
- * @author ohtayo <ohta.yoshihiro@outlook.jp>
+ *
+ * @author ohtayo (ohta.yoshihiro@outlook.jp)
  */
 
 public class ParallelOMOPSORunner extends AbstractAlgorithmRunner {
@@ -68,9 +69,10 @@ public class ParallelOMOPSORunner extends AbstractAlgorithmRunner {
       fileNameOfInitialSolutions = args[4];
     } else {
 //      problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModel2ObjDiffConPMV";
-      problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModel4ObjDiffConPMV";
+//      problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModel4ObjDiffConPMV";
+      problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelVarDiff4ObjRegretConPMV";
 //      problemName = "org.uma.jmetal.problem.multiobjective.zdt.ZDT1";
-      numberOfThreads = 2;
+      numberOfThreads = 1;
       iterations = 10;
       particles = 10;
       fileNameOfInitialSolutions = "";

@@ -13,14 +13,18 @@ import java.util.List;
 /**
  * Multi-objective Problem of air-conditioning setpoint temperature schedule optimization using EnergyPlus building energy simulator.
  * Building model: reference building model in the ZEB design guideline
- * Variable : setpoint temperature schedule between 5:00 and 24:00 using difference (length:20)
- * Objective 1: power consumption
- * Objective 2: thermal comfort level
+ * Variable : setpoint temperature schedule between 6:00 and 24:00 using difference (length:19)
+ * Objective 1: thermal comfort level
+ * Objective 2: total power consumption
+ * Objective 3: variation of PMV in the case of weather forecast has upward or downward errors
+ * Objective 4: variation of total power consumption in the case of weather forecast has upward or downward errors
  * Constraint 1: exceedance of comfort level
- * @author ohtayo <ohta.yoshihiro@outlook.jp>
+ * This objective function and optimized results are presented in CEC2019.
+ *
+ * @author ohtayo (ohta.yoshihiro@outlook.jp)
  */
 @SuppressWarnings("serial")
-public class ZEBRefModel2ObjDiffConPMV extends AbstractDoubleProblem {
+public class ZEBRefModelVarDiff4ObjDiffConPMV extends AbstractDoubleProblem {
   public OverallConstraintViolation<DoubleSolution> overallConstraintViolationDegree ;
   public NumberOfViolatedConstraints<DoubleSolution> numberOfViolatedConstraints ;
   public double[] constraintViolation ;
@@ -29,12 +33,12 @@ public class ZEBRefModel2ObjDiffConPMV extends AbstractDoubleProblem {
   /**
    * Constructor.
    */
-  public ZEBRefModel2ObjDiffConPMV() {
+  public ZEBRefModelVarDiff4ObjDiffConPMV() {
 
     setNumberOfVariables(19);
-    setNumberOfObjectives(2);
+    setNumberOfObjectives(4);
     setNumberOfConstraints(1);
-    setName("ZEBRefModel2ObjDiffConPMV") ;
+    setName("ZEBRefModel4ObjDiffConPMV") ;
 
     // set limit of variables
     List<Double> lowerLimit = new ArrayList<>(getNumberOfVariables()) ;
@@ -55,6 +59,12 @@ public class ZEBRefModel2ObjDiffConPMV extends AbstractDoubleProblem {
     // objective2
     minValue.add(2.0e9);
     maxValue.add(9.0e9);
+    // objective3
+    minValue.add(0.0);
+    maxValue.add(2.0);
+    // objective4
+    minValue.add(0.0);
+    maxValue.add(7.0e9);
 
     constraintViolation = new double[getNumberOfConstraints()];
     for(int i=0; i< getNumberOfConstraints(); i++){
@@ -76,37 +86,54 @@ public class ZEBRefModel2ObjDiffConPMV extends AbstractDoubleProblem {
     // EnergyPlusのシミュレーション実行
     JMetalLogger.logger.info("energy plus execution at thread:"+threadName);
 
-    // 快適度に制約がある問題を計算
-    double[] fitness = new double[getNumberOfObjectives()];
-    double[] constraints = new double[getNumberOfConstraints()];
-    EnergyPlusObjectives energyPlusObjectives = new EnergyPlusObjectives(variables);
-    fitness[0] = Math.abs( energyPlusObjectives.calculateAveragePMV() );
-    fitness[1] = energyPlusObjectives.calculateTotalElectricEnergy();
-    constraints[0] = energyPlusObjectives.countConstraintExceededTimesOfPMV();
+    // 予報通りの場合を計算
+    EnergyPlusObjectives objectivesWithoutError = new EnergyPlusObjectives(variables, ".\\xml\\energyplus.xml");
 
-    // Normalize objective values
+    // 予報誤差のある場合を計算
+    EnergyPlusObjectives objectivesWithUpwardError = new EnergyPlusObjectives(variables, ".\\xml\\energyplus_upward.xml");
+    EnergyPlusObjectives objectivesWithDownwardError = new EnergyPlusObjectives(variables, ".\\xml\\energyplus_downward.xml");
+
+    // 目的関数を計算して代入
+    double[] fitness = new double[getNumberOfObjectives()];
+    double[] pmv = new double[3];
+    double[] power = new double[3];
+    pmv[0] = Math.abs( objectivesWithoutError.calculateAveragePMV() );
+    pmv[1] = Math.abs( objectivesWithUpwardError.calculateAveragePMV() );
+    pmv[2] = Math.abs( objectivesWithDownwardError.calculateAveragePMV() );
+    power[0] = objectivesWithoutError.calculateTotalElectricEnergy();
+    power[1] = objectivesWithUpwardError.calculateTotalElectricEnergy();
+    power[2] = objectivesWithDownwardError.calculateTotalElectricEnergy();
+    fitness[0] = pmv[0];
+    fitness[1] = power[0];
+    fitness[2] = Math.abs(pmv[1]-pmv[2]);
+    fitness[3] = Math.abs(power[1]-power[2]);
+
+    // Normalize and set objective values
     double[] normalizedFitness = new double[getNumberOfObjectives()];
     for(int o=0; o<getNumberOfObjectives(); o++) {
       normalizedFitness[o] = (fitness[o] - minValue.get(o)) / (maxValue.get(o) - minValue.get(o));
     }
-
-    // 評価値と制約違反量を格納
     for(int o=0; o<getNumberOfObjectives(); o++) {
       solution.setObjective(o, normalizedFitness[o]);
     }
+
+    // set constraints
+    double[] constraints = new double[getNumberOfConstraints()];
+    constraints[0] = objectivesWithoutError.countConstraintExceededTimesOfPMV();
+
     constraintViolation = constraints;
 
     this.evaluateConstraints(solution);
   }
 
   /** EvaluateConstraints() method */
-  private void evaluateConstraints(DoubleSolution solution)  {
-
+  private void evaluateConstraints(DoubleSolution solution)
+  {
     double overallConstraintViolation = 0.0;
     int violatedConstraints = 0;
     for (int i = 0; i < getNumberOfConstraints(); i++) {
       if ( (-1 * constraintViolation[i]) <0.0){
-        overallConstraintViolation-=constraintViolation[i]; //制約違反量に負の値を与える
+        overallConstraintViolation -= constraintViolation[i]; //制約違反量に負の値を与える
         violatedConstraints++;
       }
     }

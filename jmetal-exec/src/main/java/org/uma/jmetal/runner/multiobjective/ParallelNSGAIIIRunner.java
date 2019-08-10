@@ -27,7 +27,8 @@ import jp.ohtayo.commons.util.StringUtility;
 
 /**
  * Class to configure and run the NSGA-III algorithm (parallel version)
- * @author ohtayo <ohta.yoshihiro@outlook.jp>
+ *
+ * @author ohtayo (ohta.yoshihiro@outlook.jp)
  */
 public class ParallelNSGAIIIRunner extends AbstractAlgorithmRunner {
   /**
@@ -71,7 +72,8 @@ public class ParallelNSGAIIIRunner extends AbstractAlgorithmRunner {
       numberOfPopulations = Integer.valueOf(args[3]);
       fileNameOfInitialSolutions = args[4];
     } else {
-      problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModel2ObjDiffConPMV";
+//      problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModel2ObjDiffConPMV";
+      problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelVarDiff4ObjRegretConPMV";
 //      problemName = "org.uma.jmetal.problem.multiobjective.zdt.ZDT1";
       numberOfThreads = 6;
       numberOfIterations = 10;
