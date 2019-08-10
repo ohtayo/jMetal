@@ -72,9 +72,9 @@ public class ParallelOMOPSORunner extends AbstractAlgorithmRunner {
 //      problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModel4ObjDiffConPMV";
       problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelVarDiff4ObjRegretConPMV";
 //      problemName = "org.uma.jmetal.problem.multiobjective.zdt.ZDT1";
-      numberOfThreads = 1;
-      iterations = 10;
-      particles = 10;
+      numberOfThreads = 6;
+      iterations = 100;
+      particles = 30;
       fileNameOfInitialSolutions = "";
       //fileNameOfInitialSolutions = "C:\\workspace\\jMetal\\initialSolutions.csv";
     }
