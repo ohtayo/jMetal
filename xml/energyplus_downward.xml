@@ -5,7 +5,7 @@
 <!-- EnergyPlusのexeのあるフォルダ名 -->
 <entry key="exeFolder">C:\EnergyPlusV8-5-0\</entry>
 
-<!-- EnergyPlusのepwのファイル名名 -->
+<!-- EnergyPlusのepwのファイル名 -->
 <entry key="weatherFile">JPN_36303333_TOKYO_EA_downward_0715_0821.epw</entry>
 
 <!-- EnergyPlusの作業フォルダの親フォルダ名 -->

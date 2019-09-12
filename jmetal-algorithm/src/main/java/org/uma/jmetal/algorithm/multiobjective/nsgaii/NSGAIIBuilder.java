@@ -20,7 +20,7 @@ import java.util.List;
  * @author Antonio J. Nebro <antonio@lcc.uma.es>
  */
 public class NSGAIIBuilder<S extends Solution<?>> implements AlgorithmBuilder<NSGAII<S>> {
-  public enum NSGAIIVariant {NSGAII, SteadyStateNSGAII, Measures, NSGAII45, DNSGAII}
+  public enum NSGAIIVariant {NSGAII, SteadyStateNSGAII, Measures, NSGAII45, DNSGAII, NSGAIIWithEpsilonArchive}
 
   /**
    * NSGAIIBuilder class
@@ -113,7 +113,6 @@ public class NSGAIIBuilder<S extends Solution<?>> implements AlgorithmBuilder<NS
     return this;
   }
 
-
   public NSGAIIBuilder<S> setVariant(NSGAIIVariant variant) {
     this.variant = variant;
 
@@ -124,8 +123,7 @@ public class NSGAIIBuilder<S extends Solution<?>> implements AlgorithmBuilder<NS
     NSGAII<S> algorithm = null ;
     if (variant.equals(NSGAIIVariant.NSGAII)) {
       algorithm = new NSGAII<S>(problem, maxEvaluations, populationSize, matingPoolSize, offspringPopulationSize,
-              crossoverOperator,
-          mutationOperator, selectionOperator, dominanceComparator, evaluator);
+              crossoverOperator, mutationOperator, selectionOperator, dominanceComparator, evaluator);
     } else if (variant.equals(NSGAIIVariant.SteadyStateNSGAII)) {
       algorithm = new SteadyStateNSGAII<S>(problem, maxEvaluations, populationSize, crossoverOperator,
           mutationOperator, selectionOperator, dominanceComparator, evaluator);
@@ -134,6 +132,9 @@ public class NSGAIIBuilder<S extends Solution<?>> implements AlgorithmBuilder<NS
               crossoverOperator, mutationOperator, selectionOperator, dominanceComparator, evaluator);
     }else if(variant.equals(NSGAIIVariant.DNSGAII)){
       algorithm = new DNSGAII<>(problem, maxEvaluations, populationSize, matingPoolSize, offspringPopulationSize,
+              crossoverOperator, mutationOperator, selectionOperator, dominanceComparator, evaluator) ;
+    }else if(variant.equals(NSGAIIVariant.NSGAIIWithEpsilonArchive)){
+      algorithm = new NSGAIIWithEpsilonArchive<S>(problem, maxEvaluations, populationSize, matingPoolSize, offspringPopulationSize,
               crossoverOperator, mutationOperator, selectionOperator, dominanceComparator, evaluator) ;
     }
 
