@@ -118,6 +118,18 @@ public class ZEBRefModelLSTMVarDiff2ObjConPMV extends AbstractDoubleProblem {
     constraintViolation = constraints;
 
     this.evaluateConstraints(solution);
+
+    // for debug 制約がAttributeに反映されない場合があるので，反映されていなければ無理やり値を入れる
+    OverallConstraintViolation<DoubleSolution> overallConstraintViolation;
+    overallConstraintViolation = new OverallConstraintViolation<DoubleSolution>() ;
+    double violation = overallConstraintViolation.getAttribute(solution);
+    double comfort = solution.getObjectives()[0]*2;
+    double power = solution.getObjectives()[1];
+    if( (violation==0) && ((comfort>0.5)||(power<0.25)) ){
+      JMetalLogger.logger.severe("illegal objective values.");
+      overallConstraintViolationDegree.setAttribute(solution, 100.0);
+      numberOfViolatedConstraints.setAttribute(solution, 1);
+    }
   }
 
   /** EvaluateConstraints() method */
