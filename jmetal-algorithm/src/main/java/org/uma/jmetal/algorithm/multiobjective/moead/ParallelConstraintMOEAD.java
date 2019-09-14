@@ -23,10 +23,10 @@ import java.util.List;
 @SuppressWarnings("serial")
 public class ParallelConstraintMOEAD extends AbstractMOEAD<DoubleSolution>  {
 
-  private DifferentialEvolutionCrossover differentialEvolutionCrossover ;
-  private ViolationThresholdComparator<DoubleSolution> violationThresholdComparator ;
-  private SolutionListEvaluator<DoubleSolution> evaluator;
-  private List<DoubleSolution> initialPopulation;
+  protected DifferentialEvolutionCrossover differentialEvolutionCrossover ;
+  protected ViolationThresholdComparator<DoubleSolution> violationThresholdComparator ;
+  protected SolutionListEvaluator<DoubleSolution> evaluator;
+  protected List<DoubleSolution> initialPopulation;
 
   public ParallelConstraintMOEAD(Problem<DoubleSolution> problem,
                                  int populationSize,

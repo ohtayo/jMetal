@@ -17,7 +17,7 @@ import org.uma.jmetal.util.evaluator.impl.SequentialSolutionListEvaluator;
  * @version 1.0
  */
 public class MOEADBuilder implements AlgorithmBuilder<AbstractMOEAD<DoubleSolution>> {
-  public enum Variant {MOEAD, ConstraintMOEAD, MOEADDRA, MOEADSTM, MOEADD, ParallelConstraintMOEAD} ;
+  public enum Variant {MOEAD, ConstraintMOEAD, MOEADDRA, MOEADSTM, MOEADD, ParallelConstraintMOEAD, ParallelConstraintMOEADWithEpsilonArchive} ;
 
   protected Problem<DoubleSolution> problem ;
 
@@ -206,6 +206,10 @@ public class MOEADBuilder implements AlgorithmBuilder<AbstractMOEAD<DoubleSoluti
               maximumNumberOfReplacedSolutions, neighborSize);
     }else if (moeadVariant.equals(Variant.ParallelConstraintMOEAD)) {
       algorithm =  new ParallelConstraintMOEAD(problem, populationSize, resultPopulationSize, maxEvaluations, mutation,
+              crossover, functionType, dataDirectory, neighborhoodSelectionProbability,
+              maximumNumberOfReplacedSolutions, neighborSize, evaluator);
+    }else if (moeadVariant.equals(Variant.ParallelConstraintMOEADWithEpsilonArchive)) {
+      algorithm =  new ParallelConstraintMOEADWithEpsilonArchive(problem, populationSize, resultPopulationSize, maxEvaluations, mutation,
               crossover, functionType, dataDirectory, neighborhoodSelectionProbability,
               maximumNumberOfReplacedSolutions, neighborSize, evaluator);
     }
