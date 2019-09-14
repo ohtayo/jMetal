@@ -163,7 +163,7 @@ public class NSGAIII<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, 
   }
 
   
-  private List<ReferencePoint<S>> getReferencePointsCopy() {
+  protected List<ReferencePoint<S>> getReferencePointsCopy() {
 	  List<ReferencePoint<S>> copy = new ArrayList<>();
 	  for (ReferencePoint<S> r : this.referencePoints) {
 		  copy.add(new ReferencePoint<>(r));

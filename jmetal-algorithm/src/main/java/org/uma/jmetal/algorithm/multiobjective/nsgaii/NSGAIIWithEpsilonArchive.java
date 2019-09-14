@@ -21,7 +21,7 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * @author Antonio J. Nebro <antonio@lcc.uma.es>
+ * @author ohtayo <ohta.yoshihiro@outlook.jp>
  */
 @SuppressWarnings("serial")
 public class NSGAIIWithEpsilonArchive<S extends Solution<?>> extends NSGAII<S> {
@@ -63,23 +63,6 @@ public class NSGAIIWithEpsilonArchive<S extends Solution<?>> extends NSGAII<S> {
     return eta;
   }
 
-  public void setInitialPopulation(List<S> initialPopulation) {
-    this.initialPopulation = initialPopulation;
-  }
-  @Override
-  public List<S> createInitialPopulation(){
-    List<S> population = new ArrayList<>(getMaxPopulationSize());
-    if(this.initialPopulation == null){
-      for (int i = 0; i < getMaxPopulationSize(); i++) {
-        S newIndividual = getProblem().createSolution();
-        population.add(newIndividual);
-      }
-    }else{
-      population = this.initialPopulation;
-    }
-    return population;
-  }
-
   @Override protected void initProgress() {
     currentGeneration = 1;
     evaluations = getMaxPopulationSize();
@@ -90,7 +73,6 @@ public class NSGAIIWithEpsilonArchive<S extends Solution<?>> extends NSGAII<S> {
   @Override protected void updateProgress() {
     currentGeneration += 1;
     evaluations += offspringPopulationSize;
-    updateArchive(population);
     dump();
   }
 
@@ -123,70 +105,10 @@ public class NSGAIIWithEpsilonArchive<S extends Solution<?>> extends NSGAII<S> {
     }
   }
 
-  @Override protected boolean isStoppingConditionReached() {
-    return evaluations >= maxEvaluations;
-  }
-
-  @Override protected List<S> evaluatePopulation(List<S> population) {
-    population = evaluator.evaluate(population, getProblem());
-
-    return population;
-  }
-
-  /**
-   * This method iteratively applies a {@link SelectionOperator} to the population to fill the mating pool population.
-   *
-   * @param population
-   * @return The mating pool population
-   */
-  @Override
-  protected List<S> selection(List<S> population) {
-    List<S> matingPopulation = new ArrayList<>(population.size());
-    for (int i = 0; i < matingPoolSize; i++) {
-      S solution = selectionOperator.execute(population);
-      matingPopulation.add(solution);
-    }
-
-    return matingPopulation;
-  }
-
-  /**
-   * This methods iteratively applies a {@link CrossoverOperator} a  {@link MutationOperator} to the population to
-   * create the offspring population. The population size must be divisible by the number of parents required
-   * by the {@link CrossoverOperator}; this way, the needed parents are taken sequentially from the population.
-   *
-   * The number of solutions returned by the {@link CrossoverOperator} must be equal to the offspringPopulationSize
-   * state variable
-   *
-   * @param matingPool
-   * @return The new created offspring population
-   */
-  @Override
-  protected List<S> reproduction(List<S> matingPool) {
-    int numberOfParents = crossoverOperator.getNumberOfRequiredParents() ;
-
-    checkNumberOfParents(matingPool, numberOfParents);
-
-    List<S> offspringPopulation = new ArrayList<>(offspringPopulationSize);
-    for (int i = 0; i < matingPool.size(); i += numberOfParents) {
-      List<S> parents = new ArrayList<>(numberOfParents);
-      for (int j = 0; j < numberOfParents; j++) {
-        parents.add(population.get(i+j));
-      }
-
-      List<S> offspring = crossoverOperator.execute(parents);
-
-      for(S s: offspring){
-        mutationOperator.execute(s);
-        offspringPopulation.add(s);
-        if (offspringPopulation.size() >= offspringPopulationSize)
-          break;
-      }
-    }
-    return offspringPopulation;
-  }
-
   @Override protected List<S> replacement(List<S> population, List<S> offspringPopulation) {
+    // add offspring to epsilon archive.
+    updateArchive(offspringPopulation);
+
     List<S> jointPopulation = new ArrayList<>();
     jointPopulation.addAll(population);
     jointPopulation.addAll(offspringPopulation);
@@ -197,15 +119,11 @@ public class NSGAIIWithEpsilonArchive<S extends Solution<?>> extends NSGAII<S> {
     return rankingAndCrowdingSelection.execute(jointPopulation) ;
   }
 
-  @Override public List<S> getResult() {
-    return SolutionListUtils.getNondominatedSolutions(getPopulation());
-  }
-
   @Override public String getName() {
-    return "NSGAII" ;
+    return "NSGAIIWithEpsilonArchive" ;
   }
 
   @Override public String getDescription() {
-    return "Nondominated Sorting Genetic Algorithm version II" ;
+    return "Nondominated Sorting Genetic Algorithm version II with epsilon archive" ;
   }
 }
