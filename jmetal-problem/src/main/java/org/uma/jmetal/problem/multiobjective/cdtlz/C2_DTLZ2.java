@@ -17,6 +17,12 @@ import org.uma.jmetal.util.solutionattribute.impl.OverallConstraintViolation;
 public class C2_DTLZ2 extends DTLZ2 {
   public OverallConstraintViolation<DoubleSolution> overallConstraintViolationDegree ;
   public NumberOfViolatedConstraints<DoubleSolution> numberOfViolatedConstraints ;
+  /**
+   * Creates a default C2_DTLZ2 problem (n=13 variables (M+9) and M=4 objectives)
+   */
+  public C2_DTLZ2() {
+    this(13, 4);
+  }
 
   private double rValue ;
   /**

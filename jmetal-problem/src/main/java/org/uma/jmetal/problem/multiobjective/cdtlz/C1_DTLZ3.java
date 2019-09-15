@@ -31,6 +31,12 @@ public class C1_DTLZ3 extends DTLZ3 {
     rValue.put(10, 15.0) ;
     rValue.put(15, 15.0) ;
   }
+  /**
+   * Creates a default C1_DTLZ3 problem (n=13 variables (M+9) and M=4 objectives)
+   */
+  public C1_DTLZ3() {
+    this(13, 4);
+  }
 
   /**
    * Constructor
