@@ -48,6 +48,11 @@ public class ParallelNSGAIIRunner extends AbstractAlgorithmRunner {
     } else {
       problemName = "org.uma.jmetal.problem.multiobjective.zdt.ZDT1";
       referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/ZDT1.pf" ;
+      problemName = "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ4";
+      referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ4.4D.pf" ;
+      problemName = "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ1";
+      problemName = "org.uma.jmetal.problem.multiobjective.dtlz.DTLZ1";
+      referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.4D.pf" ;
     }
 
     problem = (DoubleProblem) ProblemUtils.<DoubleSolution> loadProblem(problemName);

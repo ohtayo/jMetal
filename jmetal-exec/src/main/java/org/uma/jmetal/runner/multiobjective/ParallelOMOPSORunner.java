@@ -1,5 +1,7 @@
 package org.uma.jmetal.runner.multiobjective;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.List;
 
 import org.uma.jmetal.algorithm.Algorithm;
@@ -40,6 +42,7 @@ public class ParallelOMOPSORunner extends AbstractAlgorithmRunner {
     // 変数定義
     DoubleProblem problem;
     Algorithm<List<DoubleSolution>> algorithm;
+    String referenceParetoFront = "";
 
     // 引数処理：目的関数，参照パレートフロント，スレッド数の決定
     String problemName;
@@ -72,11 +75,13 @@ public class ParallelOMOPSORunner extends AbstractAlgorithmRunner {
 //      problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelLSTMVarDiff2ObjConPMV";
 //      problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModel4ObjDiffConPMV";
 //      problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelVarDiff4ObjRegretConPMV";
-      problemName =  "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ1";
-//      problemName =  "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ4";
+//      problemName =  "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ1";
+      problemName =  "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ4";
+//      problemName =  "org.uma.jmetal.problem.multiobjective.dtlz.DTLZ4";
+      referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ4.4D.pf";
       numberOfThreads = 6;
-      iterations = 2000;
-      particles = 35;
+      iterations = 1000;
+      particles = 100;
       fileNameOfInitialSolutions = "";
       //fileNameOfInitialSolutions = "C:\\workspace\\jMetal\\initialSolutions.csv";
     }
@@ -126,5 +131,12 @@ public class ParallelOMOPSORunner extends AbstractAlgorithmRunner {
 
     // 最終解の出力
     printFinalSolutionSet(population);
+    if (!referenceParetoFront.equals("")) {
+      try {
+        printQualityIndicators(population, referenceParetoFront);
+      }catch(FileNotFoundException e){
+        e.printStackTrace();
+      }
+    }
   }
 }
