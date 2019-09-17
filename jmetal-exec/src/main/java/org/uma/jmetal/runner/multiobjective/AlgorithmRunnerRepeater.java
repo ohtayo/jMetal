@@ -2,6 +2,7 @@ package org.uma.jmetal.runner.multiobjective;
 
 import jp.ohtayo.commons.io.Csv;
 import jp.ohtayo.commons.math.Matrix;
+import jp.ohtayo.commons.math.Vector;
 import org.apache.commons.io.FileUtils;
 import org.uma.jmetal.algorithm.multiobjective.moead.ParallelConstraintMOEADWithEpsilonArchive;
 import org.uma.jmetal.problem.DoubleProblem;
@@ -72,25 +73,48 @@ public class AlgorithmRunnerRepeater {
         }
 */
         // Todo: (1)すべての試行で得られたすべての結果の最大値と最小値で正規化してHVを求めるように修正する
-        // Todo: (2)DTLZ1で4目的以上の場合HVが算出できない問題を解決する
+        // →ビルドは通っているのでデバッグ中
+        // Todo: (2)DTLZ1で4目的以上の場合HVが算出できない問題を解決する．invertedfrontがおかしいような気がする．他の結果のinvertedfrontの様子を見てみる．
+        // →InvertedFrontは0-1の範囲で1-0にinvertするだけなので，0-1の範囲を超過する解が多いとほとんど0になってしまう．
+        // →(1)の最大値最小値で正規化すればよいはず．DTLZ1は全然良い解を得られていない．
         // Todo: (3)OMOPSOだとC3DTLZ4は100個体1000世代では全然うまく探索できていない．他の手法も同様か試す
 
-        // calculate average HyperVolume of each generations
-        Matrix hypervolumes = new Matrix(iterations, generations+1);
-        Matrix normalizedHypervolumes = new Matrix(iterations, generations+1);
-        String hvFolder = archiveFolderBase + experimentName+"\\";
-
+        // read objectives and min/max values of all solutions
+        Matrix minimumValuesInIterate = new Matrix(problem.getNumberOfObjectives(), generations);
+        Matrix maximumValuesInIterate = new Matrix(problem.getNumberOfObjectives(), generations);
+        Vector minimumValues = new Vector(problem.getNumberOfObjectives());
+        Vector maximumValues = new Vector(problem.getNumberOfObjectives());
+        Matrix[][] solutions = new Matrix[iterations][generations];
         for( int i=0; i<iterations; i++) {
-            for (int g=1; g<=generations; g++) {
+            for (int g = 1; g <= generations; g++) {
                 // read fitness in each generation
                 String archiveFolder = archiveFolderBase + experimentName + "\\" + String.valueOf(i) + "\\";
-                String solutionsFile = "epsilonFitness"+g+".csv";
-                Matrix solutions = new Matrix(Csv.read(archiveFolder + solutionsFile));
-                List<DoubleSolution> population = new ArrayList<DoubleSolution>(solutions.length());
-                for (int s = 0; s < solutions.length(); s++) {
+                String solutionsFile = "epsilonFitness" + g + ".csv";
+                solutions[i][g] = new Matrix(Csv.read(archiveFolder + solutionsFile));
+                minimumValuesInIterate.setColumn(g, solutions[i][g].min(Matrix.DIRECTION_COLUMN));
+                maximumValuesInIterate.setColumn(g, solutions[i][g].max(Matrix.DIRECTION_COLUMN));
+            }
+            Matrix tempMinimumValues = new Matrix(problem.getNumberOfObjectives(), 2);
+            tempMinimumValues.setColumn(0, minimumValues);
+            tempMinimumValues.setColumn(1, minimumValuesInIterate.min(Matrix.DIRECTION_COLUMN));
+            minimumValues = tempMinimumValues.min(Matrix.DIRECTION_COLUMN);
+            Matrix tempMaximumValues = new Matrix(problem.getNumberOfObjectives(), 2);
+            tempMaximumValues.setColumn(0, maximumValues);
+            tempMaximumValues.setColumn(1, maximumValuesInIterate.min(Matrix.DIRECTION_COLUMN));
+            maximumValues = tempMaximumValues.min(Matrix.DIRECTION_COLUMN);
+        }
+
+        // calculate average HyperVolume of each generations
+        Matrix normalizedHypervolumes = new Matrix(iterations, generations+1);
+        String hvFolder = archiveFolderBase + experimentName+"\\";
+        for( int i=0; i<iterations; i++) {
+            for (int g = 1; g <= generations; g++) {
+                //
+                List<DoubleSolution> population = new ArrayList<DoubleSolution>(solutions[i][g].length());
+                for (int s = 0; s < solutions[i][g].length(); s++) {
                     DoubleSolution newIndividual = problem.createSolution();
-                    for (int o = 0; o < solutions.columnLength(); o++) {
-                        newIndividual.setObjective(o, solutions.get(s, o));
+                    for (int o = 0; o < solutions[i][g].columnLength(); o++) {
+                        newIndividual.setObjective(o, solutions[i][g].get(s, o));
                     }
                     population.add(newIndividual);
                 }
@@ -98,14 +122,12 @@ public class AlgorithmRunnerRepeater {
                 // calculate hypervolume
                 try {
                     Front referenceFront = new ArrayFront(referenceParetoFront);
-                    FrontNormalizer frontNormalizer = new FrontNormalizer(referenceFront);
+                    FrontNormalizer frontNormalizer = new FrontNormalizer(minimumValues.get(), maximumValues.get());
                     Front normalizedReferenceFront = frontNormalizer.normalize(referenceFront);
                     Front normalizedFront = frontNormalizer.normalize(new ArrayFront(population));
                     List<PointSolution> normalizedPopulation = FrontUtils.convertFrontToSolutionList(normalizedFront);
                     double normalizedHypervolume = new PISAHypervolume<PointSolution>(normalizedReferenceFront).evaluate(normalizedPopulation);
-                    double hypervolume = new PISAHypervolume<DoubleSolution>(referenceFront).evaluate(population);
                     normalizedHypervolumes.set(i, g, normalizedHypervolume);
-                    hypervolumes.set(i, g, hypervolume);
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                 }
@@ -114,6 +136,5 @@ public class AlgorithmRunnerRepeater {
 
         // save hypervolume
         Csv.write(hvFolder+"HV(n).csv",normalizedHypervolumes.get());
-        Csv.write(hvFolder+"HV.csv",hypervolumes.get());
     }
 }
