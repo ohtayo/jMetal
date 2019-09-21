@@ -47,18 +47,18 @@ public class AlgorithmRunnerRepeater {
             "jmetal-problem/src/test/resources/pareto_fronts/DTLZ4.4D.pf"
         };
         String[] algorithms = {
-            "ParallelOMOPSO",
-            "ParallelNSGAIIWithEpsilonArchive",
-            "ParallelNSGAIIIWithEpsilonArchive",
+//            "ParallelOMOPSO",
+//            "ParallelNSGAIIWithEpsilonArchive"
+//            "ParallelNSGAIIIWithEpsilonArchive",
             "ParallelConstraintMOEADWithEpsilonArchive"
         };
         int numberOfIndividuals = 35;
-        int numberOfGenerations = 2000;
-        int numberOfRepeats = 20;    // 20
+        int numberOfGenerations = 200;
+        int numberOfRepeats = 2;    // 20
         int numberOfThreads = 4;
 
         // run each problem and algorithms
-        for (int problemNumber=0; problemNumber<2; problemNumber++){
+        for (int problemNumber=0; problemNumber<problems.length; problemNumber++){
             // define problem
             String problemName = problems[problemNumber];
             String referenceParetoFront = referenceParetoFronts[problemNumber];
@@ -72,7 +72,7 @@ public class AlgorithmRunnerRepeater {
             args[3] = String.valueOf(numberOfThreads);
             args[4] = referenceParetoFront;
 
-            for(int algorithmNumber=0; algorithmNumber<4; algorithmNumber++) {
+            for(int algorithmNumber=0; algorithmNumber<algorithms.length; algorithmNumber++) {
                 // make experiment name
                 String algorithmName = algorithms[algorithmNumber];
                 String experimentName = tempProblemName[tempProblemName.length - 1] + "_"+algorithmName+"_pop" + numberOfIndividuals + "_gen" + numberOfGenerations;

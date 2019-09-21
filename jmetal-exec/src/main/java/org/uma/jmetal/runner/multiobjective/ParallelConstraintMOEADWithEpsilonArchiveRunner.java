@@ -85,9 +85,11 @@ public class ParallelConstraintMOEADWithEpsilonArchiveRunner extends AbstractAlg
       //problemName = "org.uma.jmetal.problem.multiobjective.ep.EPZeb2Objective1ConstraintEachComfortNormalized";
       problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelVarDiff4ObjRegretConPMV";
       //referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/Tanaka.pf";
-      numberOfThreads = 6;
+      numberOfThreads = 4;
       //fileNameOfInitialSolutions = "C:\\workspace\\jMetal_edit\\initialSolutions.csv";
       //fileNameOfInitialSolutions = "C:\\workspace\\jMetal_edit\\result\\20190323_MOEAD_500世代_設計変数差分_快適度制約あり\\variable30.csv";
+      problemName = "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ1";
+      referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.4D.pf";
     }
 
     problem = (DoubleProblem)ProblemUtils.<DoubleSolution> loadProblem(problemName);

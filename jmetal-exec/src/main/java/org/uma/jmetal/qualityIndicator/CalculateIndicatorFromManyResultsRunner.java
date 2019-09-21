@@ -3,6 +3,7 @@ package org.uma.jmetal.qualityIndicator;
 import jp.ohtayo.commons.io.Csv;
 import jp.ohtayo.commons.math.Matrix;
 import jp.ohtayo.commons.math.Vector;
+import org.apache.commons.io.FileUtils;
 import org.uma.jmetal.problem.DoubleProblem;
 import org.uma.jmetal.qualityindicator.QualityIndicator;
 import org.uma.jmetal.qualityindicator.impl.*;
@@ -17,7 +18,9 @@ import org.uma.jmetal.util.front.util.FrontNormalizer;
 import org.uma.jmetal.util.front.util.FrontUtils;
 import org.uma.jmetal.util.point.PointSolution;
 
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -40,16 +43,16 @@ public class CalculateIndicatorFromManyResultsRunner {
     // Todo: (4)全problemNameの最大値・最小値を算出して保存するだけにする．
     // Todo: (5)その後，すべてのproblemNameの最大値・最小値で正規化して世代ごとにhypervolume計算するようにする
 
-
     // folders
-    String resultFolder = "C:\\workspace\\jMetal\\result\\";
     String archiveFolderBase = "C:\\workspace\\jMetal\\archive\\";
 
     // problem and search settings
-    String problemName = "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ1";
-    String referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.4D.pf";
-//    String problem = "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ4";
-//    String referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ4.4D.pf";
+//    String problemName = "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ1";
+//    String referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.4D.pf";
+    String problemName = "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ4";
+    String referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ4.4D.pf";
+    String[] tempProblemName = problemName.split(Pattern.quote("."));
+    String splittedProblemName = tempProblemName[tempProblemName.length - 1];
 
     String[] algorithms = {
         "ParallelOMOPSO",
@@ -58,22 +61,20 @@ public class CalculateIndicatorFromManyResultsRunner {
         "ParallelConstraintMOEADWithEpsilonArchive"
     };
     int numberOfIndividuals = 35;
-    int numberOfGenerations = 2000;
-    int numberOfRepeats = 20;    // 20
+    int numberOfGenerations = 200; // 2000
+    int numberOfRepeats = 2;    // 20
     int numberOfThreads = 4;
 
-    // 目的関数の定義
+    // definition of problem
     DoubleProblem problem = (DoubleProblem) ProblemUtils.<DoubleSolution> loadProblem(problemName);
 
-
+    // calculate minimum and maximum objective values from search results.
     Matrix minimumValues = new Matrix(problem.getNumberOfObjectives(), algorithms.length, Double.MAX_VALUE);
     Matrix maximumValues = new Matrix(problem.getNumberOfObjectives(), algorithms.length, Double.MIN_VALUE);
     for(int algorithmNumber=0; algorithmNumber<algorithms.length; algorithmNumber++) {
-      String[] tempProblemName = problemName.split(Pattern.quote("."));
       String algorithmName = algorithms[algorithmNumber];
-      String experimentName = tempProblemName[tempProblemName.length - 1] + "_"+algorithmName+"_pop" + numberOfIndividuals + "_gen" + numberOfGenerations;
+      String experimentName = splittedProblemName + "_"+algorithmName+"_pop" + numberOfIndividuals + "_gen" + numberOfGenerations;
 
-      // read objectives and min/max values of all solutions
       Matrix minimumValuesInIterate = new Matrix(problem.getNumberOfObjectives(), numberOfGenerations);
       Matrix maximumValuesInIterate = new Matrix(problem.getNumberOfObjectives(), numberOfGenerations);
       Matrix[][] solutions = new Matrix[numberOfRepeats][numberOfGenerations];
@@ -96,17 +97,22 @@ public class CalculateIndicatorFromManyResultsRunner {
         maximumValues.setColumn(algorithmNumber, tempMaximumValues.max(Matrix.DIRECTION_ROW));
       }
     }
+    // 問題に対するすべてのアルゴリズムの最大値・最小値のセットを保存
+    String minmaxFolder = archiveFolderBase + splittedProblemName+"\\";
+    new File(minmaxFolder).mkdir();
+    Csv.write(minmaxFolder+"minimumValue.csv", minimumValues.get());
+    Csv.write(minmaxFolder+"maximumValue.csv", maximumValues.get());
 
     // calculate average HyperVolume of each generations
     Matrix normalizedHypervolumes = new Matrix(numberOfRepeats, numberOfGenerations);
     Matrix averagedHypervolumes = new Matrix(algorithms.length, numberOfGenerations);
     String hypervolumesFolder = archiveFolderBase + "Hypervolume\\";
+    new File(hypervolumesFolder).mkdir();
     Matrix[][] solutions = new Matrix[numberOfRepeats][numberOfGenerations];
 
     for(int algorithmNumber=0; algorithmNumber<algorithms.length; algorithmNumber++) {
-      String[] tempProblemName = problemName.split(Pattern.quote("."));
       String algorithmName = algorithms[algorithmNumber];
-      String experimentName = tempProblemName[tempProblemName.length - 1] + "_" + algorithmName + "_pop" + numberOfIndividuals + "_gen" + numberOfGenerations;
+      String experimentName = splittedProblemName + "_" + algorithmName + "_pop" + numberOfIndividuals + "_gen" + numberOfGenerations;
 
       for (int i = 0; i < numberOfRepeats; i++) {
         for (int g = 0; g < numberOfGenerations; g++) {
@@ -142,6 +148,6 @@ public class CalculateIndicatorFromManyResultsRunner {
       // save hypervolume
       Csv.write(hypervolumesFolder+"HV(normalized)_"+experimentName+".csv", normalizedHypervolumes.T().get());
     }
-    Csv.write(hypervolumesFolder+"HV(averaged)_"+problemName+".csv"  , averagedHypervolumes.T().get());
+    Csv.write(hypervolumesFolder+"HV(averaged)_"+splittedProblemName+"_pop" + numberOfIndividuals + "_gen" + numberOfGenerations+".csv"  , averagedHypervolumes.T().get());
   }
 }

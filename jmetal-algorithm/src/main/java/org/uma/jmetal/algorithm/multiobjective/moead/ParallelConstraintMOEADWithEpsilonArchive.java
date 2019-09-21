@@ -65,11 +65,11 @@ public class ParallelConstraintMOEADWithEpsilonArchive extends ParallelConstrain
     initializePopulation();
     idealPoint.update(population);
     updateArchive(population);
-    dump();
 
     violationThresholdComparator.updateThreshold(population);
 
     evaluations = populationSize ;
+    dump();
 
     do {
       int[] permutation = new int[populationSize];

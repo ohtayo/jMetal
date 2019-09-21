@@ -49,7 +49,7 @@ public class ParallelNSGAIIWithEpsilonArchiveRunner extends AbstractAlgorithmRun
     String problemName ;
     int numberOfIndividuals = 30;
     int numberOfGenerations = 500;
-    int numberOfThreads = 8;
+    int numberOfThreads = 4;
     String referenceParetoFront = "" ;
     String fileNameOfInitialSolutions = "";
     if (args.length == 1) {
@@ -83,7 +83,12 @@ public class ParallelNSGAIIWithEpsilonArchiveRunner extends AbstractAlgorithmRun
       problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelVarDiff4ObjRegretConPMV";
 //      problemName = "org.uma.jmetal.problem.multiobjective.zdt.ZDT1";
 //      referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/ZDT1.pf" ;
+      problemName = "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ1";
+      referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.4D.pf";
     }
+    // if population size is not divisible by 2, add one individual.
+    if(numberOfIndividuals%2 != 0)  numberOfIndividuals++;
+
     int maxEvaluations = numberOfGenerations*numberOfIndividuals;
 
     problem = (DoubleProblem) ProblemUtils.<DoubleSolution> loadProblem(problemName);
