@@ -38,38 +38,45 @@ public class ParallelOMOPSORunner extends AbstractAlgorithmRunner {
    * Invoking command:
   java org.uma.jmetal.runner.multiobjective.ParallelOMOPSORunner problemName [referenceFront]
    */
-  public static void main(String[] args) throws JMetalException {
+  public static void main(String[] args) throws JMetalException, FileNotFoundException {
     // 変数定義
     DoubleProblem problem;
     Algorithm<List<DoubleSolution>> algorithm;
-    String referenceParetoFront = "";
 
     // 引数処理：目的関数，参照パレートフロント，スレッド数の決定
     String problemName;
+    int numberOfParticles = 100;
+    int numberOfIterations = 100;
     int numberOfThreads = 1;
-    int iterations = 100;
-    int particles = 100;
+    String referenceParetoFront = "";
     String fileNameOfInitialSolutions = "";
     if (args.length == 1) {
       problemName = args[0];
     } else if (args.length == 2) {
       problemName = args[0];
-      numberOfThreads = Integer.valueOf(args[1]);
+      numberOfParticles = Integer.valueOf(args[1]);
     } else if (args.length == 3){
       problemName = args[0];
-      numberOfThreads = Integer.valueOf(args[1]);
-      iterations = Integer.valueOf(args[2]);
+      numberOfParticles = Integer.valueOf(args[1]);
+      numberOfIterations = Integer.valueOf(args[2]);
     } else if (args.length == 4){
       problemName = args[0];
-      numberOfThreads = Integer.valueOf(args[1]);
-      iterations = Integer.valueOf(args[2]);
-      particles = Integer.valueOf(args[3]);
+      numberOfParticles = Integer.valueOf(args[1]);
+      numberOfIterations = Integer.valueOf(args[2]);
+      numberOfThreads = Integer.valueOf(args[3]);
     } else if (args.length == 5){
       problemName = args[0];
-      numberOfThreads = Integer.valueOf(args[1]);
-      iterations = Integer.valueOf(args[2]);
-      particles = Integer.valueOf(args[3]);
-      fileNameOfInitialSolutions = args[4];
+      numberOfParticles = Integer.valueOf(args[1]);
+      numberOfIterations = Integer.valueOf(args[2]);
+      numberOfThreads = Integer.valueOf(args[3]);
+      referenceParetoFront = args[4];
+    } else if (args.length == 6){
+      problemName = args[0];
+      numberOfParticles = Integer.valueOf(args[1]);
+      numberOfIterations = Integer.valueOf(args[2]);
+      numberOfThreads = Integer.valueOf(args[3]);
+      referenceParetoFront = args[4];
+      fileNameOfInitialSolutions = args[5];
     } else {
 //      problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelVarDiff2ObjConPMV";
 //      problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelLSTMVarDiff2ObjConPMV";
@@ -84,8 +91,8 @@ public class ParallelOMOPSORunner extends AbstractAlgorithmRunner {
 //      referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ4.3D.pf";
  //     referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ4.4D.pf";
       numberOfThreads = 4;
-      iterations = 2000;
-      particles = 35;
+      numberOfIterations = 2000;
+      numberOfParticles = 35;
       fileNameOfInitialSolutions = "";
       //fileNameOfInitialSolutions = "C:\\workspace\\jMetal\\initialSolutions.csv";
     }
@@ -101,10 +108,10 @@ public class ParallelOMOPSORunner extends AbstractAlgorithmRunner {
 
     // OMOPSOのパラメータ定義
     OMOPSOBuilder builder = new OMOPSOBuilder(problem, evaluator)
-            .setMaxIterations(iterations)
-            .setSwarmSize(particles)
+            .setMaxIterations(numberOfIterations)
+            .setSwarmSize(numberOfParticles)
             .setUniformMutation(new UniformMutation(mutationProbability, 0.5))
-            .setNonUniformMutation(new NonUniformMutation(mutationProbability, 0.5, iterations));
+            .setNonUniformMutation(new NonUniformMutation(mutationProbability, 0.5, numberOfIterations));
     algorithm = builder.build();
 
     // 初期値のファイル名の指定があれば初期値を設定
@@ -136,11 +143,7 @@ public class ParallelOMOPSORunner extends AbstractAlgorithmRunner {
     // 最終解の出力
     printFinalSolutionSet(population);
     if (!referenceParetoFront.equals("")) {
-      try {
-        printQualityIndicators(population, referenceParetoFront);
-      }catch(FileNotFoundException e){
-        e.printStackTrace();
-      }
+      printQualityIndicators(population, referenceParetoFront);
     }
   }
 }

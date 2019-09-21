@@ -47,23 +47,38 @@ public class ParallelConstraintMOEADWithEpsilonArchiveRunner extends AbstractAlg
     SolutionListEvaluator<DoubleSolution> evaluator ;
 
     String problemName ;
-    String referenceParetoFront = "";
+    int numberOfIndividuals = 35;  // default: 300
+    int numberOfGenerations = 500;   // 500
     int numberOfThreads=1;
-    String fileNameOfInitialPopulation = "";
+    String referenceParetoFront = "";
+    String fileNameOfInitialSolutions = "";
     if (args.length == 1) {
       problemName = args[0];
     } else if (args.length == 2) {
-      problemName = args[0] ;
-      referenceParetoFront = args[1] ;
-    }else if (args.length == 3) {
-      problemName = args[0] ;
-      referenceParetoFront = args[1] ;
-      numberOfThreads = Integer.valueOf(args[2]);
-    }else if (args.length == 4) {
-      problemName = args[0] ;
-      referenceParetoFront = args[1] ;
-      numberOfThreads = Integer.valueOf(args[2]);
-      fileNameOfInitialPopulation = args[3];
+      problemName = args[0];
+      numberOfIndividuals = Integer.valueOf(args[1]);
+    } else if (args.length == 3){
+      problemName = args[0];
+      numberOfIndividuals = Integer.valueOf(args[1]);
+      numberOfGenerations = Integer.valueOf(args[2]);
+    } else if (args.length == 4){
+      problemName = args[0];
+      numberOfIndividuals = Integer.valueOf(args[1]);
+      numberOfGenerations = Integer.valueOf(args[2]);
+      numberOfThreads = Integer.valueOf(args[3]);
+    } else if (args.length == 5){
+      problemName = args[0];
+      numberOfIndividuals = Integer.valueOf(args[1]);
+      numberOfGenerations = Integer.valueOf(args[2]);
+      numberOfThreads = Integer.valueOf(args[3]);
+      referenceParetoFront = args[4];
+    } else if (args.length == 6){
+      problemName = args[0];
+      numberOfIndividuals = Integer.valueOf(args[1]);
+      numberOfGenerations = Integer.valueOf(args[2]);
+      numberOfThreads = Integer.valueOf(args[3]);
+      referenceParetoFront = args[4];
+      fileNameOfInitialSolutions = args[5];
     } else {
       //problemName = "org.uma.jmetal.problem.multiobjective.Tanaka";
       //problemName = "org.uma.jmetal.problem.multiobjective.ep.EPZeb2ObjectiveNoConstraint";
@@ -71,8 +86,8 @@ public class ParallelConstraintMOEADWithEpsilonArchiveRunner extends AbstractAlg
       problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelVarDiff4ObjRegretConPMV";
       //referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/Tanaka.pf";
       numberOfThreads = 6;
-      //fileNameOfInitialPopulation = "C:\\workspace\\jMetal_edit\\initialSolutions.csv";
-      //fileNameOfInitialPopulation = "C:\\workspace\\jMetal_edit\\result\\20190323_MOEAD_500世代_設計変数差分_快適度制約あり\\variable30.csv";
+      //fileNameOfInitialSolutions = "C:\\workspace\\jMetal_edit\\initialSolutions.csv";
+      //fileNameOfInitialSolutions = "C:\\workspace\\jMetal_edit\\result\\20190323_MOEAD_500世代_設計変数差分_快適度制約あり\\variable30.csv";
     }
 
     problem = (DoubleProblem)ProblemUtils.<DoubleSolution> loadProblem(problemName);
@@ -93,16 +108,14 @@ public class ParallelConstraintMOEADWithEpsilonArchiveRunner extends AbstractAlg
     mutation = new PolynomialMutation(mutationProbability, mutationDistributionIndex);
 
     int neighborSize = 5;    // default: 20
-    int populationSize = 35;  // default: 300
-    int iterations = 500;   // 500
-    int maxEvaluations = iterations * populationSize;  // default: 50000
+    int maxEvaluations = numberOfGenerations * numberOfIndividuals;  // default: 50000
 
     algorithm = new MOEADBuilder(problem, Variant.ParallelConstraintMOEADWithEpsilonArchive)
             .setCrossover(crossover)
             .setMutation(mutation)
             .setMaxEvaluations(maxEvaluations)
-            .setPopulationSize(populationSize)
-            .setResultPopulationSize(populationSize)
+            .setPopulationSize(numberOfIndividuals)
+            .setResultPopulationSize(numberOfIndividuals)
             .setNeighborhoodSelectionProbability(0.9)
             .setMaximumNumberOfReplacedSolutions(2)
             .setNeighborSize(neighborSize)
@@ -112,17 +125,17 @@ public class ParallelConstraintMOEADWithEpsilonArchiveRunner extends AbstractAlg
             .build() ;
 
     // 初期値を設定
-    if(!StringUtility.isNullOrEmpty(fileNameOfInitialPopulation)) {
+    if(!StringUtility.isNullOrEmpty(fileNameOfInitialSolutions)) {
       List<DoubleSolution> initialPopulation = new ArrayList<DoubleSolution>();
-      Matrix data = new Matrix(Csv.read(fileNameOfInitialPopulation));
-      for (int r = 0; r < populationSize; r++) {
+      Matrix data = new Matrix(Csv.read(fileNameOfInitialSolutions));
+      for (int r = 0; r < numberOfIndividuals; r++) {
         initialPopulation.add(problem.createSolution());
         for (int c = 0; c < data.columnLength(); c++) {
           initialPopulation.get(r).setVariableValue(c, data.get(r, c));
         }
       }
       ((ParallelConstraintMOEADWithEpsilonArchive)algorithm).setInitialPopulation(initialPopulation);
-      JMetalLogger.logger.info("Use initial population: "+ FilenameUtils.getName(fileNameOfInitialPopulation));
+      JMetalLogger.logger.info("Use initial population: "+ FilenameUtils.getName(fileNameOfInitialSolutions));
     }
 
     AlgorithmRunner algorithmRunner = new AlgorithmRunner.Executor(algorithm)
