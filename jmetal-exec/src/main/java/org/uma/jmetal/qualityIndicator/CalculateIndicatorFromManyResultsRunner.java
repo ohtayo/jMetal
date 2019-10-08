@@ -32,16 +32,6 @@ import java.util.regex.Pattern;
  */
 public class CalculateIndicatorFromManyResultsRunner {
   public static void main(String[] args) throws Exception {
-    // (1)すべての試行で得られたすべての結果の最大値と最小値で正規化してHVを求めるように修正する
-    // →OK
-    // (2)DTLZ1で4目的以上の場合HVが算出できない問題を解決する．invertedfrontがおかしいような気がする．他の結果のinvertedfrontの様子を見てみる．
-    // →InvertedFrontは0-1の範囲で1-0にinvertするだけなので，0-1の範囲を超過する解が多いとほとんど0になってしまう．
-    // →(1)の最大値最小値で正規化すればよい⇒OK．将来的にすべての探索手法ですべての結果の最大値/最小値で正規化する．
-    // Todo: (3)OMOPSOだとC3DTLZ4は100個体1000世代では全然うまく探索できていない．他の手法も同様か試してHVを計算してリファレンスとする．
-    // Todo: 各runnerのargsの仕様を共通化して，repeaterから指定できるようにする．
-    // problemName, numberOfIndividuals, numberOfIterations, numberOfThreads, nameOfReferenceParetoFront, nameOfInitialSolutions, その他手法固有値
-    // Todo: (4)全problemNameの最大値・最小値を算出して保存するだけにする．
-    // Todo: (5)その後，すべてのproblemNameの最大値・最小値で正規化して世代ごとにhypervolume計算するようにする
 
     // folders
     String archiveFolderBase = "C:\\workspace\\jMetal\\archive\\";
@@ -55,10 +45,13 @@ public class CalculateIndicatorFromManyResultsRunner {
     String splittedProblemName = tempProblemName[tempProblemName.length - 1];
 
     String[] algorithms = {
-        "ParallelOMOPSO",
-        "ParallelNSGAIIWithEpsilonArchive",
-        "ParallelNSGAIIIWithEpsilonArchive",
-        "ParallelConstraintMOEADWithEpsilonArchive"
+//        "ParallelOMOPSO",
+//        "ParallelNSGAIIWithEpsilonArchive",
+//        "ParallelNSGAIIIWithEpsilonArchive",
+//        "ParallelConstraintMOEADWithEpsilonArchive"
+        "ParallelNSGAII",
+        "ParallelNSGAIII",
+        "ParallelConstraintMOEAD"
     };
     int numberOfIndividuals = 35;
     int numberOfGenerations = 200; // 2000

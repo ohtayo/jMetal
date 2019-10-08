@@ -50,12 +50,15 @@ public class AlgorithmRunnerRepeater {
 //            "ParallelOMOPSO",
 //            "ParallelNSGAIIWithEpsilonArchive"
 //            "ParallelNSGAIIIWithEpsilonArchive",
-            "ParallelConstraintMOEADWithEpsilonArchive"
+//            "ParallelConstraintMOEADWithEpsilonArchive"
+            "ParallelNSGAII",
+            "ParallelNSGAIII",
+            "ParallelConstraintMOEAD"
         };
         int numberOfIndividuals = 35;
         int numberOfGenerations = 200;
         int numberOfRepeats = 2;    // 20
-        int numberOfThreads = 4;
+        int numberOfThreads = 3;
 
         // run each problem and algorithms
         for (int problemNumber=0; problemNumber<problems.length; problemNumber++){
