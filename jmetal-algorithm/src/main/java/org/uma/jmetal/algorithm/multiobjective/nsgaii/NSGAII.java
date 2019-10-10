@@ -155,10 +155,10 @@ public class NSGAII<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, L
   protected List<S> reproduction(List<S> matingPool) {
     int numberOfParents = crossoverOperator.getNumberOfRequiredParents() ;
 
-    checkNumberOfParents(matingPool, numberOfParents);
+//    checkNumberOfParents(matingPool, numberOfParents);
 
     List<S> offspringPopulation = new ArrayList<>(offspringPopulationSize);
-    for (int i = 0; i < matingPool.size(); i += numberOfParents) {
+    for (int i = 0; i < matingPool.size()-1; i += numberOfParents) {
       List<S> parents = new ArrayList<>(numberOfParents);
       for (int j = 0; j < numberOfParents; j++) {
         parents.add(population.get(i+j));
