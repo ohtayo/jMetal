@@ -7,7 +7,6 @@ import org.apache.commons.io.FilenameUtils;
 import org.uma.jmetal.algorithm.Algorithm;
 import org.uma.jmetal.algorithm.multiobjective.nsgaii.NSGAII;
 import org.uma.jmetal.algorithm.multiobjective.nsgaii.NSGAIIBuilder;
-import org.uma.jmetal.algorithm.multiobjective.nsgaiii.NSGAIII;
 import org.uma.jmetal.operator.CrossoverOperator;
 import org.uma.jmetal.operator.MutationOperator;
 import org.uma.jmetal.operator.SelectionOperator;
@@ -18,7 +17,7 @@ import org.uma.jmetal.problem.DoubleProblem;
 import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.util.*;
 import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
-import org.uma.jmetal.util.evaluator.impl.MultithreadedSolutionListEvaluator;
+import org.uma.jmetal.util.evaluator.impl.ThreadPoolSolutionListEvaluator;
 
 import java.io.FileNotFoundException;
 import java.util.List;
@@ -44,9 +43,9 @@ public class ParallelNSGAIIRunner extends AbstractAlgorithmRunner {
     SelectionOperator<List<DoubleSolution>, DoubleSolution> selection;
 
     String problemName;
-    int numberOfIndividuals = 35;
+    int numberOfIndividuals = 36;
     int numberOfGenerations = 200;
-    int numberOfThreads = 1;
+    int numberOfThreads = 2;
     String referenceParetoFront = "" ;
     String fileNameOfInitialSolutions="";
     if (args.length == 1) {
@@ -98,7 +97,7 @@ public class ParallelNSGAIIRunner extends AbstractAlgorithmRunner {
 
     selection = new BinaryTournamentSelection<DoubleSolution>();
 
-    SolutionListEvaluator<DoubleSolution> evaluator = new MultithreadedSolutionListEvaluator<DoubleSolution>(numberOfThreads, problem) ;
+    SolutionListEvaluator<DoubleSolution> evaluator = new ThreadPoolSolutionListEvaluator<DoubleSolution>(numberOfThreads, problem) ;
 
     int maxEvaluations = numberOfGenerations * numberOfIndividuals;  // default: 25000
 
