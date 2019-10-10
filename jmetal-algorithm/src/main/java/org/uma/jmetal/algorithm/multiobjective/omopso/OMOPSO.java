@@ -96,7 +96,7 @@ public class OMOPSO extends AbstractParticleSwarmOptimization<DoubleSolution, Li
     // dump solution list in the searching
     List<DoubleSolution> epsilon = getResult();
     new SolutionListOutput(epsilon)
-            .setVarFileOutputContext(new DefaultFileOutputContext("./result/epsilonPosition" + currentIteration + ".csv"))
+            .setVarFileOutputContext(new DefaultFileOutputContext("./result/epsilonVariable" + currentIteration + ".csv"))
             .setFunFileOutputContext(new DefaultFileOutputContext("./result/epsilonFitness" + currentIteration + ".csv"))
             .setSeparator(",")
             .print();
@@ -106,7 +106,7 @@ public class OMOPSO extends AbstractParticleSwarmOptimization<DoubleSolution, Li
             .print();
     List<DoubleSolution> leader = this.leaderArchive.getSolutionList();
     new SolutionListOutput(leader)
-            .setVarFileOutputContext(new DefaultFileOutputContext("./result/leaderPosition" + currentIteration + ".csv"))
+            .setVarFileOutputContext(new DefaultFileOutputContext("./result/leaderVariable" + currentIteration + ".csv"))
             .setFunFileOutputContext(new DefaultFileOutputContext("./result/leaderFitness" + currentIteration + ".csv"))
             .setSeparator(",")
             .print();

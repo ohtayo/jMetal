@@ -55,11 +55,11 @@ public class ParallelConstraintMOEAD extends AbstractMOEAD<DoubleSolution>  {
     initializeNeighborhood();
     initializePopulation();
     idealPoint.update(population);
-    dump();
 
     violationThresholdComparator.updateThreshold(population);
 
     evaluations = populationSize ;
+    dump();
 
     do {
       int[] permutation = new int[populationSize];

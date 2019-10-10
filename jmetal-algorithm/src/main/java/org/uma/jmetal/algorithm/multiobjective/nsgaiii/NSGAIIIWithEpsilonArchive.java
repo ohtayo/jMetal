@@ -64,22 +64,22 @@ public class NSGAIIIWithEpsilonArchive<S extends Solution<?>> extends NSGAIII<S>
     // dump solution list in the searching
     List<S> result = getResult();
     new SolutionListOutput(result)
+            .setVarFileOutputContext(new DefaultFileOutputContext("./result/nonDominatedVariable" + iterations + ".csv"))
+            .setFunFileOutputContext(new DefaultFileOutputContext("./result/nonDominatedFitness" + iterations + ".csv"))
+            .setSeparator(",")
+            .print();
+    new ConstraintListOutput<S>(result)
+            .setConFileOutputContext(new DefaultFileOutputContext("./result/nonDominatedConstraint" + iterations + ".csv"))
+            .setSeparator(",")
+            .print();
+    List<S> allPopulation = getPopulation();
+    new SolutionListOutput(allPopulation)
             .setVarFileOutputContext(new DefaultFileOutputContext("./result/variable" + iterations + ".csv"))
             .setFunFileOutputContext(new DefaultFileOutputContext("./result/fitness" + iterations + ".csv"))
             .setSeparator(",")
             .print();
     new ConstraintListOutput<S>(result)
             .setConFileOutputContext(new DefaultFileOutputContext("./result/constraint" + iterations + ".csv"))
-            .setSeparator(",")
-            .print();
-    List<S> allPopulation = getPopulation();
-    new SolutionListOutput(allPopulation)
-            .setVarFileOutputContext(new DefaultFileOutputContext("./result/variableall" + iterations + ".csv"))
-            .setFunFileOutputContext(new DefaultFileOutputContext("./result/fitnessall" + iterations + ".csv"))
-            .setSeparator(",")
-            .print();
-    new ConstraintListOutput<S>(result)
-            .setConFileOutputContext(new DefaultFileOutputContext("./result/constraintall" + iterations + ".csv"))
             .setSeparator(",")
             .print();
     List<S> epsilon = epsilonArchive.getSolutionList();
