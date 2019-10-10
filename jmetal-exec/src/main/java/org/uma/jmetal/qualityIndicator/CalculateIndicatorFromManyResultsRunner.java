@@ -54,8 +54,8 @@ public class CalculateIndicatorFromManyResultsRunner {
         "ParallelConstraintMOEAD"
     };
     int numberOfIndividuals = 35;
-    int numberOfGenerations = 200; // 2000
-    int numberOfRepeats = 2;    // 20
+    int numberOfGenerations = 1000; // 2000
+    int numberOfRepeats = 20;    // 20
     int numberOfThreads = 4;
 
     // definition of problem

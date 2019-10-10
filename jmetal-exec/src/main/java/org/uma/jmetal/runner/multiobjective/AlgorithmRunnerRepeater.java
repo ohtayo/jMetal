@@ -1,33 +1,16 @@
 package org.uma.jmetal.runner.multiobjective;
 
-import jp.ohtayo.commons.io.Csv;
-import jp.ohtayo.commons.math.Matrix;
-import jp.ohtayo.commons.math.Vector;
 import org.apache.commons.io.FileUtils;
-import org.uma.jmetal.algorithm.multiobjective.moead.ParallelConstraintMOEADWithEpsilonArchive;
-import org.uma.jmetal.problem.DoubleProblem;
-import org.uma.jmetal.qualityindicator.impl.hypervolume.PISAHypervolume;
-import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.util.JMetalException;
-import org.uma.jmetal.util.ProblemUtils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.regex.Pattern;
 
-import org.uma.jmetal.util.AbstractAlgorithmRunner;
-import org.uma.jmetal.util.front.Front;
-import org.uma.jmetal.util.front.imp.ArrayFront;
-import org.uma.jmetal.util.front.util.FrontNormalizer;
-import org.uma.jmetal.util.front.util.FrontUtils;
-import org.uma.jmetal.util.point.PointSolution;
-
 /**
- * Class for running algorithm many times.
+ * Class for running algorithms many times.
  *
  * @author ohtayo (ohta.yoshihiro@outlook.jp)
  */
@@ -56,9 +39,9 @@ public class AlgorithmRunnerRepeater {
             "ParallelConstraintMOEAD"
         };
         int numberOfIndividuals = 35;
-        int numberOfGenerations = 200;
-        int numberOfRepeats = 2;    // 20
-        int numberOfThreads = 3;
+        int numberOfGenerations = 2000;  //2000
+        int numberOfRepeats = 20;    // 20
+        int numberOfThreads = 8;
 
         // run each problem and algorithms
         for (int problemNumber=0; problemNumber<problems.length; problemNumber++){

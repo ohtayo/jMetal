@@ -43,9 +43,9 @@ public class ParallelNSGAIIRunner extends AbstractAlgorithmRunner {
     SelectionOperator<List<DoubleSolution>, DoubleSolution> selection;
 
     String problemName;
-    int numberOfIndividuals = 36;
-    int numberOfGenerations = 200;
-    int numberOfThreads = 2;
+    int numberOfIndividuals = 35;
+    int numberOfGenerations = 500;
+    int numberOfThreads = 6;
     String referenceParetoFront = "" ;
     String fileNameOfInitialSolutions="";
     if (args.length == 1) {
@@ -81,8 +81,9 @@ public class ParallelNSGAIIRunner extends AbstractAlgorithmRunner {
       problemName = "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ4";
       referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ4.4D.pf" ;
       problemName = "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ1";
-//      problemName = "org.uma.jmetal.problem.multiobjective.dtlz.DTLZ1";
+      problemName = "org.uma.jmetal.problem.multiobjective.dtlz.DTLZ1";
       referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.4D.pf" ;
+      problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelVarDiff4ObjRegretConPMV";
     }
 
     problem = (DoubleProblem) ProblemUtils.<DoubleSolution> loadProblem(problemName);
