@@ -39,9 +39,9 @@ public class AlgorithmRunnerRepeater {
             "ParallelConstraintMOEAD"
         };
         int numberOfIndividuals = 35;
-        int numberOfGenerations = 2000;  //2000
-        int numberOfRepeats = 20;    // 20
-        int numberOfThreads = 8;
+        int numberOfGenerations = 200;  //2000
+        int numberOfRepeats = 2;    // 20
+        int numberOfThreads = 4;
 
         // run each problem and algorithms
         for (int problemNumber=0; problemNumber<problems.length; problemNumber++){

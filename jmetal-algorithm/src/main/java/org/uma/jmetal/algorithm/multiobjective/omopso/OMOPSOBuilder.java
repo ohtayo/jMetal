@@ -10,6 +10,8 @@ import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
 
 /** Class implementing the OMOPSO algorithm */
 public class OMOPSOBuilder implements AlgorithmBuilder<OMOPSO> {
+  public enum OMOPSOVariant {OMOPSO, OMOPSOWithSizeLimitedArchive}
+
   protected DoubleProblem problem;
   protected SolutionListEvaluator<DoubleSolution> evaluator;
 
@@ -21,9 +23,12 @@ public class OMOPSOBuilder implements AlgorithmBuilder<OMOPSO> {
   private UniformMutation uniformMutation ;
   private NonUniformMutation nonUniformMutation ;
 
+  private OMOPSOVariant variant;
+
   public OMOPSOBuilder(DoubleProblem problem, SolutionListEvaluator<DoubleSolution> evaluator) {
     this.evaluator = evaluator ;
     this.problem = problem ;
+    this.variant = OMOPSOVariant.OMOPSO;
   }
 
   public OMOPSOBuilder setSwarmSize(int swarmSize) {
@@ -62,6 +67,11 @@ public class OMOPSOBuilder implements AlgorithmBuilder<OMOPSO> {
     return this ;
   }
 
+  public OMOPSOBuilder setVariant(OMOPSOVariant variant){
+    this.variant = variant;
+    return this;
+  }
+
   /* Getters */
   public int getArchiveSize() {
     return archiveSize;
@@ -90,7 +100,14 @@ public class OMOPSOBuilder implements AlgorithmBuilder<OMOPSO> {
   public SolutionListEvaluator<DoubleSolution> getSolutionListEvaluator() { return evaluator; }
 
   public OMOPSO build() {
-    return new OMOPSO(problem, evaluator, swarmSize, maxIterations, archiveSize, uniformMutation,
-        nonUniformMutation, eta) ;
+    OMOPSO algorithm = null;
+    if(this.variant == OMOPSOVariant.OMOPSO){
+      algorithm = new OMOPSO(problem, evaluator, swarmSize, maxIterations, archiveSize, uniformMutation,
+          nonUniformMutation, eta);
+    }else if(this.variant == OMOPSOVariant.OMOPSOWithSizeLimitedArchive){
+      algorithm = new OMOPSOWithSizeLimitedArchive(problem, evaluator, swarmSize, maxIterations, archiveSize, uniformMutation,
+          nonUniformMutation, eta);
+    }
+    return algorithm ;
   }
 }

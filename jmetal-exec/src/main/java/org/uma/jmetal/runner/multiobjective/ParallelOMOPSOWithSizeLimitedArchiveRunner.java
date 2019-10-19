@@ -1,29 +1,23 @@
 package org.uma.jmetal.runner.multiobjective;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.List;
-
+import jp.ohtayo.commons.io.Csv;
+import jp.ohtayo.commons.math.Matrix;
+import jp.ohtayo.commons.util.StringUtility;
+import org.apache.commons.io.FilenameUtils;
 import org.uma.jmetal.algorithm.Algorithm;
 import org.uma.jmetal.algorithm.multiobjective.omopso.OMOPSO;
 import org.uma.jmetal.algorithm.multiobjective.omopso.OMOPSOBuilder;
+import org.uma.jmetal.algorithm.multiobjective.omopso.OMOPSOWithSizeLimitedArchive;
 import org.uma.jmetal.operator.impl.mutation.NonUniformMutation;
 import org.uma.jmetal.operator.impl.mutation.UniformMutation;
 import org.uma.jmetal.problem.DoubleProblem;
 import org.uma.jmetal.solution.DoubleSolution;
-import org.uma.jmetal.util.AbstractAlgorithmRunner;
-import org.uma.jmetal.util.AlgorithmRunner;
-import org.uma.jmetal.util.JMetalException;
-import org.uma.jmetal.util.JMetalLogger;
-import org.uma.jmetal.util.ProblemUtils;
+import org.uma.jmetal.util.*;
 import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
 import org.uma.jmetal.util.evaluator.impl.ThreadPoolSolutionListEvaluator;
 
-import org.apache.commons.io.FilenameUtils;
-
-import jp.ohtayo.commons.io.Csv;
-import jp.ohtayo.commons.math.Matrix;
-import jp.ohtayo.commons.util.StringUtility;
+import java.io.FileNotFoundException;
+import java.util.List;
 
 /**
  * Class for configuring and running the OMOPSO algorithm (parallel version)
@@ -31,7 +25,7 @@ import jp.ohtayo.commons.util.StringUtility;
  * @author ohtayo (ohta.yoshihiro@outlook.jp)
  */
 
-public class ParallelOMOPSORunner extends AbstractAlgorithmRunner {
+public class ParallelOMOPSOWithSizeLimitedArchiveRunner extends AbstractAlgorithmRunner {
   /**
    * @param args Command line arguments.
    * @throws SecurityException
@@ -91,11 +85,12 @@ public class ParallelOMOPSORunner extends AbstractAlgorithmRunner {
 //      referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ4.3D.pf";
  //     referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ4.4D.pf";
       numberOfThreads = 2;
-      numberOfIterations = 200;
+      numberOfIterations = 1000;
       numberOfParticles = 36;
       fileNameOfInitialSolutions = "";
       //fileNameOfInitialSolutions = "C:\\workspace\\jMetal\\initialSolutions.csv";
     }
+    int archiveSize = 150;  // アーカイブの制限サイズ
 
     // 目的関数の定義
     problem = (DoubleProblem) ProblemUtils.<DoubleSolution> loadProblem(problemName);
@@ -110,27 +105,27 @@ public class ParallelOMOPSORunner extends AbstractAlgorithmRunner {
     OMOPSOBuilder builder = new OMOPSOBuilder(problem, evaluator)
             .setMaxIterations(numberOfIterations)
             .setSwarmSize(numberOfParticles)
+            .setArchiveSize(archiveSize)
             .setUniformMutation(new UniformMutation(mutationProbability, 0.5))
             .setNonUniformMutation(new NonUniformMutation(mutationProbability, 0.5, numberOfIterations));
     algorithm = builder.build();
 
     // 初期値のファイル名の指定があれば初期値を設定
     if(!StringUtility.isNullOrEmpty(fileNameOfInitialSolutions)){
-      List<DoubleSolution> initialSwarm = ((OMOPSO) algorithm).createInitialSwarm();
+      List<DoubleSolution> initialSwarm = ((OMOPSOWithSizeLimitedArchive) algorithm).createInitialSwarm();
       Matrix data = new Matrix(Csv.read(fileNameOfInitialSolutions));
       for (int r=0; r<initialSwarm.size(); r++){
         for(int c=0; c<data.columnLength(); c++){
           initialSwarm.get(r).setVariableValue( c, data.get(r, c) );
         }
       }
-      ((OMOPSO) algorithm).setInitialSwarm(initialSwarm);
+      ((OMOPSOWithSizeLimitedArchive) algorithm).setInitialSwarm(initialSwarm);
       JMetalLogger.logger.info("Use initial population: "+ FilenameUtils.getName(fileNameOfInitialSolutions));
     }
 
     // アルゴリズム実行
     AlgorithmRunner algorithmRunner = new AlgorithmRunner.Executor(algorithm)
             .execute() ;
-    builder.getSolutionListEvaluator().shutdown();  // マルチスレッドのシャットダウン
 
     // 探索結果と計算結果の取得
     List<DoubleSolution> population = algorithm.getResult() ;

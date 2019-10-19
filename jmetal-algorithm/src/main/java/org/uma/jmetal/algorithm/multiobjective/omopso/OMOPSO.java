@@ -28,24 +28,24 @@ public class OMOPSO extends AbstractParticleSwarmOptimization<DoubleSolution, Li
 
   SolutionListEvaluator<DoubleSolution> evaluator;
 
-  private int swarmSize;
-  private int archiveSize;
+  public int swarmSize;
+  public int archiveSize;
   private int maxIterations;
-  private int currentIteration;
+  public int currentIteration;
 
-  private DoubleSolution[] localBest;
+  public DoubleSolution[] localBest;
   private CrowdingDistanceArchive<DoubleSolution> leaderArchive;
-  private NonDominatedSolutionListArchive<DoubleSolution> epsilonArchive;
+  public NonDominatedSolutionListArchive<DoubleSolution> epsilonArchive;
 
-  private double[][] speed;
+  public double[][] speed;
 
   private Comparator<DoubleSolution> dominanceComparator;
-  private Comparator<DoubleSolution> crowdingDistanceComparator;
+  public Comparator<DoubleSolution> crowdingDistanceComparator;
 
   private UniformMutation uniformMutation;
   private NonUniformMutation nonUniformMutation;
 
-  private JMetalRandom randomGenerator;
+  public JMetalRandom randomGenerator;
   private CrowdingDistance<DoubleSolution> crowdingDistance;
 
   private List<DoubleSolution> initialSwarm;
@@ -83,37 +83,31 @@ public class OMOPSO extends AbstractParticleSwarmOptimization<DoubleSolution, Li
   @Override protected void initProgress() {
     currentIteration = 1;
     crowdingDistance.computeDensityEstimator(leaderArchive.getSolutionList());
-    dump();
+    dump(epsilonArchive.getSolutionList(), "epsilon");
+    dump(leaderArchive.getSolutionList());
   }
 
   @Override protected void updateProgress() {
     currentIteration += 1;
     crowdingDistance.computeDensityEstimator(leaderArchive.getSolutionList());
-    dump();
+    dump(epsilonArchive.getSolutionList(), "epsilon");
+    dump(leaderArchive.getSolutionList());
   }
 
-  protected void dump(){
+  protected void dump(List<DoubleSolution> solutionList, String prefix){
     // dump solution list in the searching
-    List<DoubleSolution> epsilon = getResult();
-    new SolutionListOutput(epsilon)
-            .setVarFileOutputContext(new DefaultFileOutputContext("./result/epsilonVariable" + currentIteration + ".csv"))
-            .setFunFileOutputContext(new DefaultFileOutputContext("./result/epsilonFitness" + currentIteration + ".csv"))
+    new SolutionListOutput(solutionList)
+            .setVarFileOutputContext(new DefaultFileOutputContext("./result/"+prefix+"variable" + currentIteration + ".csv"))
+            .setFunFileOutputContext(new DefaultFileOutputContext("./result/"+prefix+"fitness" + currentIteration + ".csv"))
             .setSeparator(",")
             .print();
-    new ConstraintListOutput<DoubleSolution>(epsilon)
-            .setConFileOutputContext(new DefaultFileOutputContext("./result/epsilonConstraint" + currentIteration + ".csv"))
+    new ConstraintListOutput<DoubleSolution>(solutionList)
+            .setConFileOutputContext(new DefaultFileOutputContext("./result/"+prefix+"constraint" + currentIteration + ".csv"))
             .setSeparator(",")
             .print();
-    List<DoubleSolution> leader = this.leaderArchive.getSolutionList();
-    new SolutionListOutput(leader)
-            .setVarFileOutputContext(new DefaultFileOutputContext("./result/leaderVariable" + currentIteration + ".csv"))
-            .setFunFileOutputContext(new DefaultFileOutputContext("./result/leaderFitness" + currentIteration + ".csv"))
-            .setSeparator(",")
-            .print();
-    new ConstraintListOutput<DoubleSolution>(leader)
-            .setConFileOutputContext(new DefaultFileOutputContext("./result/leaderConstraint" + currentIteration + ".csv"))
-            .setSeparator(",")
-            .print();
+  }
+  protected void dump(List<DoubleSolution> solutionList){
+    dump(solutionList,"");
   }
 
   @Override protected boolean isStoppingConditionReached() {
@@ -144,7 +138,6 @@ public class OMOPSO extends AbstractParticleSwarmOptimization<DoubleSolution, Li
   }
 
   @Override public List<DoubleSolution> getResult() {
-    //return this.leaderArchive.getSolutionList();
       return this.epsilonArchive.getSolutionList();
   }
 
