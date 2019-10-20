@@ -87,37 +87,31 @@ public class NSGAIII<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, 
   @Override
   protected void initProgress() {
     iterations = 1 ;
-    dump();
+    dump(getPopulation());
+    dump(getResult(), "nonDominated");
   }
 
   @Override
   protected void updateProgress() {
     iterations++ ;
-    dump();
+    dump(getPopulation());
+    dump(getResult(), "nonDominated");
   }
 
-  protected void dump(){
+  protected void dump(List<S> solutionList, String prefix){
     // dump solution list in the searching
-    List<S> result = getResult();
-    new SolutionListOutput(result)
-            .setVarFileOutputContext(new DefaultFileOutputContext("./result/nonDominatedVariable" + iterations + ".csv"))
-            .setFunFileOutputContext(new DefaultFileOutputContext("./result/nonDominatedFitness" + iterations + ".csv"))
+    new SolutionListOutput(solutionList)
+            .setVarFileOutputContext(new DefaultFileOutputContext("./result/"+prefix+"variable" + iterations + ".csv"))
+            .setFunFileOutputContext(new DefaultFileOutputContext("./result/"+prefix+"fitness" + iterations + ".csv"))
             .setSeparator(",")
             .print();
-    new ConstraintListOutput<S>(result)
-            .setConFileOutputContext(new DefaultFileOutputContext("./result/nonDominatedConstraint" + iterations + ".csv"))
+    new ConstraintListOutput<S>(solutionList)
+            .setConFileOutputContext(new DefaultFileOutputContext("./result/"+prefix+"constraint" + iterations + ".csv"))
             .setSeparator(",")
             .print();
-    List<S> allPopulation = getPopulation();
-    new SolutionListOutput(allPopulation)
-            .setVarFileOutputContext(new DefaultFileOutputContext("./result/variable" + iterations + ".csv"))
-            .setFunFileOutputContext(new DefaultFileOutputContext("./result/fitness" + iterations + ".csv"))
-            .setSeparator(",")
-            .print();
-    new ConstraintListOutput<S>(result)
-            .setConFileOutputContext(new DefaultFileOutputContext("./result/constraint" + iterations + ".csv"))
-            .setSeparator(",")
-            .print();
+  }
+  protected void dump(List<S> solutionList){
+    dump(solutionList,"");
   }
 
   @Override

@@ -84,11 +84,15 @@ public class ParallelNSGAIIIWithEpsilonArchiveRunner extends AbstractAlgorithmRu
       problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelVarDiff4ObjRegretConPMV";
 //      problemName = "org.uma.jmetal.problem.multiobjective.zdt.ZDT1";
       numberOfThreads = 6;
-      numberOfGenerations = 10;
-      numberOfIndividuals = 10;
+      numberOfGenerations = 1000;
+      numberOfIndividuals = 35;
       fileNameOfInitialSolutions = "";
       //fileNameOfInitialSolutions = "C:\\workspace\\jMetal\\initialSolutions.csv";
+      problemName = "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ1";
+      referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.4D.pf";
     }
+
+    int archiveSize = 120;
 
     // 目的関数の設定
     problem = ProblemUtils.loadProblem(problemName);
@@ -109,12 +113,13 @@ public class ParallelNSGAIIIWithEpsilonArchiveRunner extends AbstractAlgorithmRu
 
     // NSGAIIIのパラメータ定義
     NSGAIIIBuilder<DoubleSolution> builder = new NSGAIIIBuilder<>(problem)
-      .setCrossoverOperator(crossover)
-      .setMutationOperator(mutation)
-      .setSelectionOperator(selection)
-      .setMaxIterations(numberOfGenerations)
-      .setPopulationSize(numberOfIndividuals)
-      .setSolutionListEvaluator(evaluator) ;
+            .setCrossoverOperator(crossover)
+            .setMutationOperator(mutation)
+            .setSelectionOperator(selection)
+            .setMaxIterations(numberOfGenerations)
+            .setPopulationSize(numberOfIndividuals)
+            .setArchiveSize(archiveSize)
+            .setSolutionListEvaluator(evaluator) ;
     algorithm = new NSGAIIIWithEpsilonArchive<DoubleSolution>(builder);
 
     // 初期値のファイル名の指定があれば初期値を設定
