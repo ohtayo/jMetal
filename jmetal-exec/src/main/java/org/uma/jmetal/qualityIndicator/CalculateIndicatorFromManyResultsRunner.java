@@ -37,10 +37,10 @@ public class CalculateIndicatorFromManyResultsRunner {
     String archiveFolderBase = "C:\\workspace\\jMetal\\archive\\";
 
     // problem and search settings
-//    String problemName = "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ1";
-//    String referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.4D.pf";
-    String problemName = "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ4";
-    String referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ4.4D.pf";
+    String problemName = "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ1";
+    String referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.4D.pf";
+//    String problemName = "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ4";
+//    String referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ4.4D.pf";
     String[] tempProblemName = problemName.split(Pattern.quote("."));
     String splittedProblemName = tempProblemName[tempProblemName.length - 1];
 
@@ -49,9 +49,11 @@ public class CalculateIndicatorFromManyResultsRunner {
 //        "ParallelNSGAIIWithEpsilonArchive",
 //        "ParallelNSGAIIIWithEpsilonArchive",
 //        "ParallelConstraintMOEADWithEpsilonArchive"
-        "ParallelNSGAII",
-        "ParallelNSGAIII",
-        "ParallelConstraintMOEAD"
+//        "ParallelNSGAII",
+//        "ParallelNSGAIII",
+//        "ParallelConstraintMOEAD",
+        "ParallelOMOPSOWithSizeLimitedArchive"
+
     };
     int numberOfIndividuals = 35;
     int numberOfGenerations = 1000; // 2000
@@ -62,17 +64,21 @@ public class CalculateIndicatorFromManyResultsRunner {
     DoubleProblem problem = (DoubleProblem) ProblemUtils.<DoubleSolution> loadProblem(problemName);
 
     // calculate minimum and maximum objective values from search results.
+    JMetalLogger.logger.info("Calculate minimum and maximum objective values from search results.");
     Matrix minimumValues = new Matrix(problem.getNumberOfObjectives(), algorithms.length, Double.MAX_VALUE);
     Matrix maximumValues = new Matrix(problem.getNumberOfObjectives(), algorithms.length, Double.MIN_VALUE);
     for(int algorithmNumber=0; algorithmNumber<algorithms.length; algorithmNumber++) {
       String algorithmName = algorithms[algorithmNumber];
       String experimentName = splittedProblemName + "_"+algorithmName+"_pop" + numberOfIndividuals + "_gen" + numberOfGenerations;
+      JMetalLogger.logger.info(experimentName);
 
       Matrix minimumValuesInIterate = new Matrix(problem.getNumberOfObjectives(), numberOfGenerations);
       Matrix maximumValuesInIterate = new Matrix(problem.getNumberOfObjectives(), numberOfGenerations);
       Matrix[][] solutions = new Matrix[numberOfRepeats][numberOfGenerations];
       for (int i = 0; i < numberOfRepeats; i++) {
+        JMetalLogger.logger.info("Repeats: "+i);
         for (int g = 0; g < numberOfGenerations; g++) {
+          //JMetalLogger.logger.info("Generations: "+g);
           // read fitness in each generation
           String archiveFolder = archiveFolderBase + experimentName + "\\" + String.valueOf(i) + "\\";
           String solutionsFile = "epsilonFitness" + (g + 1) + ".csv";
@@ -97,6 +103,7 @@ public class CalculateIndicatorFromManyResultsRunner {
     Csv.write(minmaxFolder+"maximumValue.csv", maximumValues.get());
 
     // calculate average HyperVolume of each generations
+    JMetalLogger.logger.info("Calculate average HyperVolume of each generations.");
     Matrix normalizedHypervolumes = new Matrix(numberOfRepeats, numberOfGenerations);
     Matrix averagedHypervolumes = new Matrix(algorithms.length, numberOfGenerations);
     String hypervolumesFolder = archiveFolderBase + "Hypervolume\\";
@@ -106,9 +113,12 @@ public class CalculateIndicatorFromManyResultsRunner {
     for(int algorithmNumber=0; algorithmNumber<algorithms.length; algorithmNumber++) {
       String algorithmName = algorithms[algorithmNumber];
       String experimentName = splittedProblemName + "_" + algorithmName + "_pop" + numberOfIndividuals + "_gen" + numberOfGenerations;
+      JMetalLogger.logger.info(experimentName);
 
       for (int i = 0; i < numberOfRepeats; i++) {
+        JMetalLogger.logger.info("Repeats: "+i);
         for (int g = 0; g < numberOfGenerations; g++) {
+          //JMetalLogger.logger.info("Generations: "+g);
           String archiveFolder = archiveFolderBase + experimentName + "\\" + String.valueOf(i) + "\\";
           String solutionsFile = "epsilonFitness" + (g + 1) + ".csv";
           solutions[i][g] = new Matrix(Csv.read(archiveFolder + solutionsFile));

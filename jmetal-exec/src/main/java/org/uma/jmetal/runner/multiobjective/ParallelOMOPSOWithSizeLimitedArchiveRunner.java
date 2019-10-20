@@ -17,6 +17,7 @@ import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
 import org.uma.jmetal.util.evaluator.impl.ThreadPoolSolutionListEvaluator;
 
 import java.io.FileNotFoundException;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -90,9 +91,11 @@ public class ParallelOMOPSOWithSizeLimitedArchiveRunner extends AbstractAlgorith
       fileNameOfInitialSolutions = "";
       //fileNameOfInitialSolutions = "C:\\workspace\\jMetal\\initialSolutions.csv";
     }
-    int archiveSize = 150;  // アーカイブの制限サイズ
+    int archiveSize = 300;  // アーカイブの制限サイズ
 
     // 目的関数の定義
+    Integer[] problemArgs = {8,3,1};
+    problem = (DoubleProblem) ProblemUtils.<DoubleSolution> loadProblem(problemName, (Object[]) problemArgs);
     problem = (DoubleProblem) ProblemUtils.<DoubleSolution> loadProblem(problemName);
 
     // 突然変異確率
@@ -107,7 +110,8 @@ public class ParallelOMOPSOWithSizeLimitedArchiveRunner extends AbstractAlgorith
             .setSwarmSize(numberOfParticles)
             .setArchiveSize(archiveSize)
             .setUniformMutation(new UniformMutation(mutationProbability, 0.5))
-            .setNonUniformMutation(new NonUniformMutation(mutationProbability, 0.5, numberOfIterations));
+            .setNonUniformMutation(new NonUniformMutation(mutationProbability, 0.5, numberOfIterations))
+            .setVariant(OMOPSOBuilder.OMOPSOVariant.OMOPSOWithSizeLimitedArchive);
     algorithm = builder.build();
 
     // 初期値のファイル名の指定があれば初期値を設定

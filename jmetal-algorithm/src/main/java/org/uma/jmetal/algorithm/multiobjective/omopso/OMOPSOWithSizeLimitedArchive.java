@@ -16,6 +16,7 @@ import org.uma.jmetal.util.fileoutput.SolutionListOutput;
 import org.uma.jmetal.util.fileoutput.impl.DefaultFileOutputContext;
 import org.uma.jmetal.util.pseudorandom.JMetalRandom;
 import org.uma.jmetal.util.solutionattribute.impl.CrowdingDistance;
+import org.uma.jmetal.util.solutionattribute.impl.StrengthRawFitness;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -25,8 +26,9 @@ import java.util.List;
 @SuppressWarnings("serial")
 public class OMOPSOWithSizeLimitedArchive extends OMOPSO {
 
-  public List<DoubleSolution> truncatedArchive; // SPEA2の端切りアーカイブ
-  public EnvironmentalSelection<DoubleSolution> environmentalSelection; // SPEA2の環境選択
+  private List<DoubleSolution> truncatedArchive; // SPEA2の端切りアーカイブ
+  private EnvironmentalSelection<DoubleSolution> environmentalSelection; // SPEA2の環境選択
+  private StrengthRawFitness<DoubleSolution> strenghtRawFitness = new StrengthRawFitness<DoubleSolution>(); // SPEA2の適合度
 
   /** Constructor */
   public OMOPSOWithSizeLimitedArchive(DoubleProblem problem, SolutionListEvaluator<DoubleSolution> evaluator,
@@ -111,8 +113,10 @@ public class OMOPSOWithSizeLimitedArchive extends OMOPSO {
     for (DoubleSolution solution : swarm) {
       DoubleSolution particle = (DoubleSolution) solution.copy();
       epsilonArchive.add((DoubleSolution) particle.copy());
-      truncatedArchive = environmentalSelection.execute(epsilonArchive.getSolutionList());
     }
+    List<DoubleSolution> union = epsilonArchive.getSolutionList();
+    strenghtRawFitness.computeDensityEstimator(union);
+    truncatedArchive = environmentalSelection.execute(union);
   }
 
   @Override public String getName() {

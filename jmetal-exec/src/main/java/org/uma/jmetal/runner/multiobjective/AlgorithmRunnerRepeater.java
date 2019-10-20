@@ -22,11 +22,11 @@ public class AlgorithmRunnerRepeater {
 
         // problem and search settings
         String[] problems = {
-            "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ1",
+//            "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ1",
             "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ4"
         };
         String[] referenceParetoFronts = {
-            "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.4D.pf",
+//            "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.4D.pf",
             "jmetal-problem/src/test/resources/pareto_fronts/DTLZ4.4D.pf"
         };
         String[] algorithms = {
@@ -34,14 +34,15 @@ public class AlgorithmRunnerRepeater {
 //            "ParallelNSGAIIWithEpsilonArchive"
 //            "ParallelNSGAIIIWithEpsilonArchive",
 //            "ParallelConstraintMOEADWithEpsilonArchive"
-            "ParallelNSGAII",
-            "ParallelNSGAIII",
-            "ParallelConstraintMOEAD"
+//            "ParallelNSGAII",
+//            "ParallelNSGAIII",
+//            "ParallelConstraintMOEAD",
+            "ParallelOMOPSOWithSizeLimitedArchive"
         };
         int numberOfIndividuals = 35;
-        int numberOfGenerations = 200;  //2000
-        int numberOfRepeats = 2;    // 20
-        int numberOfThreads = 4;
+        int numberOfGenerations = 1000;  //2000
+        int numberOfRepeats = 20;    // 20
+        int numberOfThreads = 6;
 
         // run each problem and algorithms
         for (int problemNumber=0; problemNumber<problems.length; problemNumber++){
