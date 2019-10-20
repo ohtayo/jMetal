@@ -29,13 +29,14 @@ public class NSGAIIBuilder<S extends Solution<?>> implements AlgorithmBuilder<NS
   private int maxEvaluations;
   private int populationSize;
   protected int matingPoolSize;
-  protected int offspringPopulationSize ;
+  protected int offspringPopulationSize;
 
   private CrossoverOperator<S>  crossoverOperator;
   private MutationOperator<S> mutationOperator;
   private SelectionOperator<List<S>, S> selectionOperator;
   private SolutionListEvaluator<S> evaluator;
-  private Comparator<S> dominanceComparator ;
+  private Comparator<S> dominanceComparator;
+  private int archiveSize;
 
   private NSGAIIVariant variant;
 
@@ -86,6 +87,17 @@ public class NSGAIIBuilder<S extends Solution<?>> implements AlgorithmBuilder<NS
     return this;
   }
 
+  public NSGAIIBuilder<S> setArchiveSize(int archiveSize) {
+    if (archiveSize < 0) {
+      throw new JMetalException("Archive size is negative: " + archiveSize);
+    }
+
+    this.archiveSize = archiveSize;
+
+    return this;
+  }
+
+
   public NSGAIIBuilder<S> setSelectionOperator(SelectionOperator<List<S>, S> selectionOperator) {
     if (selectionOperator == null) {
       throw new JMetalException("selectionOperator is null");
@@ -134,7 +146,7 @@ public class NSGAIIBuilder<S extends Solution<?>> implements AlgorithmBuilder<NS
       algorithm = new DNSGAII<>(problem, maxEvaluations, populationSize, matingPoolSize, offspringPopulationSize,
               crossoverOperator, mutationOperator, selectionOperator, dominanceComparator, evaluator) ;
     }else if(variant.equals(NSGAIIVariant.NSGAIIWithEpsilonArchive)){
-      algorithm = new NSGAIIWithEpsilonArchive<S>(problem, maxEvaluations, populationSize, matingPoolSize, offspringPopulationSize,
+      algorithm = new NSGAIIWithEpsilonArchive<S>(problem, maxEvaluations, populationSize, matingPoolSize, offspringPopulationSize, archiveSize,
               crossoverOperator, mutationOperator, selectionOperator, dominanceComparator, evaluator) ;
     }
 
@@ -152,6 +164,10 @@ public class NSGAIIBuilder<S extends Solution<?>> implements AlgorithmBuilder<NS
 
   public int getPopulationSize() {
     return populationSize;
+  }
+
+  public int getArchiveSize() {
+    return archiveSize;
   }
 
   public CrossoverOperator<S> getCrossoverOperator() {

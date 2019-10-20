@@ -47,7 +47,7 @@ public class ParallelNSGAIIWithEpsilonArchiveRunner extends AbstractAlgorithmRun
     SelectionOperator<List<DoubleSolution>, DoubleSolution> selection;
 
     String problemName ;
-    int numberOfIndividuals = 30;
+    int numberOfIndividuals = 35;
     int numberOfGenerations = 500;
     int numberOfThreads = 4;
     String referenceParetoFront = "" ;
@@ -86,10 +86,9 @@ public class ParallelNSGAIIWithEpsilonArchiveRunner extends AbstractAlgorithmRun
       problemName = "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ1";
       referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.4D.pf";
     }
-    // if population size is not divisible by 2, add one individual.
-    if(numberOfIndividuals%2 != 0)  numberOfIndividuals++;
 
     int maxEvaluations = numberOfGenerations*numberOfIndividuals;
+    int archiveSize = 400;
 
     problem = (DoubleProblem) ProblemUtils.<DoubleSolution> loadProblem(problemName);
 
@@ -109,6 +108,7 @@ public class ParallelNSGAIIWithEpsilonArchiveRunner extends AbstractAlgorithmRun
         .setSelectionOperator(selection)
         .setMaxEvaluations(maxEvaluations)
         .setSolutionListEvaluator(evaluator)
+        .setArchiveSize(archiveSize)
         .setVariant(NSGAIIBuilder.NSGAIIVariant.NSGAIIWithEpsilonArchive);
     algorithm = builder.build() ;
 
@@ -141,8 +141,6 @@ public class ParallelNSGAIIWithEpsilonArchiveRunner extends AbstractAlgorithmRun
     if (!referenceParetoFront.equals("")) {
       printQualityIndicators(population, referenceParetoFront) ;
     }
-
-    evaluator.shutdown();
 
     JMetalLogger.logger.info("Total execution time: " + computingTime + "ms");
   }
