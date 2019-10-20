@@ -29,7 +29,7 @@ public class C1_DTLZ1 extends DTLZ1 {
    * @param numberOfVariables
    * @param numberOfObjectives
    */
-  public C1_DTLZ1(int numberOfVariables, int numberOfObjectives) {
+  public C1_DTLZ1(Integer numberOfVariables, Integer numberOfObjectives) {
     super(numberOfVariables, numberOfObjectives) ;
 
     setNumberOfConstraints(1);

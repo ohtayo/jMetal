@@ -37,7 +37,7 @@ public class ConvexC2_DTLZ2 extends DTLZ2 {
    * @param numberOfVariables
    * @param numberOfObjectives
    */
-  public ConvexC2_DTLZ2(int numberOfVariables, int numberOfObjectives) {
+  public ConvexC2_DTLZ2(Integer numberOfVariables, Integer numberOfObjectives) {
     super(numberOfVariables, numberOfObjectives) ;
 
     setNumberOfConstraints(1);
