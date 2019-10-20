@@ -91,7 +91,7 @@ public class ParallelOMOPSOWithSizeLimitedArchiveRunner extends AbstractAlgorith
       fileNameOfInitialSolutions = "";
       //fileNameOfInitialSolutions = "C:\\workspace\\jMetal\\initialSolutions.csv";
     }
-    int archiveSize = 300;  // アーカイブの制限サイズ
+    int archiveSize = 400;  // アーカイブの制限サイズ
 
     // 目的関数の定義
     Integer[] problemArgs = {8,3,1};

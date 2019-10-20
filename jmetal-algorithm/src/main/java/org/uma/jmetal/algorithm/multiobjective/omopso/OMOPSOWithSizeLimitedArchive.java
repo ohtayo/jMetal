@@ -28,7 +28,7 @@ public class OMOPSOWithSizeLimitedArchive extends OMOPSO {
 
   private List<DoubleSolution> truncatedArchive; // SPEA2の端切りアーカイブ
   private EnvironmentalSelection<DoubleSolution> environmentalSelection; // SPEA2の環境選択
-  private StrengthRawFitness<DoubleSolution> strenghtRawFitness = new StrengthRawFitness<DoubleSolution>(); // SPEA2の適合度
+  private StrengthRawFitness<DoubleSolution> strengthRawFitness = new StrengthRawFitness<DoubleSolution>(); // SPEA2の適合度
 
   /** Constructor */
   public OMOPSOWithSizeLimitedArchive(DoubleProblem problem, SolutionListEvaluator<DoubleSolution> evaluator,
@@ -115,7 +115,7 @@ public class OMOPSOWithSizeLimitedArchive extends OMOPSO {
       epsilonArchive.add((DoubleSolution) particle.copy());
     }
     List<DoubleSolution> union = epsilonArchive.getSolutionList();
-    strenghtRawFitness.computeDensityEstimator(union);
+    strengthRawFitness.computeDensityEstimator(union);
     truncatedArchive = environmentalSelection.execute(union);
   }
 
