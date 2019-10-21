@@ -48,7 +48,7 @@ public class ParallelNSGAIIWithEpsilonArchiveRunner extends AbstractAlgorithmRun
 
     String problemName ;
     int numberOfIndividuals = 35;
-    int numberOfGenerations = 500;
+    int numberOfGenerations = 1000;
     int numberOfThreads = 4;
     String referenceParetoFront = "" ;
     String fileNameOfInitialSolutions = "";

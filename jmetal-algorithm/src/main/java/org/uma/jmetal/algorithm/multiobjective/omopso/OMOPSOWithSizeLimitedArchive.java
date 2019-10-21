@@ -26,38 +26,40 @@ import java.util.List;
 @SuppressWarnings("serial")
 public class OMOPSOWithSizeLimitedArchive extends OMOPSO {
 
+  private double eta;
+  private NonDominatedSolutionListArchive<DoubleSolution> temporaryArchive; // 一時アーカイブ
   private List<DoubleSolution> truncatedArchive; // SPEA2の端切りアーカイブ
   private EnvironmentalSelection<DoubleSolution> environmentalSelection; // SPEA2の環境選択
-  private StrengthRawFitness<DoubleSolution> strengthRawFitness = new StrengthRawFitness<DoubleSolution>(); // SPEA2の適合度
+  private StrengthRawFitness<DoubleSolution> strengthRawFitness; // SPEA2の適合度
 
   /** Constructor */
   public OMOPSOWithSizeLimitedArchive(DoubleProblem problem, SolutionListEvaluator<DoubleSolution> evaluator,
                                       int swarmSize, int maxIterations, int leaderSize, UniformMutation uniformMutation,
                                       NonUniformMutation nonUniformMutation, double eta) {
     super(problem, evaluator, swarmSize, maxIterations, leaderSize, uniformMutation, nonUniformMutation, eta);
+    this.eta = eta;
     truncatedArchive = new ArrayList<>(archiveSize);
+    strengthRawFitness = new StrengthRawFitness<DoubleSolution>();
     environmentalSelection = new EnvironmentalSelection<DoubleSolution>(archiveSize);
   }
 
   @Override protected void initProgress() {
     currentIteration = 1;
     dump(epsilonArchive.getSolutionList(), "epsilon");
-    dump(truncatedArchive);
+    dump(truncatedArchive, "truncated");
   }
 
   @Override protected void updateProgress() {
     currentIteration += 1;
     dump(epsilonArchive.getSolutionList(), "epsilon");
-    dump(truncatedArchive);
+    dump(truncatedArchive, "truncated");
   }
 
   @Override
   protected void initializeLeader(List<DoubleSolution> swarm) {
-    for (DoubleSolution solution : swarm) {
-      DoubleSolution particle = (DoubleSolution) solution.copy();
-      if (truncatedArchive.add(particle)) {
-        epsilonArchive.add((DoubleSolution) particle.copy());
-      }
+    for (DoubleSolution particle : swarm) {
+      epsilonArchive.add((DoubleSolution) particle.copy());
+      truncatedArchive.add((DoubleSolution) particle.copy());
     }
   }
 
@@ -110,11 +112,15 @@ public class OMOPSOWithSizeLimitedArchive extends OMOPSO {
    * @param swarm List of solutions (swarm)
    */
   @Override protected void updateLeaders(List<DoubleSolution> swarm) {
-    for (DoubleSolution solution : swarm) {
-      DoubleSolution particle = (DoubleSolution) solution.copy();
+    temporaryArchive = new NonDominatedSolutionListArchive<DoubleSolution>(new DominanceComparator<DoubleSolution>(this.eta));
+    for (DoubleSolution solution : truncatedArchive){
+      temporaryArchive.add((DoubleSolution) solution.copy());
+    }
+    for (DoubleSolution particle : swarm) {
+      temporaryArchive.add((DoubleSolution) particle.copy());
       epsilonArchive.add((DoubleSolution) particle.copy());
     }
-    List<DoubleSolution> union = epsilonArchive.getSolutionList();
+    List<DoubleSolution> union = temporaryArchive.getSolutionList();
     strengthRawFitness.computeDensityEstimator(union);
     truncatedArchive = environmentalSelection.execute(union);
   }

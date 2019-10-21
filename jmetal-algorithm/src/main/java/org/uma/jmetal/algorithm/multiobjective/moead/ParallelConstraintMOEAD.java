@@ -59,7 +59,7 @@ public class ParallelConstraintMOEAD extends AbstractMOEAD<DoubleSolution>  {
     violationThresholdComparator.updateThreshold(population);
 
     evaluations = populationSize ;
-    dump();
+    dump(getResult());
 
     do {
       int[] permutation = new int[populationSize];
@@ -96,7 +96,7 @@ public class ParallelConstraintMOEAD extends AbstractMOEAD<DoubleSolution>  {
       }
 
       violationThresholdComparator.updateThreshold(population);
-      dump();
+      dump(getResult());
 
     } while (evaluations < maxEvaluations);
   }
@@ -108,19 +108,20 @@ public class ParallelConstraintMOEAD extends AbstractMOEAD<DoubleSolution>  {
     return children;
   }
 
-  protected void dump()
-  {
+  protected void dump(List<DoubleSolution> solutionList, String prefix){
     // dump solution list in the searching
-    List<DoubleSolution> result = getResult();
-    new SolutionListOutput(result)
-            .setVarFileOutputContext(new DefaultFileOutputContext("./result/variable" + Integer.valueOf(evaluations/populationSize) + ".csv"))
-            .setFunFileOutputContext(new DefaultFileOutputContext("./result/fitness" + Integer.valueOf(evaluations/populationSize) + ".csv"))
-            .setSeparator(",")
-            .print();
-    new ConstraintListOutput<DoubleSolution>(result)
-            .setConFileOutputContext(new DefaultFileOutputContext("./result/constraint" + Integer.valueOf(evaluations/populationSize)  + ".csv"))
-            .setSeparator(",")
-            .print();
+    new SolutionListOutput(solutionList)
+        .setVarFileOutputContext(new DefaultFileOutputContext("./result/"+prefix+"variable" + Integer.valueOf(evaluations/populationSize)  + ".csv"))
+        .setFunFileOutputContext(new DefaultFileOutputContext("./result/"+prefix+"fitness" + Integer.valueOf(evaluations/populationSize)  + ".csv"))
+        .setSeparator(",")
+        .print();
+    new ConstraintListOutput<DoubleSolution>(solutionList)
+        .setConFileOutputContext(new DefaultFileOutputContext("./result/"+prefix+"constraint" + Integer.valueOf(evaluations/populationSize)  + ".csv"))
+        .setSeparator(",")
+        .print();
+  }
+  protected void dump(List<DoubleSolution> solutionList){
+    dump(solutionList,"");
   }
 
   public void setInitialPopulation(List<DoubleSolution> initialPopulation) {

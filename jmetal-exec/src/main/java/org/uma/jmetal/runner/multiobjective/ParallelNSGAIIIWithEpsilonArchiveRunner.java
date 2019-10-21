@@ -92,7 +92,7 @@ public class ParallelNSGAIIIWithEpsilonArchiveRunner extends AbstractAlgorithmRu
       referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.4D.pf";
     }
 
-    int archiveSize = 120;
+    int archiveSize = 400;
 
     // 目的関数の設定
     problem = ProblemUtils.loadProblem(problemName);

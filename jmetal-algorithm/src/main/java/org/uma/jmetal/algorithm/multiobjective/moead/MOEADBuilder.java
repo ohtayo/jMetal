@@ -36,6 +36,7 @@ public class MOEADBuilder implements AlgorithmBuilder<AbstractMOEAD<DoubleSoluti
 
   protected int populationSize;
   protected int resultPopulationSize ;
+  protected int archiveSize;
 
   protected int maxEvaluations;
 
@@ -64,9 +65,7 @@ public class MOEADBuilder implements AlgorithmBuilder<AbstractMOEAD<DoubleSoluti
   }
 
   /* Getters/Setters */
-  public int getNeighborSize() {
-    return neighborSize;
-  }
+  public int getNeighborSize() { return neighborSize;  }
 
   public int getMaxEvaluations() {
     return maxEvaluations;
@@ -79,6 +78,8 @@ public class MOEADBuilder implements AlgorithmBuilder<AbstractMOEAD<DoubleSoluti
   public int getResultPopulationSize() {
     return resultPopulationSize;
   }
+
+  public int getArchiveSize() { return archiveSize;  }
 
   public String getDataDirectory() {
     return dataDirectory;
@@ -118,6 +119,12 @@ public class MOEADBuilder implements AlgorithmBuilder<AbstractMOEAD<DoubleSoluti
 
   public MOEADBuilder setResultPopulationSize(int resultPopulationSize) {
     this.resultPopulationSize = resultPopulationSize;
+
+    return this;
+  }
+
+  public MOEADBuilder setArchiveSize(int archiveSize) {
+    this.archiveSize = archiveSize;
 
     return this;
   }
@@ -209,7 +216,8 @@ public class MOEADBuilder implements AlgorithmBuilder<AbstractMOEAD<DoubleSoluti
               crossover, functionType, dataDirectory, neighborhoodSelectionProbability,
               maximumNumberOfReplacedSolutions, neighborSize, evaluator);
     }else if (moeadVariant.equals(Variant.ParallelConstraintMOEADWithEpsilonArchive)) {
-      algorithm =  new ParallelConstraintMOEADWithEpsilonArchive(problem, populationSize, resultPopulationSize, maxEvaluations, mutation,
+      algorithm =  new ParallelConstraintMOEADWithEpsilonArchive(problem, populationSize, resultPopulationSize, archiveSize,
+              maxEvaluations, mutation,
               crossover, functionType, dataDirectory, neighborhoodSelectionProbability,
               maximumNumberOfReplacedSolutions, neighborSize, evaluator);
     }

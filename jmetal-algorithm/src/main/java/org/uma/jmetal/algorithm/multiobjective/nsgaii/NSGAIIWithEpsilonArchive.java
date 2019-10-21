@@ -1,21 +1,15 @@
 package org.uma.jmetal.algorithm.multiobjective.nsgaii;
 
-import org.uma.jmetal.algorithm.impl.AbstractGeneticAlgorithm;
 import org.uma.jmetal.algorithm.multiobjective.spea2.util.EnvironmentalSelection;
 import org.uma.jmetal.operator.CrossoverOperator;
 import org.uma.jmetal.operator.MutationOperator;
 import org.uma.jmetal.operator.SelectionOperator;
 import org.uma.jmetal.operator.impl.selection.RankingAndCrowdingSelection;
 import org.uma.jmetal.problem.Problem;
-import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.solution.Solution;
-import org.uma.jmetal.util.SolutionListUtils;
 import org.uma.jmetal.util.archive.impl.NonDominatedSolutionListArchive;
 import org.uma.jmetal.util.comparator.DominanceComparator;
 import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
-import org.uma.jmetal.util.fileoutput.ConstraintListOutput;
-import org.uma.jmetal.util.fileoutput.SolutionListOutput;
-import org.uma.jmetal.util.fileoutput.impl.DefaultFileOutputContext;
 import org.uma.jmetal.util.solutionattribute.impl.StrengthRawFitness;
 
 import java.util.ArrayList;
@@ -27,11 +21,12 @@ import java.util.List;
  */
 @SuppressWarnings("serial")
 public class NSGAIIWithEpsilonArchive<S extends Solution<?>> extends NSGAII<S> {
-  private NonDominatedSolutionListArchive<S> epsilonArchive;  // epsilon archive
   private double eta = 0.0075;  // eta of epsilon archive
+  private NonDominatedSolutionListArchive<S> epsilonArchive;  // epsilon archive
+  private NonDominatedSolutionListArchive<S> temporaryArchive;  // 一時アーカイブ
   private List<S> truncatedArchive; // SPEA2の端切りアーカイブ
+  private StrengthRawFitness<S> strengthRawFitness; // SPEA2の適合度
   private EnvironmentalSelection<S> environmentalSelection; // SPEA2の環境選択
-  private StrengthRawFitness<S> strengthRawFitness = new StrengthRawFitness<S>(); // SPEA2の適合度
 
   /**
    * Constructor
@@ -47,9 +42,10 @@ public class NSGAIIWithEpsilonArchive<S extends Solution<?>> extends NSGAII<S> {
             selectionOperator, dominanceComparator,
             evaluator) ;
 
-    truncatedArchive = new ArrayList<>(archiveSize);
-    environmentalSelection = new EnvironmentalSelection<S>(archiveSize);
     epsilonArchive = new NonDominatedSolutionListArchive<S>(new DominanceComparator<S>(eta));
+    truncatedArchive = new ArrayList<>(archiveSize);
+    strengthRawFitness = new StrengthRawFitness<S>();
+    environmentalSelection = new EnvironmentalSelection<S>(archiveSize);
   }
 
   // setter for eta
@@ -81,10 +77,15 @@ public class NSGAIIWithEpsilonArchive<S extends Solution<?>> extends NSGAII<S> {
 
   protected void updateArchive(List<S> population)
   {
+    temporaryArchive = new NonDominatedSolutionListArchive<S>(new DominanceComparator<S>(eta));
+    for (S solution : truncatedArchive){
+      temporaryArchive.add((S) solution.copy());
+    }
     for (S solution : population){
+      temporaryArchive.add((S) solution.copy());
       epsilonArchive.add((S) solution.copy());
     }
-    List<S> union = epsilonArchive.getSolutionList();
+    List<S> union = temporaryArchive.getSolutionList();
     strengthRawFitness.computeDensityEstimator(union);
     truncatedArchive = environmentalSelection.execute(union);
   }

@@ -48,7 +48,7 @@ public class ParallelConstraintMOEADWithEpsilonArchiveRunner extends AbstractAlg
 
     String problemName ;
     int numberOfIndividuals = 35;  // default: 300
-    int numberOfGenerations = 500;   // 500
+    int numberOfGenerations = 1000;   // 500
     int numberOfThreads=1;
     String referenceParetoFront = "";
     String fileNameOfInitialSolutions = "";
@@ -92,6 +92,8 @@ public class ParallelConstraintMOEADWithEpsilonArchiveRunner extends AbstractAlg
       referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.4D.pf";
     }
 
+    int archiveSize = 400;
+
     problem = (DoubleProblem)ProblemUtils.<DoubleSolution> loadProblem(problemName);
 
     if (numberOfThreads == 1) {
@@ -118,6 +120,7 @@ public class ParallelConstraintMOEADWithEpsilonArchiveRunner extends AbstractAlg
             .setMaxEvaluations(maxEvaluations)
             .setPopulationSize(numberOfIndividuals)
             .setResultPopulationSize(numberOfIndividuals)
+            .setArchiveSize(archiveSize)
             .setNeighborhoodSelectionProbability(0.9)
             .setMaximumNumberOfReplacedSolutions(2)
             .setNeighborSize(neighborSize)
