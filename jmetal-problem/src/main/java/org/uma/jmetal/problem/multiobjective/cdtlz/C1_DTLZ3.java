@@ -45,6 +45,7 @@ public class C1_DTLZ3 extends DTLZ3 {
    */
   public C1_DTLZ3(Integer numberOfVariables, Integer numberOfObjectives) {
     super(numberOfVariables, numberOfObjectives) ;
+    setName("C1_DTLZ3");
 
     setNumberOfConstraints(1);
 

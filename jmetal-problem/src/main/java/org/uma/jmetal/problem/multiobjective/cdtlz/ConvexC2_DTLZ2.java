@@ -39,6 +39,7 @@ public class ConvexC2_DTLZ2 extends DTLZ2 {
    */
   public ConvexC2_DTLZ2(Integer numberOfVariables, Integer numberOfObjectives) {
     super(numberOfVariables, numberOfObjectives) ;
+    setName("ConvexC2_DTLZ2");
 
     setNumberOfConstraints(1);
 
@@ -82,4 +83,6 @@ public class ConvexC2_DTLZ2 extends DTLZ2 {
     overallConstraintViolationDegree.setAttribute(solution, overallConstraintViolation);
     numberOfViolatedConstraints.setAttribute(solution, violatedConstraints);
   }
+
+
 }

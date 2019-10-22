@@ -32,6 +32,7 @@ public class C2_DTLZ2 extends DTLZ2 {
    */
   public C2_DTLZ2(Integer numberOfVariables, Integer numberOfObjectives) {
     super(numberOfVariables, numberOfObjectives) ;
+    setName("C2_DTLZ2");
 
     setNumberOfConstraints(1);
 
