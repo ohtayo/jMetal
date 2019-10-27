@@ -26,11 +26,11 @@ import java.util.List;
 @SuppressWarnings("serial")
 public class OMOPSOWithSizeLimitedArchive extends OMOPSO {
 
-  private double eta;
-  private NonDominatedSolutionListArchive<DoubleSolution> temporaryArchive; // 一時アーカイブ
-  private List<DoubleSolution> truncatedArchive; // SPEA2の端切りアーカイブ
-  private EnvironmentalSelection<DoubleSolution> environmentalSelection; // SPEA2の環境選択
-  private StrengthRawFitness<DoubleSolution> strengthRawFitness; // SPEA2の適合度
+  public double eta;
+  public NonDominatedSolutionListArchive<DoubleSolution> temporaryArchive; // 一時アーカイブ
+  public List<DoubleSolution> truncatedArchive; // SPEA2の端切りアーカイブ
+  public EnvironmentalSelection<DoubleSolution> environmentalSelection; // SPEA2の環境選択
+  public StrengthRawFitness<DoubleSolution> strengthRawFitness; // SPEA2の適合度
 
   /** Constructor */
   public OMOPSOWithSizeLimitedArchive(DoubleProblem problem, SolutionListEvaluator<DoubleSolution> evaluator,

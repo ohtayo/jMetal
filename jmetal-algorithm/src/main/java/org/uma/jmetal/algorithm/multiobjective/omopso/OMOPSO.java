@@ -5,6 +5,7 @@ import org.uma.jmetal.operator.impl.mutation.NonUniformMutation;
 import org.uma.jmetal.operator.impl.mutation.UniformMutation;
 import org.uma.jmetal.problem.DoubleProblem;
 import org.uma.jmetal.solution.DoubleSolution;
+import org.uma.jmetal.solution.Solution;
 import org.uma.jmetal.util.archive.impl.CrowdingDistanceArchive;
 import org.uma.jmetal.util.archive.impl.NonDominatedSolutionListArchive;
 import org.uma.jmetal.util.comparator.CrowdingDistanceComparator;
@@ -24,7 +25,7 @@ import java.util.List;
 @SuppressWarnings("serial")
 public class OMOPSO extends AbstractParticleSwarmOptimization<DoubleSolution, List<DoubleSolution>> {
 
-  private DoubleProblem problem;
+  public DoubleProblem problem;
 
   SolutionListEvaluator<DoubleSolution> evaluator;
 
@@ -94,14 +95,14 @@ public class OMOPSO extends AbstractParticleSwarmOptimization<DoubleSolution, Li
     dump(leaderArchive.getSolutionList());
   }
 
-  protected void dump(List<DoubleSolution> solutionList, String prefix){
+  protected void dump(List<? extends Solution<?>> solutionList, String prefix){
     // dump solution list in the searching
     new SolutionListOutput(solutionList)
             .setVarFileOutputContext(new DefaultFileOutputContext("./result/"+prefix+"variable" + currentIteration + ".csv"))
             .setFunFileOutputContext(new DefaultFileOutputContext("./result/"+prefix+"fitness" + currentIteration + ".csv"))
             .setSeparator(",")
             .print();
-    new ConstraintListOutput<DoubleSolution>(solutionList)
+    new ConstraintListOutput<>(solutionList)
             .setConFileOutputContext(new DefaultFileOutputContext("./result/"+prefix+"constraint" + currentIteration + ".csv"))
             .setSeparator(",")
             .print();

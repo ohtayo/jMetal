@@ -10,7 +10,7 @@ import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
 
 /** Class implementing the OMOPSO algorithm */
 public class OMOPSOBuilder implements AlgorithmBuilder<OMOPSO> {
-  public enum OMOPSOVariant {OMOPSO, OMOPSOWithSizeLimitedArchive}
+  public enum OMOPSOVariant {OMOPSO, OMOPSOWithSizeLimitedArchive, DirectiveOMOPSO}
 
   protected DoubleProblem problem;
   protected SolutionListEvaluator<DoubleSolution> evaluator;
@@ -106,6 +106,9 @@ public class OMOPSOBuilder implements AlgorithmBuilder<OMOPSO> {
           nonUniformMutation, eta);
     }else if(this.variant == OMOPSOVariant.OMOPSOWithSizeLimitedArchive){
       algorithm = new OMOPSOWithSizeLimitedArchive(problem, evaluator, swarmSize, maxIterations, archiveSize, uniformMutation,
+          nonUniformMutation, eta);
+    }    else if(this.variant == OMOPSOVariant.DirectiveOMOPSO){
+      algorithm = new DirectiveOMOPSO(problem, evaluator, swarmSize, maxIterations, archiveSize, uniformMutation,
           nonUniformMutation, eta);
     }
     return algorithm ;
