@@ -77,26 +77,26 @@ public class ParallelOMOPSOWithSizeLimitedArchiveRunner extends AbstractAlgorith
 //      problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelLSTMVarDiff2ObjConPMV";
 //      problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModel4ObjDiffConPMV";
 //      problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelVarDiff4ObjRegretConPMV";
-//      problemName =  "org.uma.jmetal.problem.multiobjective.dtlz.DTLZ1";
-//      problemName =  "org.uma.jmetal.problem.multiobjective.dtlz.DTLZ4";
-      problemName =  "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ1";
-//     problemName =  "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ4";
-//      referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.3D.pf";
-     referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.4D.pf";
-//      referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ4.3D.pf";
- //     referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ4.4D.pf";
-      numberOfThreads = 2;
+
+//      problemName =  "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ1";
+     problemName =  "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ4";
+
+//     referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.4D.pf";
+//     referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.2D.pf";
+//     referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ4.4D.pf";
+     referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ4.2D.pf";
+      numberOfThreads =1;
       numberOfIterations = 1000;
-      numberOfParticles = 36;
+      numberOfParticles = 35;
       fileNameOfInitialSolutions = "";
       //fileNameOfInitialSolutions = "C:\\workspace\\jMetal\\initialSolutions.csv";
     }
     int archiveSize = 400;  // アーカイブの制限サイズ
 
     // 目的関数の定義
-    Integer[] problemArgs = {8,3,1};
+    Integer[] problemArgs = {8,2,1};
     problem = (DoubleProblem) ProblemUtils.<DoubleSolution> loadProblem(problemName, (Object[]) problemArgs);
-    problem = (DoubleProblem) ProblemUtils.<DoubleSolution> loadProblem(problemName);
+//    problem = (DoubleProblem) ProblemUtils.<DoubleSolution> loadProblem(problemName);
 
     // 突然変異確率
     double mutationProbability = 1.0 / problem.getNumberOfVariables() ;

@@ -76,16 +76,15 @@ public class ParallelDirectionalOMOPSOWithSizeLimitedArchiveRunner extends Abstr
 //      problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelLSTMVarDiff2ObjConPMV";
 //      problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModel4ObjDiffConPMV";
 //      problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelVarDiff4ObjRegretConPMV";
-//      problemName =  "org.uma.jmetal.problem.multiobjective.dtlz.DTLZ1";
-//      problemName =  "org.uma.jmetal.problem.multiobjective.dtlz.DTLZ4";
-      problemName =  "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ1";
-//     problemName =  "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ4";
-//      referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.3D.pf";
-      referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.4D.pf";
-//      referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ4.3D.pf";
- //     referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ4.4D.pf";
-      referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.2D.pf";
-      numberOfThreads = 3;
+
+//      problemName =  "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ1";
+      problemName =  "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ4";
+
+//      referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.4D.pf";
+//      referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.2D.pf";
+//      referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ4.4D.pf";
+      referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ4.2D.pf";
+      numberOfThreads = 1;
       numberOfIterations = 1000;
       numberOfParticles = 35;
       fileNameOfInitialSolutions = "";

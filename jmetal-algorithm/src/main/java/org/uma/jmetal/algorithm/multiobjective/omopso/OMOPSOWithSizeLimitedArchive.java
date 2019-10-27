@@ -6,6 +6,7 @@ import org.uma.jmetal.operator.impl.mutation.NonUniformMutation;
 import org.uma.jmetal.operator.impl.mutation.UniformMutation;
 import org.uma.jmetal.problem.DoubleProblem;
 import org.uma.jmetal.solution.DoubleSolution;
+import org.uma.jmetal.solution.impl.ParticleSwarmSolution;
 import org.uma.jmetal.util.archive.impl.CrowdingDistanceArchive;
 import org.uma.jmetal.util.archive.impl.NonDominatedSolutionListArchive;
 import org.uma.jmetal.util.comparator.CrowdingDistanceComparator;
@@ -121,8 +122,15 @@ public class OMOPSOWithSizeLimitedArchive extends OMOPSO {
       epsilonArchive.add((DoubleSolution) particle.copy());
     }
     List<DoubleSolution> union = temporaryArchive.getSolutionList();
-    strengthRawFitness.computeDensityEstimator(union);
-    truncatedArchive = environmentalSelection.execute(union);
+    if(union.size()<=1) {
+      truncatedArchive.clear();
+      for ( DoubleSolution particle: union){
+        truncatedArchive.add((DoubleSolution) particle.copy());
+      }
+    }else{
+      strengthRawFitness.computeDensityEstimator(union);
+      truncatedArchive = environmentalSelection.execute(union);
+    }
   }
 
   @Override public String getName() {

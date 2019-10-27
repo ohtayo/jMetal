@@ -31,7 +31,7 @@ public class OMOPSO extends AbstractParticleSwarmOptimization<DoubleSolution, Li
 
   public int swarmSize;
   public int archiveSize;
-  private int maxIterations;
+  public int maxIterations;
   public int currentIteration;
 
   public DoubleSolution[] localBest;

@@ -9,6 +9,7 @@ import org.uma.jmetal.solution.impl.DefaultDoubleSolution;
 import org.uma.jmetal.solution.impl.ParticleSwarmSolution;
 import org.uma.jmetal.util.archive.impl.NonDominatedSolutionListArchive;
 import org.uma.jmetal.util.comparator.DominanceComparator;
+import org.uma.jmetal.util.comparator.StrengthFitnessComparator;
 import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
 import org.uma.jmetal.util.neighborhood.impl.KNearestNeighborhood;
 import org.uma.jmetal.util.solutionattribute.impl.StrengthRawFitness;
@@ -24,7 +25,7 @@ public class DirectiveOMOPSO extends OMOPSOWithSizeLimitedArchive {
   public List<ParticleSwarmSolution> truncatedArchive; // SPEA2の端切りアーカイブ
   public EnvironmentalSelection<ParticleSwarmSolution> environmentalSelection; // SPEA2の環境選択
   public StrengthRawFitness<ParticleSwarmSolution> strengthRawFitness; // SPEA2の適合度
-
+  private StrengthFitnessComparator<ParticleSwarmSolution> strengthFitnessComparator;
   /** Constructor */
   public DirectiveOMOPSO(DoubleProblem problem, SolutionListEvaluator<DoubleSolution> evaluator,
                          int swarmSize, int maxIterations, int leaderSize, UniformMutation uniformMutation,
@@ -34,6 +35,7 @@ public class DirectiveOMOPSO extends OMOPSOWithSizeLimitedArchive {
     truncatedArchive = new ArrayList<ParticleSwarmSolution>(archiveSize);
     strengthRawFitness = new StrengthRawFitness<ParticleSwarmSolution>();
     environmentalSelection = new EnvironmentalSelection<ParticleSwarmSolution>(archiveSize);
+    strengthFitnessComparator = new StrengthFitnessComparator<ParticleSwarmSolution>();
   }
 
   @Override protected void initProgress() {
@@ -63,82 +65,131 @@ public class DirectiveOMOPSO extends OMOPSOWithSizeLimitedArchive {
       C2 = randomGenerator.nextDouble(1.5, 2.0);
       W = randomGenerator.nextDouble(0.1, 0.5);
 
-      // 飛翔させる対象粒子とアーカイブの優越関係を確認
-      List<ParticleSwarmSolution> dominanceArchive = new ArrayList<>(archiveSize);
-      List<ParticleSwarmSolution> sameRankArchive = new ArrayList<>(archiveSize);
-      for(int a=0; a < truncatedArchive.size(); a++ ){
-        DominanceComparator<ParticleSwarmSolution> comparator = new DominanceComparator<ParticleSwarmSolution>();
-        int dominated = comparator.compare( particle, truncatedArchive.get(a));
-        // if particle is dominated by archive
-        if( dominated==1 ){
-          dominanceArchive.add(truncatedArchive.get(a).copy());
-          // if particle is same rank of archive
-        }else if(dominated ==0){
-          sameRankArchive.add(truncatedArchive.get(a).copy());
+      // 探索初期は同一ランクの中からバイナリトーナメント選択でglobalBestを選択し，その方向を足す．
+      double probability = (double)currentIteration/(double)maxIterations;
+      if( probability < randomGenerator.nextDouble() ) {
+        // random select
+        ParticleSwarmSolution one ;
+        ParticleSwarmSolution two;
+        int pos1 = randomGenerator.nextInt(0, truncatedArchive.size() - 1);
+        int pos2 = randomGenerator.nextInt(0, truncatedArchive.size() - 1);
+        one = truncatedArchive.get(pos1);
+        two = truncatedArchive.get(pos2);
+
+        // binary tournament selection using strength raw fitness
+        if (strengthFitnessComparator.compare(one, two) < 1) {
+          bestGlobal = one ;
+        } else {
+          bestGlobal = two ;
+        }
+
+        // update speed
+        for (int var = 0; var < particle.getNumberOfVariables(); var++) {
+          //Computing the velocity of this particle
+          speed[i][var] =
+                  W * speed[i][var]
+                          + C1 * r1 * (bestParticle.getVariableValue(var) - particle.getVariableValue(var))
+                          + C2 * r2 * (bestGlobal.getVariableValue(var) - particle.getVariableValue(var));
         }
       }
-      // (1) もし対象particleよりもarchiveに優越している個体があれば，その個体からランダムでglobalbestを決定する．
-      if(dominanceArchive.size() >0 ) {
-        int pos = randomGenerator.nextInt(0, dominanceArchive.size() - 1);
-        bestGlobal = dominanceArchive.get(pos);
-        for (int var = 0; var < particle.getNumberOfVariables(); var++) {
-          //Computing the velocity of this particle
-          speed[i][var] =
-              W * speed[i][var]
-            + C1 * r1 * (bestParticle.getVariableValue(var) - particle.getVariableValue(var))
-            + C2 * r2 * (bestGlobal.getVariableValue(var) - particle.getVariableValue(var));
+      // 探索後期はarchiveとの優越関係によって変える
+      else {
+        // 飛翔させる対象粒子とアーカイブの優越関係を確認
+        List<ParticleSwarmSolution> dominanceArchive = new ArrayList<>(archiveSize);
+        List<ParticleSwarmSolution> sameRankArchive = new ArrayList<>(archiveSize);
+        for (int a = 0; a < truncatedArchive.size(); a++) {
+          DominanceComparator<ParticleSwarmSolution> comparator = new DominanceComparator<ParticleSwarmSolution>();
+          int dominated = comparator.compare(particle, truncatedArchive.get(a));
+          // if particle is dominated by archive
+          if (dominated == 1) {
+            dominanceArchive.add(truncatedArchive.get(a).copy());
+            // if particle is same rank of archive
+          } else if (dominated == 0) {
+            sameRankArchive.add(truncatedArchive.get(a).copy());
+          }
         }
-      // (2) 対象particleとarchiveが同一ランクであれば，同一ランクarchiveから近い10個体のうちランダムでvelocityを足し合わせる
-      }else if(sameRankArchive.size() > 0){
-        sameRankArchive.add(particle);
-        int maxNeighborSize = 10;
-        int neighborSize = sameRankArchive.size()<maxNeighborSize ? sameRankArchive.size()-1 :  maxNeighborSize-1;
-        KNearestNeighborhood<ParticleSwarmSolution> neighborhood = new KNearestNeighborhood<ParticleSwarmSolution>( neighborSize );
-        List<ParticleSwarmSolution> neighbors = neighborhood.getNeighbors(sameRankArchive, sameRankArchive.size()-1);
-        int pos = randomGenerator.nextInt(0, neighbors.size() - 1);
-        bestGlobal = neighbors.get(pos);
-        for (int var = 0; var < particle.getNumberOfVariables(); var++) {
-          //Computing the velocity of this particle
-          speed[i][var] =
-              W * speed[i][var]
-            + C1 * r1 * (bestParticle.getVariableValue(var) - particle.getVariableValue(var))
-            + C2 * r2 * bestGlobal.getSpeed(var);
+        // (1) もし対象particleよりもarchiveに優越している個体があれば，その個体からバイナリトーナメント選択でglobalbestを決定する．
+        if (dominanceArchive.size() > 0) {
+          if ( dominanceArchive.size()==1 ){
+            dominanceArchive.add(dominanceArchive.get(0));
+          }
+
+          // random select
+          ParticleSwarmSolution one ;
+          ParticleSwarmSolution two;
+          int pos1 = randomGenerator.nextInt(0, dominanceArchive.size() - 1);
+          int pos2 = randomGenerator.nextInt(0, dominanceArchive.size() - 1);
+          one = dominanceArchive.get(pos1);
+          two = dominanceArchive.get(pos2);
+
+          // binary tournament selection using strength raw fitness
+          if (strengthFitnessComparator.compare(one, two) < 1) {
+            bestGlobal = one ;
+          } else {
+            bestGlobal = two ;
+          }
+
+          for (int var = 0; var < particle.getNumberOfVariables(); var++) {
+            //Computing the velocity of this particle
+            speed[i][var] =
+                    W * speed[i][var]
+                            + C1 * r1 * (bestParticle.getVariableValue(var) - particle.getVariableValue(var))
+                            + C2 * r2 * (bestGlobal.getVariableValue(var) - particle.getVariableValue(var));
+          }
+          // (2) 対象particleとarchiveが同一ランクであれば，同一ランクarchiveから近い10個体のうちランダムでvelocityを足し合わせる
+        } else if (sameRankArchive.size() > 0) {
+          updateVelocityUsingSameRankArchive(W, C1, C2, r1, r2, i, particle, sameRankArchive);
         }
-      }
-      // (3) アーカイブ全てが対象particleに優越されていたら，globalBestは用いないで飛翔する．
-      else{
-        for (int var = 0; var < particle.getNumberOfVariables(); var++) {
-          //Computing the velocity of this particle
-          speed[i][var] =
-              W * speed[i][var]
-            + C1 * r1 * (bestParticle.getVariableValue(var) - particle.getVariableValue(var))
-            + C2 * r2 * speed[i][var];
+        // (3) アーカイブ全てが対象particleに優越されていたら，globalBestは用いないで飛翔する．
+        else {
+          for (int var = 0; var < particle.getNumberOfVariables(); var++) {
+            //Computing the velocity of this particle
+            speed[i][var] =
+                    W * speed[i][var]
+                            + C1 * r1 * (bestParticle.getVariableValue(var) - particle.getVariableValue(var))
+                            + C2 * r2 * speed[i][var];
+          }
         }
       }
     }
   }
 
-  protected double updateVelocityUsingDominanceArchive(double currentSpeed, List<DoubleSolution> archive) {
-    return 0;
-  }
 
-  protected double updateVelocityUsingSameRankArchive(List<DoubleSolution> archive) {
-    return 0;
-  }
+  protected void updateVelocityUsingSameRankArchive(double W, double C1, double C2, double r1, double r2, int i, ParticleSwarmSolution particle, List<ParticleSwarmSolution> sameRankArchive) {
+    ParticleSwarmSolution bestGlobal = null;
+    DoubleSolution bestParticle = localBest[i];
 
-  protected double updateVelocityItself(double currentSpeed) {
-    return 0;
+    sameRankArchive.add(particle);
+    int maxNeighborSize = 10;
+    int neighborSize = sameRankArchive.size() < maxNeighborSize ? sameRankArchive.size() - 1 : maxNeighborSize - 1;  // maxNeighborSizeに満たなければすべてneighborとする
+    KNearestNeighborhood<ParticleSwarmSolution> neighborhood = new KNearestNeighborhood<ParticleSwarmSolution>(neighborSize);
+    List<ParticleSwarmSolution> neighbors = neighborhood.getNeighbors(sameRankArchive, sameRankArchive.size() - 1);
+    int pos = randomGenerator.nextInt(0, neighbors.size() - 1);
+    bestGlobal = neighbors.get(pos);
+    for (int var = 0; var < particle.getNumberOfVariables(); var++) {
+      //Computing the velocity of this particle
+      speed[i][var] =
+              W * speed[i][var]
+            + C1 * r1 * (bestParticle.getVariableValue(var) - particle.getVariableValue(var))
+            + C2 * r2 * bestGlobal.getSpeed(var);
+    }
+
   }
 
   @Override
   protected void initializeLeader(List<DoubleSolution> swarm) {
-    for (int s=0; s<swarm.size(); s++) {
-      // make solution include speed.
-      ParticleSwarmSolution particle = new ParticleSwarmSolution(swarm.get(s));
-
+    // picup non-dominated solutions
+    temporaryArchive = new NonDominatedSolutionListArchive<ParticleSwarmSolution>(new DominanceComparator<ParticleSwarmSolution>(this.eta));
+    for (DoubleSolution particle : swarm) {
+      temporaryArchive.add( new ParticleSwarmSolution(particle).copy() );
+    }
+    // add non-dominated solutions to archives
+    for (ParticleSwarmSolution particle : temporaryArchive.getSolutionList()){
       truncatedArchive.add( particle.copy() );
       epsilonArchive.add( particle.copy() );
     }
+    strengthRawFitness.computeDensityEstimator(truncatedArchive);
+    truncatedArchive = environmentalSelection.execute(truncatedArchive);
   }
 
   /**
