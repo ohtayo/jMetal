@@ -66,7 +66,7 @@ public class DefaultDoubleSolution
       setVariableValue(i, value) ;
     }
   }
-  
+
 	@Override
 	public Map<Object, Object> getAttributes() {
 		return attributes;
