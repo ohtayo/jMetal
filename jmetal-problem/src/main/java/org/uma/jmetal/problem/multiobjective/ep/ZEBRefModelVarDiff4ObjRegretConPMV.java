@@ -37,7 +37,7 @@ public class ZEBRefModelVarDiff4ObjRegretConPMV extends AbstractDoubleProblem {
     setNumberOfVariables(19);
     setNumberOfObjectives(4);
     setNumberOfConstraints(1);
-    setName("ZEBRefModel4ObjDiffConPMV") ;
+    setName("ZEBRefModelVarDiff4ObjRegretConPMV") ;
 
     // set limit of variables
     List<Double> lowerLimit = new ArrayList<>(getNumberOfVariables()) ;

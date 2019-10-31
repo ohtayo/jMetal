@@ -164,8 +164,21 @@ public class DirectiveOMOPSO extends OMOPSOWithSizeLimitedArchive {
     int neighborSize = sameRankArchive.size() < maxNeighborSize ? sameRankArchive.size() - 1 : maxNeighborSize - 1;  // maxNeighborSizeに満たなければすべてneighborとする
     KNearestNeighborhood<ParticleSwarmSolution> neighborhood = new KNearestNeighborhood<ParticleSwarmSolution>(neighborSize);
     List<ParticleSwarmSolution> neighbors = neighborhood.getNeighbors(sameRankArchive, sameRankArchive.size() - 1);
-    int pos = randomGenerator.nextInt(0, neighbors.size() - 1);
-    bestGlobal = neighbors.get(pos);
+
+    // random select
+    ParticleSwarmSolution one ;
+    ParticleSwarmSolution two;
+    int pos1 = randomGenerator.nextInt(0, neighbors.size() - 1);
+    int pos2 = randomGenerator.nextInt(0, neighbors.size() - 1);
+    one = neighbors.get(pos1);
+    two = neighbors.get(pos2);
+    // binary tournament selection using strength raw fitness
+    if (strengthFitnessComparator.compare(one, two) < 1) {
+      bestGlobal = one ;
+    } else {
+      bestGlobal = two ;
+    }
+
     for (int var = 0; var < particle.getNumberOfVariables(); var++) {
       //Computing the velocity of this particle
       speed[i][var] =
