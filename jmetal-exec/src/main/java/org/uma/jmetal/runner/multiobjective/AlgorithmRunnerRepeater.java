@@ -22,22 +22,23 @@ public class AlgorithmRunnerRepeater {
 
         // problem and search settings
         String[] problems = {
-//            "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ1",
+            "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ1",
             "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ4"
         };
         String[] referenceParetoFronts = {
-//            "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.4D.pf",
+            "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.4D.pf",
             "jmetal-problem/src/test/resources/pareto_fronts/DTLZ4.4D.pf"
         };
         String[] algorithms = {
 //            "ParallelOMOPSO",
-//            "ParallelNSGAIIWithEpsilonArchive"
+//            "ParallelNSGAIIWithEpsilonArchive",
 //            "ParallelNSGAIIIWithEpsilonArchive",
-//            "ParallelConstraintMOEADWithEpsilonArchive"
+//            "ParallelConstraintMOEADWithEpsilonArchive",
 //            "ParallelNSGAII",
 //            "ParallelNSGAIII",
 //            "ParallelConstraintMOEAD",
-            "ParallelOMOPSOWithSizeLimitedArchive"
+//            "ParallelOMOPSOWithSizeLimitedArchive",
+            "ParallelDirectionalOMOPSOWithSizeLimitedArchive"
         };
         int numberOfIndividuals = 35;
         int numberOfGenerations = 1000;  //2000
