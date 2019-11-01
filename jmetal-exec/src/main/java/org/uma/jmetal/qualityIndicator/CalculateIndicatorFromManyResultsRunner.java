@@ -61,7 +61,8 @@ public class CalculateIndicatorFromManyResultsRunner {
         "ParallelNSGAII",
         "ParallelNSGAIII",
         "ParallelConstraintMOEAD",
-//        "ParallelOMOPSOWithSizeLimitedArchive"
+        "ParallelOMOPSOWithSizeLimitedArchive",
+        "ParallelDirectionalOMOPSOWithSizeLimitedArchive"
     };
     int numberOfIndividuals = 35;
 //    int numberOfGenerations = 1000; // 2000
