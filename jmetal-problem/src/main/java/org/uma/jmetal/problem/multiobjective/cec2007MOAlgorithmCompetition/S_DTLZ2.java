@@ -11,8 +11,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Class representing problem S_DTLZ2.
- * C source code from <https://github.com/P-N-Suganthan/CEC2007>.
+ * Problem S_DTLZ4, defined in:
+ * V. L. Huang and A. K. Qin and K. Deb and E. Zitzler and P. N. Suganthan and J. J Liang and M. Preuss and S. Huband,
+ * "Problem definitions for performance assessment of multi-objective optimization algorithms", IEEE Congress on Evolutionary Computation 2007(CEC2007), 2007
+ * Build 64 bit DLL from C source code of <https://github.com/P-N-Suganthan/CEC2007>.
  * @author ohtayo <ohta.yoshihiro@outlook.jp>
  */
 @SuppressWarnings("serial")
