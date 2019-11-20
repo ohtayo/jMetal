@@ -22,28 +22,32 @@ public class AlgorithmRunnerRepeater {
 
         // problem and search settings
         String[] problems = {
-            "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ1",
-            "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ4"
+//            "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ1",
+//            "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ4"
+            "org.uma.jmetal.problem.multiobjective.cec2007MOAlgorithmCompetition.C3_S_DTLZ2",
+            "org.uma.jmetal.problem.multiobjective.cec2007MOAlgorithmCompetition.C3_S_DTLZ3"
         };
         String[] referenceParetoFronts = {
-            "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.4D.pf",
-            "jmetal-problem/src/test/resources/pareto_fronts/DTLZ4.4D.pf"
+//            "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.4D.pf",
+//            "jmetal-problem/src/test/resources/pareto_fronts/DTLZ4.4D.pf"
+            "jmetal-problem/src/test/resources/pareto_fronts/DTLZ2.3D.pf",
+            "jmetal-problem/src/test/resources/pareto_fronts/DTLZ3.3D.pf"
         };
         String[] algorithms = {
-//            "ParallelOMOPSO",
-//            "ParallelNSGAIIWithEpsilonArchive",
-//            "ParallelNSGAIIIWithEpsilonArchive",
-//            "ParallelConstraintMOEADWithEpsilonArchive",
-//            "ParallelNSGAII",
-//            "ParallelNSGAIII",
-//            "ParallelConstraintMOEAD",
-//            "ParallelOMOPSOWithSizeLimitedArchive",
-            "ParallelDirectionalOMOPSOWithSizeLimitedArchive"
+            "ParallelOMOPSO",
+            "ParallelNSGAIIWithEpsilonArchive",
+            "ParallelNSGAIIIWithEpsilonArchive",
+            "ParallelConstraintMOEADWithEpsilonArchive",
+            "ParallelNSGAII",
+            "ParallelNSGAIII",
+            "ParallelConstraintMOEAD",
+            "ParallelOMOPSOWithSizeLimitedArchive"//,
+//            "ParallelDirectionalOMOPSOWithSizeLimitedArchive"
         };
         int numberOfIndividuals = 35;
         int numberOfGenerations = 1000;  //2000
         int numberOfRepeats = 20;    // 20
-        int numberOfThreads = 6;
+        int numberOfThreads = 2;
 
         // run each problem and algorithms
         for (int problemNumber=0; problemNumber<problems.length; problemNumber++){

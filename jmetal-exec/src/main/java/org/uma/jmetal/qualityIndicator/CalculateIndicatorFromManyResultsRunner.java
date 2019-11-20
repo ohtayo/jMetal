@@ -50,8 +50,10 @@ public class CalculateIndicatorFromManyResultsRunner {
 //    String referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.4D.pf";
 //    String problemName = "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ4";
 //    String referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ4.4D.pf";
-    String problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelVarDiff4ObjRegretConPMV";
-    String referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ4.4D.pf";
+//    String problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelVarDiff4ObjRegretConPMV";
+//    String referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ4.4D.pf";
+    String problemName = "org.uma.jmetal.problem.multiobjective.cec2007MOAlgorithmCompetition.C3_S_DTLZ2";
+    String referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ2.3D.pf";
 
     String[] algorithms = {
         "ParallelOMOPSO",
@@ -62,13 +64,13 @@ public class CalculateIndicatorFromManyResultsRunner {
         "ParallelNSGAIII",
         "ParallelConstraintMOEAD",
         "ParallelOMOPSOWithSizeLimitedArchive",
-        "ParallelDirectionalOMOPSOWithSizeLimitedArchive"
+  //      "ParallelDirectionalOMOPSOWithSizeLimitedArchive"
     };
     int numberOfIndividuals = 35;
 //    int numberOfGenerations = 1000; // 2000
     int numberOfGenerations = 500; // 2000
-//    int numberOfRepeats = 20;    // 20
-    int numberOfRepeats = 1;    // 20
+    int numberOfRepeats = 20;    // 20
+//    int numberOfRepeats = 1;    // 20
     int numberOfThreads = 2;
 
     // definition of problem
