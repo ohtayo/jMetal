@@ -1,37 +1,35 @@
-package org.uma.jmetal.problem.multiobjective.cdtlz;
+package org.uma.jmetal.problem.multiobjective.cec2007MOAlgorithmCompetition;
 
-import org.uma.jmetal.problem.multiobjective.dtlz.DTLZ4;
 import org.uma.jmetal.solution.DoubleSolution;
+import org.uma.jmetal.util.JMetalException;
 import org.uma.jmetal.util.solutionattribute.impl.NumberOfViolatedConstraints;
 import org.uma.jmetal.util.solutionattribute.impl.OverallConstraintViolation;
 
 /**
- * Problem C3-DTLZ4, defined in:
- * Jain, H. and K. Deb.  "An Evolutionary Many-Objective Optimization Algorithm Using Reference-Point-Based
- * Nondominated Sorting Approach, Part II: Handling Constraints and Extending to an Adaptive Approach."
- * EEE Transactions on Evolutionary Computation, 18(4):602-622, 2014.
- *
- * @author Antonio J. Nebro <antonio@lcc.uma.es>
+ * Class representing problem S_DTLZ3 with constraints.
+ * @author ohtayo <ohta.yoshihiro@outlook.jp>
  */
 @SuppressWarnings("serial")
-public class C3_DTLZ4 extends DTLZ4 {
+public class C3_S_DTLZ3 extends S_DTLZ3 {
   public OverallConstraintViolation<DoubleSolution> overallConstraintViolationDegree ;
   public NumberOfViolatedConstraints<DoubleSolution> numberOfViolatedConstraints ;
+
   /**
-   * Creates a default C3_DTLZ4 problem (n=8 variables (M+4), M=4 objectives and 1 constraints)
+   * Creates a default C3_S_DTLZ3 problem (30 variables, 3 objectives and 1 constraint)
    */
-  public C3_DTLZ4() {
-    this(8, 4, 1);
+  public C3_S_DTLZ3() {
+    this(30, 3, 1);
   }
 
   /**
-   * Constructor
-   * @param numberOfVariables
-   * @param numberOfObjectives
+   * Creates a C3_S_DTLZ3 problem instance
+   *
+   * @param numberOfVariables  Number of variables
+   * @param numberOfObjectives Number of objective functions
    */
-  public C3_DTLZ4(Integer numberOfVariables, Integer numberOfObjectives, Integer numberOfConstraints) {
-    super(numberOfVariables, numberOfObjectives) ;
-    setName("C3_DTLZ4");
+  public C3_S_DTLZ3(Integer numberOfVariables, Integer numberOfObjectives, Integer numberOfConstraints) throws JMetalException {
+    super(numberOfVariables, numberOfObjectives);
+    setName("C3_S_DTLZ3");
 
     setNumberOfConstraints(numberOfConstraints);
 
@@ -71,4 +69,5 @@ public class C3_DTLZ4 extends DTLZ4 {
     overallConstraintViolationDegree.setAttribute(solution, overallConstraintViolation);
     numberOfViolatedConstraints.setAttribute(solution, violatedConstraints);
   }
+
 }

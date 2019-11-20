@@ -21,10 +21,10 @@ public class C3_S_DTLZ2 extends S_DTLZ2 {
   public NumberOfViolatedConstraints<DoubleSolution> numberOfViolatedConstraints ;
 
   /**
-   * Creates a default C3_S_DTLZ2 problem (12 variables, 3 objectives and 1 constraint)
+   * Creates a default C3_S_DTLZ2 problem (30 variables, 3 objectives and 1 constraint)
    */
   public C3_S_DTLZ2() {
-    this(12, 3, 1);
+    this(30, 3, 1);
   }
 
   /**
@@ -59,7 +59,7 @@ public class C3_S_DTLZ2 extends S_DTLZ2 {
         if (i != j) {
           sum += Math.pow(solution.getObjective(j), 2.0) ;
         }
-        constraint[j ]+= sum ;
+        constraint[j]+= sum ;
       }
     }
 
