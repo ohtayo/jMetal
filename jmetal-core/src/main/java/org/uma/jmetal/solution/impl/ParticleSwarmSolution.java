@@ -96,4 +96,12 @@ public class ParticleSwarmSolution extends DefaultDoubleSolution {
     return new ParticleSwarmSolution(this);
   }
 
+  public boolean equals(ParticleSwarmSolution solution){
+    for(int v=0; v<getNumberOfVariables(); v++){
+      if(this.getVariableValue(v) != solution.getVariableValue(v)){
+        return false;
+      }
+    }
+    return true;
+  }
 }

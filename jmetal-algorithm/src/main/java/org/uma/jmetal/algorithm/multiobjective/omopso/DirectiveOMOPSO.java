@@ -69,7 +69,7 @@ public class DirectiveOMOPSO extends OMOPSOWithSizeLimitedArchive {
       // (a) 探索初期は同一ランクの中からバイナリトーナメント選択でglobalBestを選択し，その方向を足す．
       double probability = (double)currentIteration/(double)maxIterations;
       if( probability < randomGenerator.nextDouble() ) {
-        updateVelocityUsingBinaryTournamentSelection(W, C1, C2, r1, r2, i, particle, (ParticleSwarmSolution)bestParticle);
+        updateVelocityUsingBinaryTournamentSelection(W, C1, C2, r1, r2, i, particle, bestParticle);
       }
       // (b)探索後期はarchiveとの優越関係によって変える
       else {
@@ -89,17 +89,17 @@ public class DirectiveOMOPSO extends OMOPSOWithSizeLimitedArchive {
         }
         // (b-1) もし対象particleよりもarchiveに優越している個体があれば，その個体からバイナリトーナメント選択でglobalbestを決定する．
         if (dominanceArchive.size() > 0) {
-          updateVelocityUsingDominanceArchive(W, C1, C2, r1, r2, i, particle, dominanceArchive, (ParticleSwarmSolution)bestParticle);
+          updateVelocityUsingDominanceArchive(W, C1, C2, r1, r2, i, particle, dominanceArchive, bestParticle);
         }
         // (b-2) 対象particleとarchiveが同一ランクであれば，同一ランクarchiveから近い10個体のうちランダムでvelocityを足し合わせる
         else if (sameRankArchive.size() > 0) {
-          updateVelocityUsingSameRankArchiveVelocity(W, C1, C2, r1, r2, i, particle, sameRankArchive);
+          //updateVelocityUsingSameRankArchiveVelocity(W, C1, C2, r1, r2, i, particle, sameRankArchive);
           //updateVelocityUsingBinaryTournamentSelection(W, C1, C2, r1, r2, i, particle, (ParticleSwarmSolution)bestParticle);  // (b-2)を無効化して(a)と同じ処理をする．
-          //updateVelocityUsingSameRankArchivePosition(W, C1, C2, r1, r2, i, particle, sameRankArchive);  // (b-2-II)の手法を用いる
+          updateVelocityUsingSameRankArchivePosition(W, C1, C2, r1, r2, i, particle, sameRankArchive);  // (b-2-II)の手法を用いる
         }
         // (b-3) アーカイブ全てが対象particleに優越されていたら，globalBestは用いないで飛翔する．
         else {
-          updateVelocityUsingNoGlobalBest(W, C1, C2, r1, r2, i, particle, (ParticleSwarmSolution) bestParticle);
+          updateVelocityUsingNoGlobalBest(W, C1, C2, r1, r2, i, particle, bestParticle);
         }
       }
     }
@@ -107,7 +107,7 @@ public class DirectiveOMOPSO extends OMOPSOWithSizeLimitedArchive {
 
   // (a) : 通常のPSOと同様
   protected void updateVelocityUsingBinaryTournamentSelection(
-      double W, double C1, double C2, double r1, double r2, int i, ParticleSwarmSolution particle, ParticleSwarmSolution bestParticle
+      double W, double C1, double C2, double r1, double r2, int i, ParticleSwarmSolution particle, DoubleSolution bestParticle
   ){
     // random select
     ParticleSwarmSolution one ;
@@ -138,7 +138,7 @@ public class DirectiveOMOPSO extends OMOPSOWithSizeLimitedArchive {
 
   // (b-1) もし対象particleよりもarchiveに優越している個体があれば，その個体からバイナリトーナメント選択でglobalbestを決定する．
   protected void updateVelocityUsingDominanceArchive(
-      double W, double C1, double C2, double r1, double r2, int i, ParticleSwarmSolution particle, List<ParticleSwarmSolution> dominanceArchive, ParticleSwarmSolution bestParticle
+      double W, double C1, double C2, double r1, double r2, int i, ParticleSwarmSolution particle, List<ParticleSwarmSolution> dominanceArchive, DoubleSolution bestParticle
   ){
     if ( dominanceArchive.size()==1 ){
       dominanceArchive.add(dominanceArchive.get(0));
@@ -206,17 +206,15 @@ public class DirectiveOMOPSO extends OMOPSOWithSizeLimitedArchive {
     }
   }
 
-  // (b-3) アーカイブ全てが対象particleに優越されていたら，globalBestは用いないで飛翔する．
-  protected void updateVelocityUsingNoGlobalBest(
-      double W, double C1, double C2, double r1, double r2, int i, ParticleSwarmSolution particle, ParticleSwarmSolution bestParticle )
-  {
-    for (int var = 0; var < particle.getNumberOfVariables(); var++) {
-      //Computing the velocity of this particle
-      speed[i][var] =
-          W * speed[i][var]
-              + C1 * r1 * (bestParticle.getVariableValue(var) - particle.getVariableValue(var))
-              + C2 * r2 * speed[i][var];
+  // listにsolutionを含むかチェック
+  private boolean contains(List<ParticleSwarmSolution> list, ParticleSwarmSolution solution, int[] index){
+    for( int s=0; s<list.size(); s++) {
+      if (list.get(s).equals(solution)) {
+        index[0] = s;
+        return true;
+      }
     }
+    return false;
   }
 
   // (b-2-II) 対象particleとarchiveが同一ランクであれば
@@ -225,12 +223,27 @@ public class DirectiveOMOPSO extends OMOPSOWithSizeLimitedArchive {
       double W, double C1, double C2, double r1, double r2, int i, ParticleSwarmSolution particle, List<ParticleSwarmSolution> sameRankArchive
   ) {
     DoubleSolution bestParticle = localBest[i];
+    List<ParticleSwarmSolution> neighbors;
 
-    sameRankArchive.add(particle);
-    int maxNeighborSize = 10;
-    int neighborSize = sameRankArchive.size() < maxNeighborSize ? sameRankArchive.size() - 1 : maxNeighborSize - 1;  // maxNeighborSizeに満たなければすべてneighborとする
-    KNearestNeighborhood<ParticleSwarmSolution> neighborhood = new KNearestNeighborhood<ParticleSwarmSolution>(neighborSize);
-    List<ParticleSwarmSolution> neighbors = neighborhood.getNeighbors(sameRankArchive, sameRankArchive.size() - 1);
+    if(sameRankArchive.size()==1){
+      neighbors = sameRankArchive;
+    }else{
+      // sameRankArchiveにparticleがなければ格納，すでにある場合はそのindexを記録
+      int[] index = new int[1];
+      int solutionIndex=0;
+      if(this.contains(sameRankArchive, particle, index)) {
+        solutionIndex = index[0];
+      }else{
+        sameRankArchive.add(particle);
+        solutionIndex = sameRankArchive.size() - 1;
+      }
+
+      // sameRankArchiveから近傍解を最大10個抽出
+      int maxNeighborSize = 10;
+      int neighborSize = sameRankArchive.size() <= maxNeighborSize ? sameRankArchive.size() - 1 : maxNeighborSize;  // maxNeighborSizeに満たなければすべてneighborとする
+      KNearestNeighborhood<ParticleSwarmSolution> neighborhood = new KNearestNeighborhood<ParticleSwarmSolution>(neighborSize);
+      neighbors = neighborhood.getNeighbors(sameRankArchive, solutionIndex);
+    }
 
     // neighborsのvelocityとparticleのpositionを計算のために分離
     Matrix velocityOfNeighbors = new Matrix(neighbors.size(), particle.getNumberOfVariables());
@@ -244,6 +257,7 @@ public class DirectiveOMOPSO extends OMOPSOWithSizeLimitedArchive {
 
     // neighborsのvelocityをparticleのpositionに足し合わせて更新する
     Matrix positionAfterFlights = positionOfNeighbors.plus(velocityOfNeighbors);
+    // Todo: ここで値が一部負になった場合でも境界値まで引き戻ししなくてよいか．
 
     // neighborsのpositionの平均をとり，bestGlobalとする．
     Vector averagedPosition = positionAfterFlights.mean(Matrix.DIRECTION_COLUMN);
@@ -258,6 +272,19 @@ public class DirectiveOMOPSO extends OMOPSOWithSizeLimitedArchive {
           W * speed[i][var]
               + C1 * r1 * (bestParticle.getVariableValue(var) - particle.getVariableValue(var))
               + C2 * r2 * (bestGlobal.getVariableValue(var) - particle.getVariableValue(var));
+    }
+  }
+
+  // (b-3) アーカイブ全てが対象particleに優越されていたら，globalBestは用いないで飛翔する．
+  protected void updateVelocityUsingNoGlobalBest(
+      double W, double C1, double C2, double r1, double r2, int i, ParticleSwarmSolution particle, DoubleSolution bestParticle )
+  {
+    for (int var = 0; var < particle.getNumberOfVariables(); var++) {
+      //Computing the velocity of this particle
+      speed[i][var] =
+          W * speed[i][var]
+              + C1 * r1 * (bestParticle.getVariableValue(var) - particle.getVariableValue(var))
+              + C2 * r2 * speed[i][var];
     }
   }
 
