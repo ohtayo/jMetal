@@ -71,7 +71,7 @@ public class S_DTLZ3 extends AbstractDoubleProblem {
       x[v] = solution.getVariableValue(v) * (x_max[v]-x_min[v]) + x_min[v] ;
     }
 
-//  Call S_DTLZ3 function using JNA
+//  Call function using JNA
     CEC2007TestSuite testSuite = CEC2007TestSuite.INSTANCE;
     testSuite.S_DTLZ3(x, f, numberOfVariables, numberOfObjectives);
 
