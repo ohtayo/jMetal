@@ -33,29 +33,32 @@ public class AlgorithmRunnerRepeater {
 //            "org.uma.jmetal.problem.multiobjective.newDtlz.C3_RosenbrockDTLZ2",
 //            "org.uma.jmetal.problem.multiobjective.maf.MaF02",
               "org.uma.jmetal.problem.multiobjective.maf.C3_MaF02",
+//              "org.uma.jmetal.problem.multiobjective.coco.C_RosenbrockRastrigin",
         };
         String[] referenceParetoFronts = {
 //            "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.4D.pf",
 //            "jmetal-problem/src/test/resources/pareto_fronts/DTLZ4.4D.pf",
-            "jmetal-problem/src/test/resources/pareto_fronts/DTLZ2.3D.pf",
-//            "jmetal-problem/src/test/resources/pareto_fronts/DTLZ3.3D.pf",
+//            "jmetal-problem/src/test/resources/pareto_fronts/DTLZ2.3D.pf",
+            "jmetal-problem/src/test/resources/pareto_fronts/DTLZ3.3D.pf",
+//            "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.2D.pf",
         };
         String[] algorithms = {
-            "ParallelOMOPSO",
-            "ParallelNSGAIIWithEpsilonArchive",
-            "ParallelNSGAIIIWithEpsilonArchive",
-            "ParallelConstraintMOEADWithEpsilonArchive",
             "ParallelNSGAII",
+            "ParallelNSGAIIWithEpsilonArchive",
             "ParallelNSGAIII",
+            "ParallelNSGAIIIWithEpsilonArchive",
             "ParallelConstraintMOEAD",
+            "ParallelConstraintMOEADWithEpsilonArchive",
+            "ParallelConstraintMOEADDEWithEpsilonArchive",
+            "ParallelOMOPSO",
             "ParallelOMOPSOWithSizeLimitedArchive",
 //            "ParallelDirectionalOMOPSOWithSizeLimitedArchive",
         };
 
         int numberOfIndividuals = 35;
-        int numberOfGenerations = 200;  //2000
-        int numberOfRepeats = 20;    // 20
-        int numberOfThreads = 2;
+        int numberOfGenerations = 500;  //2000
+        int numberOfRepeats = 5;    // 20
+        int numberOfThreads = 6;
 
         // run each problem and algorithms
         for (int problemNumber=0; problemNumber<problems.length; problemNumber++){

@@ -64,26 +64,29 @@ public class CalculateIndicatorFromManyResultsRunner {
 //    String referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ2.3D.pf";
 //    String problemName = "org.uma.jmetal.problem.multiobjective.UF.UF12";
 //    String referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ2.3D.pf";
-    String problemName = "org.uma.jmetal.problem.multiobjective.maf.MaF02";
+//    String problemName = "org.uma.jmetal.problem.multiobjective.maf.C3_MaF02";
+//    String referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ2.3D.pf";
+    String problemName = "org.uma.jmetal.problem.multiobjective.coco.C_RosenbrockRastrigin";
     String referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ2.3D.pf";
 
     String[] algorithms = {
-        "ParallelOMOPSO",
-        "ParallelNSGAIIWithEpsilonArchive",
-        "ParallelNSGAIIIWithEpsilonArchive",
-        "ParallelConstraintMOEADWithEpsilonArchive",
         "ParallelNSGAII",
+        "ParallelNSGAIIWithEpsilonArchive",
         "ParallelNSGAIII",
+        "ParallelNSGAIIIWithEpsilonArchive",
         "ParallelConstraintMOEAD",
+        "ParallelConstraintMOEADWithEpsilonArchive",
+        "ParallelConstraintMOEADDEWithEpsilonArchive",
+        "ParallelOMOPSO",
         "ParallelOMOPSOWithSizeLimitedArchive",
-        "ParallelDirectionalOMOPSOWithSizeLimitedArchive",
+//      "ParallelDirectionalOMOPSOWithSizeLimitedArchive",
     };
 
     // definition of problem
     int numberOfIndividuals = 35;
-    int numberOfGenerations = 200; // 2000
+    int numberOfGenerations = 500; // 2000
     int numberOfRepeats = 5;    // 20
-    int numberOfThreads = 3;
+    int numberOfThreads = 6;
 
     DoubleProblem problem = (DoubleProblem) ProblemUtils.<DoubleSolution> loadProblem(problemName);
     if( problem.getNumberOfObjectives()==3 || problem.getNumberOfObjectives()==8 ) {

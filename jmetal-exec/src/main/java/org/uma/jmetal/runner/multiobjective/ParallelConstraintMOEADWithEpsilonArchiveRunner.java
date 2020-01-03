@@ -10,8 +10,10 @@ import org.uma.jmetal.algorithm.multiobjective.moead.MOEADBuilder;
 import org.uma.jmetal.algorithm.multiobjective.moead.MOEADBuilder.Variant;
 import org.uma.jmetal.algorithm.multiobjective.moead.ParallelConstraintMOEAD;
 import org.uma.jmetal.algorithm.multiobjective.moead.ParallelConstraintMOEADWithEpsilonArchive;
+import org.uma.jmetal.operator.CrossoverOperator;
 import org.uma.jmetal.operator.MutationOperator;
 import org.uma.jmetal.operator.impl.crossover.DifferentialEvolutionCrossover;
+import org.uma.jmetal.operator.impl.crossover.SBXCrossover;
 import org.uma.jmetal.operator.impl.mutation.PolynomialMutation;
 import org.uma.jmetal.problem.DoubleProblem;
 import org.uma.jmetal.solution.DoubleSolution;
@@ -43,11 +45,11 @@ public class ParallelConstraintMOEADWithEpsilonArchiveRunner extends AbstractAlg
     DoubleProblem problem;
     Algorithm<List<DoubleSolution>> algorithm;
     MutationOperator<DoubleSolution> mutation;
-    DifferentialEvolutionCrossover crossover;
+    CrossoverOperator<DoubleSolution> crossover;
     SolutionListEvaluator<DoubleSolution> evaluator ;
 
     String problemName ;
-    int numberOfIndividuals = 35;  // default: 300
+    int numberOfIndividuals = 36;  // default: 300
     int numberOfGenerations = 1000;   // 500
     int numberOfThreads=1;
     String referenceParetoFront = "";
@@ -85,11 +87,13 @@ public class ParallelConstraintMOEADWithEpsilonArchiveRunner extends AbstractAlg
       //problemName = "org.uma.jmetal.problem.multiobjective.ep.EPZeb2Objective1ConstraintEachComfortNormalized";
       problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelVarDiff4ObjRegretConPMV";
       //referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/Tanaka.pf";
-      numberOfThreads = 4;
+      numberOfThreads = 6;
       //fileNameOfInitialSolutions = "C:\\workspace\\jMetal_edit\\initialSolutions.csv";
       //fileNameOfInitialSolutions = "C:\\workspace\\jMetal_edit\\result\\20190323_MOEAD_500世代_設計変数差分_快適度制約あり\\variable30.csv";
       problemName = "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ1";
-      referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.4D.pf";
+      problemName = "org.uma.jmetal.problem.multiobjective.UF.C3_UF11";
+      problemName = "org.uma.jmetal.problem.multiobjective.maf.C3_MaF02";
+      referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ2.3D.pf";
     }
 
     int archiveSize = 400;
@@ -103,9 +107,9 @@ public class ParallelConstraintMOEADWithEpsilonArchiveRunner extends AbstractAlg
       evaluator = new ThreadPoolSolutionListEvaluator<DoubleSolution>(numberOfThreads, problem) ;
     }
 
-    double cr = 0.9 ; // default: 1.0
-    double f = 0.7 ;  // default: 0.5
-    crossover = new DifferentialEvolutionCrossover(cr, f, "rand/1/bin");
+    double crossoverProbability = 0.9 ;
+    double crossoverDistributionIndex = 20.0 ;
+    crossover = new SBXCrossover(crossoverProbability, crossoverDistributionIndex) ;
 
     double mutationProbability = 1.0 / problem.getNumberOfVariables();
     double mutationDistributionIndex = 20.0;

@@ -94,7 +94,7 @@ public class DirectiveOMOPSO extends OMOPSOWithSizeLimitedArchive {
         // (b-2) 対象particleとarchiveが同一ランクであれば，同一ランクarchiveから近い10個体のうちランダムでvelocityを足し合わせる
         else if (sameRankArchive.size() > 0) {
           //updateVelocityUsingSameRankArchiveVelocity(W, C1, C2, r1, r2, i, particle, sameRankArchive);
-          //updateVelocityUsingBinaryTournamentSelection(W, C1, C2, r1, r2, i, particle, (ParticleSwarmSolution)bestParticle);  // (b-2)を無効化して(a)と同じ処理をする．
+          //updateVelocityUsingBinaryTournamentSelection(W, C1, C2, r1, r2, i, particle, bestParticle);  // (b-2)を無効化して(a)と同じ処理をする．
           updateVelocityUsingSameRankArchivePosition(W, C1, C2, r1, r2, i, particle, sameRankArchive);  // (b-2-II)の手法を用いる
         }
         // (b-3) アーカイブ全てが対象particleに優越されていたら，globalBestは用いないで飛翔する．

@@ -73,19 +73,20 @@ public class ParallelOMOPSOWithSizeLimitedArchiveRunner extends AbstractAlgorith
       referenceParetoFront = args[4];
       fileNameOfInitialSolutions = args[5];
     } else {
-//      problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelVarDiff2ObjConPMV";
+      problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelVarDiff2ObjConPMV";
 //      problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelLSTMVarDiff2ObjConPMV";
 //      problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModel4ObjDiffConPMV";
 //      problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelVarDiff4ObjRegretConPMV";
 
-//      problemName =  "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ1";
-     problemName =  "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ4";
+//      problemName = "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ1";
+//      problemName = "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ4";
+        problemName = "org.uma.jmetal.problem.multiobjective.UF.C3_UF12";
 
-//     referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.4D.pf";
-//     referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.2D.pf";
-//     referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ4.4D.pf";
-     referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ4.2D.pf";
-      numberOfThreads =1;
+//      referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.4D.pf";
+//      referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.2D.pf";
+//      referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ4.4D.pf";
+//      referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ4.2D.pf";
+      numberOfThreads =6;
       numberOfIterations = 1000;
       numberOfParticles = 35;
       fileNameOfInitialSolutions = "";
@@ -94,9 +95,9 @@ public class ParallelOMOPSOWithSizeLimitedArchiveRunner extends AbstractAlgorith
     int archiveSize = 400;  // アーカイブの制限サイズ
 
     // 目的関数の定義
-    Integer[] problemArgs = {8,2,1};
-    problem = (DoubleProblem) ProblemUtils.<DoubleSolution> loadProblem(problemName, (Object[]) problemArgs);
-//    problem = (DoubleProblem) ProblemUtils.<DoubleSolution> loadProblem(problemName);
+//    Integer[] problemArgs = {8,2,1};
+//    problem = (DoubleProblem) ProblemUtils.<DoubleSolution> loadProblem(problemName, (Object[]) problemArgs);
+    problem = (DoubleProblem) ProblemUtils.<DoubleSolution> loadProblem(problemName);
 
     // 突然変異確率
     double mutationProbability = 1.0 / problem.getNumberOfVariables() ;

@@ -17,7 +17,7 @@ import org.uma.jmetal.util.evaluator.impl.SequentialSolutionListEvaluator;
  * @version 1.0
  */
 public class MOEADBuilder implements AlgorithmBuilder<AbstractMOEAD<DoubleSolution>> {
-  public enum Variant {MOEAD, ConstraintMOEAD, MOEADDRA, MOEADSTM, MOEADD, ParallelConstraintMOEAD, ParallelConstraintMOEADWithEpsilonArchive} ;
+  public enum Variant {MOEAD, ConstraintMOEAD, MOEADDRA, MOEADSTM, MOEADD, ParallelConstraintMOEAD, ParallelConstraintMOEADWithEpsilonArchive, ParallelConstraintMOEADDE, ParallelConstraintMOEADDEWithEpsilonArchive} ;
 
   protected Problem<DoubleSolution> problem ;
 
@@ -217,6 +217,15 @@ public class MOEADBuilder implements AlgorithmBuilder<AbstractMOEAD<DoubleSoluti
               maximumNumberOfReplacedSolutions, neighborSize, evaluator);
     }else if (moeadVariant.equals(Variant.ParallelConstraintMOEADWithEpsilonArchive)) {
       algorithm =  new ParallelConstraintMOEADWithEpsilonArchive(problem, populationSize, resultPopulationSize, archiveSize,
+              maxEvaluations, mutation,
+              crossover, functionType, dataDirectory, neighborhoodSelectionProbability,
+              maximumNumberOfReplacedSolutions, neighborSize, evaluator);
+    }else if (moeadVariant.equals(Variant.ParallelConstraintMOEADDE)) {
+      algorithm =  new ParallelConstraintMOEADDE(problem, populationSize, resultPopulationSize, maxEvaluations, mutation,
+              crossover, functionType, dataDirectory, neighborhoodSelectionProbability,
+              maximumNumberOfReplacedSolutions, neighborSize, evaluator);
+    }else if (moeadVariant.equals(Variant.ParallelConstraintMOEADDEWithEpsilonArchive)) {
+      algorithm =  new ParallelConstraintMOEADDEWithEpsilonArchive(problem, populationSize, resultPopulationSize, archiveSize,
               maxEvaluations, mutation,
               crossover, functionType, dataDirectory, neighborhoodSelectionProbability,
               maximumNumberOfReplacedSolutions, neighborSize, evaluator);

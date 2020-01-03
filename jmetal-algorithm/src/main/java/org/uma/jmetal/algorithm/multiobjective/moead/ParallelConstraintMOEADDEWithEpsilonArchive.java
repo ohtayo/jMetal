@@ -4,19 +4,13 @@ import org.uma.jmetal.algorithm.multiobjective.moead.util.MOEADUtils;
 import org.uma.jmetal.algorithm.multiobjective.spea2.util.EnvironmentalSelection;
 import org.uma.jmetal.operator.CrossoverOperator;
 import org.uma.jmetal.operator.MutationOperator;
-import org.uma.jmetal.operator.impl.crossover.DifferentialEvolutionCrossover;
 import org.uma.jmetal.problem.Problem;
 import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.util.archive.impl.NonDominatedSolutionListArchive;
 import org.uma.jmetal.util.comparator.DominanceComparator;
-import org.uma.jmetal.util.comparator.impl.ViolationThresholdComparator;
 import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
-import org.uma.jmetal.util.fileoutput.ConstraintListOutput;
-import org.uma.jmetal.util.fileoutput.SolutionListOutput;
-import org.uma.jmetal.util.fileoutput.impl.DefaultFileOutputContext;
 import org.uma.jmetal.util.solutionattribute.impl.StrengthRawFitness;
 
-import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,7 +20,7 @@ import java.util.List;
  * @author ohtayo <ohta.yoshihiro@outlook.jp>
  */
 @SuppressWarnings("serial")
-public class ParallelConstraintMOEADWithEpsilonArchive extends ParallelConstraintMOEAD  {
+public class ParallelConstraintMOEADDEWithEpsilonArchive extends ParallelConstraintMOEADDE  {
   private double eta = 0.0075;
   private NonDominatedSolutionListArchive<DoubleSolution> epsilonArchive;
   private NonDominatedSolutionListArchive<DoubleSolution> temporaryArchive;
@@ -34,19 +28,19 @@ public class ParallelConstraintMOEADWithEpsilonArchive extends ParallelConstrain
   private StrengthRawFitness<DoubleSolution> strengthRawFitness;
   private EnvironmentalSelection<DoubleSolution> environmentalSelection;
 
-  public ParallelConstraintMOEADWithEpsilonArchive(Problem<DoubleSolution> problem,
-                                                   int populationSize,
-                                                   int resultPopulationSize,
-                                                   int archiveSize,
-                                                   int maxEvaluations,
-                                                   MutationOperator<DoubleSolution> mutation,
-                                                   CrossoverOperator<DoubleSolution> crossover,
-                                                   FunctionType functionType,
-                                                   String dataDirectory,
-                                                   double neighborhoodSelectionProbability,
-                                                   int maximumNumberOfReplacedSolutions,
-                                                   int neighborSize,
-                                                   SolutionListEvaluator<DoubleSolution> evaluator) {
+  public ParallelConstraintMOEADDEWithEpsilonArchive(Problem<DoubleSolution> problem,
+                                                     int populationSize,
+                                                     int resultPopulationSize,
+                                                     int archiveSize,
+                                                     int maxEvaluations,
+                                                     MutationOperator<DoubleSolution> mutation,
+                                                     CrossoverOperator<DoubleSolution> crossover,
+                                                     FunctionType functionType,
+                                                     String dataDirectory,
+                                                     double neighborhoodSelectionProbability,
+                                                     int maximumNumberOfReplacedSolutions,
+                                                     int neighborSize,
+                                                     SolutionListEvaluator<DoubleSolution> evaluator) {
     super(problem, populationSize, resultPopulationSize, maxEvaluations, mutation, crossover,functionType,
         dataDirectory, neighborhoodSelectionProbability, maximumNumberOfReplacedSolutions,
         neighborSize, evaluator);
@@ -108,10 +102,10 @@ public class ParallelConstraintMOEADWithEpsilonArchive extends ParallelConstrain
 
         NeighborType neighborType = chooseNeighborType();
         neighborTypes.add(neighborType);
-        List<DoubleSolution> parents = parentSelection(subProblemId, neighborType); // MOEA/Dは3つの親を生成する．SBXは2つ親を必要とするので要素を1つ削除する．
-        parents.remove(parents.size()-1); // 末尾の要素を削除
+        List<DoubleSolution> parents = parentSelection(subProblemId, neighborType);
 
-        List<DoubleSolution> children = sbxCrossover.execute(parents);
+        differentialEvolutionCrossover.setCurrentSolution(population.get(subProblemId));
+        List<DoubleSolution> children = differentialEvolutionCrossover.execute(parents);
 
         DoubleSolution child = children.get(0);
         mutationOperator.execute(child);

@@ -4,7 +4,6 @@ import org.uma.jmetal.algorithm.multiobjective.moead.util.MOEADUtils;
 import org.uma.jmetal.operator.CrossoverOperator;
 import org.uma.jmetal.operator.MutationOperator;
 import org.uma.jmetal.operator.impl.crossover.DifferentialEvolutionCrossover;
-import org.uma.jmetal.operator.impl.crossover.SBXCrossover;
 import org.uma.jmetal.problem.Problem;
 import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.util.comparator.impl.ViolationThresholdComparator;
@@ -22,30 +21,30 @@ import java.util.List;
  * @author ohtayo <ohta.yoshihiro@outlook.jp>
  */
 @SuppressWarnings("serial")
-public class ParallelConstraintMOEAD extends AbstractMOEAD<DoubleSolution>  {
+public class ParallelConstraintMOEADDE extends AbstractMOEAD<DoubleSolution>  {
 
-  protected SBXCrossover sbxCrossover ;
+  protected DifferentialEvolutionCrossover differentialEvolutionCrossover ;
   protected ViolationThresholdComparator<DoubleSolution> violationThresholdComparator ;
   protected SolutionListEvaluator<DoubleSolution> evaluator;
   protected List<DoubleSolution> initialPopulation;
 
-  public ParallelConstraintMOEAD(Problem<DoubleSolution> problem,
-                                 int populationSize,
-                                 int resultPopulationSize,
-                                 int maxEvaluations,
-                                 MutationOperator<DoubleSolution> mutation,
-                                 CrossoverOperator<DoubleSolution> crossover,
-                                 FunctionType functionType,
-                                 String dataDirectory,
-                                 double neighborhoodSelectionProbability,
-                                 int maximumNumberOfReplacedSolutions,
-                                 int neighborSize,
-                                 SolutionListEvaluator<DoubleSolution> evaluator) {
+  public ParallelConstraintMOEADDE(Problem<DoubleSolution> problem,
+                                   int populationSize,
+                                   int resultPopulationSize,
+                                   int maxEvaluations,
+                                   MutationOperator<DoubleSolution> mutation,
+                                   CrossoverOperator<DoubleSolution> crossover,
+                                   FunctionType functionType,
+                                   String dataDirectory,
+                                   double neighborhoodSelectionProbability,
+                                   int maximumNumberOfReplacedSolutions,
+                                   int neighborSize,
+                                   SolutionListEvaluator<DoubleSolution> evaluator) {
     super(problem, populationSize, resultPopulationSize, maxEvaluations, crossover, mutation, functionType,
         dataDirectory, neighborhoodSelectionProbability, maximumNumberOfReplacedSolutions,
         neighborSize);
 
-    sbxCrossover = (SBXCrossover)crossoverOperator ;
+    differentialEvolutionCrossover = (DifferentialEvolutionCrossover)crossoverOperator ;
     violationThresholdComparator = new ViolationThresholdComparator<DoubleSolution>() ;
     this.evaluator = evaluator;
     this.initialPopulation = null;
@@ -77,9 +76,9 @@ public class ParallelConstraintMOEAD extends AbstractMOEAD<DoubleSolution>  {
         NeighborType neighborType = chooseNeighborType();
         neighborTypes.add(neighborType);
         List<DoubleSolution> parents = parentSelection(subProblemId, neighborType);
-        parents.remove(parents.size()-1); // 末尾の要素を削除
 
-        List<DoubleSolution> children = sbxCrossover.execute(parents);
+        differentialEvolutionCrossover.setCurrentSolution(population.get(subProblemId));
+        List<DoubleSolution> children = differentialEvolutionCrossover.execute(parents);
 
         DoubleSolution child = children.get(0);
         mutationOperator.execute(child);
