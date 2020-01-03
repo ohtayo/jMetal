@@ -54,7 +54,17 @@ public class CalculateIndicatorFromManyResultsRunner {
 //    String referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ4.4D.pf";
 //    String problemName = "org.uma.jmetal.problem.multiobjective.cec2007MOAlgorithmCompetition.C3_S_DTLZ2";
 //    String referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ2.3D.pf";
-    String problemName = "org.uma.jmetal.problem.multiobjective.newDtlz.C3_RosenbrockDTLZ2";
+//    String problemName = "org.uma.jmetal.problem.multiobjective.newDtlz.C3_RosenbrockDTLZ2";
+//    String referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ2.3D.pf";
+//    String problemName = "org.uma.jmetal.problem.multiobjective.cec2007MOAlgorithmCompetition.C3_R_DTLZ2";
+//    String referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ2.3D.pf";
+//    String problemName = "org.uma.jmetal.problem.multiobjective.cec2007MOAlgorithmCompetition.C3_S_DTLZ3";
+//    String referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ3.3D.pf";
+//    String problemName = "org.uma.jmetal.problem.multiobjective.UF.UF11";
+//    String referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ2.3D.pf";
+//    String problemName = "org.uma.jmetal.problem.multiobjective.UF.UF12";
+//    String referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ2.3D.pf";
+    String problemName = "org.uma.jmetal.problem.multiobjective.maf.MaF02";
     String referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ2.3D.pf";
 
     String[] algorithms = {
@@ -65,8 +75,8 @@ public class CalculateIndicatorFromManyResultsRunner {
         "ParallelNSGAII",
         "ParallelNSGAIII",
         "ParallelConstraintMOEAD",
-        "ParallelOMOPSOWithSizeLimitedArchive"//,
-//        "ParallelDirectionalOMOPSOWithSizeLimitedArchive"
+        "ParallelOMOPSOWithSizeLimitedArchive",
+        "ParallelDirectionalOMOPSOWithSizeLimitedArchive",
     };
 
     // definition of problem

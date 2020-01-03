@@ -29,14 +29,16 @@ public class AlgorithmRunnerRepeater {
 //            "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ4",
 //            "org.uma.jmetal.problem.multiobjective.cec2007MOAlgorithmCompetition.C3_S_DTLZ2",
 //            "org.uma.jmetal.problem.multiobjective.cec2007MOAlgorithmCompetition.C3_S_DTLZ3",
-            "org.uma.jmetal.problem.multiobjective.newDtlz.C3_RosenbrockDTLZ2"
+//            "org.uma.jmetal.problem.multiobjective.cec2007MOAlgorithmCompetition.C3_R_DTLZ2",
+//            "org.uma.jmetal.problem.multiobjective.newDtlz.C3_RosenbrockDTLZ2",
+//            "org.uma.jmetal.problem.multiobjective.maf.MaF02",
+              "org.uma.jmetal.problem.multiobjective.maf.C3_MaF02",
         };
         String[] referenceParetoFronts = {
 //            "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.4D.pf",
-//            "jmetal-problem/src/test/resources/pareto_fronts/DTLZ4.4D.pf"
-//            "jmetal-problem/src/test/resources/pareto_fronts/DTLZ2.3D.pf",
-//            "jmetal-problem/src/test/resources/pareto_fronts/DTLZ3.3D.pf"
+//            "jmetal-problem/src/test/resources/pareto_fronts/DTLZ4.4D.pf",
             "jmetal-problem/src/test/resources/pareto_fronts/DTLZ2.3D.pf",
+//            "jmetal-problem/src/test/resources/pareto_fronts/DTLZ3.3D.pf",
         };
         String[] algorithms = {
             "ParallelOMOPSO",
@@ -46,14 +48,14 @@ public class AlgorithmRunnerRepeater {
             "ParallelNSGAII",
             "ParallelNSGAIII",
             "ParallelConstraintMOEAD",
-            "ParallelOMOPSOWithSizeLimitedArchive"//,
-//            "ParallelDirectionalOMOPSOWithSizeLimitedArchive"
+            "ParallelOMOPSOWithSizeLimitedArchive",
+//            "ParallelDirectionalOMOPSOWithSizeLimitedArchive",
         };
 
         int numberOfIndividuals = 35;
         int numberOfGenerations = 200;  //2000
-        int numberOfRepeats = 5;    // 20
-        int numberOfThreads = 3;
+        int numberOfRepeats = 20;    // 20
+        int numberOfThreads = 2;
 
         // run each problem and algorithms
         for (int problemNumber=0; problemNumber<problems.length; problemNumber++){
