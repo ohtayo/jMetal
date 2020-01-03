@@ -93,9 +93,9 @@ public class ParallelDirectionalOMOPSOWithSizeLimitedArchiveRunner extends Abstr
     int archiveSize = 400;  // アーカイブの制限サイズ
 
     // 目的関数の定義
-    Integer[] problemArgs = {8,2,1};
-    problem = (DoubleProblem) ProblemUtils.<DoubleSolution> loadProblem(problemName, (Object[]) problemArgs);
-//    problem = (DoubleProblem) ProblemUtils.<DoubleSolution> loadProblem(problemName);
+//    Integer[] problemArgs = {8,2,1};
+//    problem = (DoubleProblem) ProblemUtils.<DoubleSolution> loadProblem(problemName, (Object[]) problemArgs);
+    problem = (DoubleProblem) ProblemUtils.<DoubleSolution> loadProblem(problemName);
 
     // 突然変異確率
     double mutationProbability = 1.0 / problem.getNumberOfVariables() ;

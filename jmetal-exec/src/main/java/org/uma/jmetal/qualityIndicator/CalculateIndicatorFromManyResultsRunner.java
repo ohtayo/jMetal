@@ -52,7 +52,9 @@ public class CalculateIndicatorFromManyResultsRunner {
 //    String referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ4.4D.pf";
 //    String problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelVarDiff4ObjRegretConPMV";
 //    String referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ4.4D.pf";
-    String problemName = "org.uma.jmetal.problem.multiobjective.cec2007MOAlgorithmCompetition.C3_S_DTLZ2";
+//    String problemName = "org.uma.jmetal.problem.multiobjective.cec2007MOAlgorithmCompetition.C3_S_DTLZ2";
+//    String referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ2.3D.pf";
+    String problemName = "org.uma.jmetal.problem.multiobjective.newDtlz.C3_RosenbrockDTLZ2";
     String referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ2.3D.pf";
 
     String[] algorithms = {
@@ -63,18 +65,20 @@ public class CalculateIndicatorFromManyResultsRunner {
         "ParallelNSGAII",
         "ParallelNSGAIII",
         "ParallelConstraintMOEAD",
-        "ParallelOMOPSOWithSizeLimitedArchive",
-  //      "ParallelDirectionalOMOPSOWithSizeLimitedArchive"
+        "ParallelOMOPSOWithSizeLimitedArchive"//,
+//        "ParallelDirectionalOMOPSOWithSizeLimitedArchive"
     };
-    int numberOfIndividuals = 35;
-//    int numberOfGenerations = 1000; // 2000
-    int numberOfGenerations = 500; // 2000
-    int numberOfRepeats = 20;    // 20
-//    int numberOfRepeats = 1;    // 20
-    int numberOfThreads = 2;
 
     // definition of problem
+    int numberOfIndividuals = 35;
+    int numberOfGenerations = 200; // 2000
+    int numberOfRepeats = 5;    // 20
+    int numberOfThreads = 3;
+
     DoubleProblem problem = (DoubleProblem) ProblemUtils.<DoubleSolution> loadProblem(problemName);
+    if( problem.getNumberOfObjectives()==3 || problem.getNumberOfObjectives()==8 ) {
+      numberOfIndividuals = 36;
+    }
 
     calculateExtremeValues(archiveFolderBase, problem, algorithms, numberOfIndividuals, numberOfGenerations, numberOfRepeats, numberOfThreads);
     calculateHypervolumes(archiveFolderBase, problem, algorithms, numberOfIndividuals, numberOfGenerations, numberOfRepeats, numberOfThreads);

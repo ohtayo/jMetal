@@ -1,7 +1,10 @@
 package org.uma.jmetal.runner.multiobjective;
 
 import org.apache.commons.io.FileUtils;
+import org.uma.jmetal.problem.DoubleProblem;
+import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.util.JMetalException;
+import org.uma.jmetal.util.ProblemUtils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -23,15 +26,17 @@ public class AlgorithmRunnerRepeater {
         // problem and search settings
         String[] problems = {
 //            "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ1",
-//            "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ4"
-            "org.uma.jmetal.problem.multiobjective.cec2007MOAlgorithmCompetition.C3_S_DTLZ2",
-            "org.uma.jmetal.problem.multiobjective.cec2007MOAlgorithmCompetition.C3_S_DTLZ3"
+//            "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ4",
+//            "org.uma.jmetal.problem.multiobjective.cec2007MOAlgorithmCompetition.C3_S_DTLZ2",
+//            "org.uma.jmetal.problem.multiobjective.cec2007MOAlgorithmCompetition.C3_S_DTLZ3",
+            "org.uma.jmetal.problem.multiobjective.newDtlz.C3_RosenbrockDTLZ2"
         };
         String[] referenceParetoFronts = {
 //            "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.4D.pf",
 //            "jmetal-problem/src/test/resources/pareto_fronts/DTLZ4.4D.pf"
+//            "jmetal-problem/src/test/resources/pareto_fronts/DTLZ2.3D.pf",
+//            "jmetal-problem/src/test/resources/pareto_fronts/DTLZ3.3D.pf"
             "jmetal-problem/src/test/resources/pareto_fronts/DTLZ2.3D.pf",
-            "jmetal-problem/src/test/resources/pareto_fronts/DTLZ3.3D.pf"
         };
         String[] algorithms = {
             "ParallelOMOPSO",
@@ -44,10 +49,11 @@ public class AlgorithmRunnerRepeater {
             "ParallelOMOPSOWithSizeLimitedArchive"//,
 //            "ParallelDirectionalOMOPSOWithSizeLimitedArchive"
         };
+
         int numberOfIndividuals = 35;
-        int numberOfGenerations = 1000;  //2000
-        int numberOfRepeats = 20;    // 20
-        int numberOfThreads = 2;
+        int numberOfGenerations = 200;  //2000
+        int numberOfRepeats = 5;    // 20
+        int numberOfThreads = 3;
 
         // run each problem and algorithms
         for (int problemNumber=0; problemNumber<problems.length; problemNumber++){
@@ -55,6 +61,12 @@ public class AlgorithmRunnerRepeater {
             String problemName = problems[problemNumber];
             String referenceParetoFront = referenceParetoFronts[problemNumber];
             String[] tempProblemName = problemName.split(Pattern.quote("."));
+
+            // check population size for MOEA/D
+            DoubleProblem problem = (DoubleProblem) ProblemUtils.<DoubleSolution> loadProblem(problemName);
+            if( problem.getNumberOfObjectives()==3 || problem.getNumberOfObjectives()==8 ) {
+                numberOfIndividuals = 36;
+            }
 
             // arguments
             args = new String[5];
