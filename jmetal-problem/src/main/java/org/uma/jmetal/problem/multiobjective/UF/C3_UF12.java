@@ -37,6 +37,8 @@ public class C3_UF12 extends  UF12 {
     setName("C3_UF12") ;
     setNumberOfConstraints(1);
 
+    overallConstraintViolationDegree = new OverallConstraintViolation<DoubleSolution>() ;
+    numberOfViolatedConstraints = new NumberOfViolatedConstraints<DoubleSolution>() ;
   }
 
   /** Evaluate() method */
