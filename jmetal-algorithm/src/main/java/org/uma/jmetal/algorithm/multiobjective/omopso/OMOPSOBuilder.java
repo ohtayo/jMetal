@@ -10,7 +10,16 @@ import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
 
 /** Class implementing the OMOPSO algorithm */
 public class OMOPSOBuilder implements AlgorithmBuilder<OMOPSO> {
-  public enum OMOPSOVariant {OMOPSO, OMOPSOWithSizeLimitedArchive, DirectiveOMOPSO}
+  public enum OMOPSOVariant {
+    OMOPSO,
+    OMOPSOWithSizeLimitedArchive,
+    DirectiveOMOPSO,
+    OMOPSODE,
+    OMOPSONDX,
+    OMOPSOCSS,
+    OMOPSOAOP,
+    OMOPSOPPS,
+  }
 
   protected DoubleProblem problem;
   protected SolutionListEvaluator<DoubleSolution> evaluator;
@@ -102,15 +111,25 @@ public class OMOPSOBuilder implements AlgorithmBuilder<OMOPSO> {
   public OMOPSO build() {
     OMOPSO algorithm = null;
     if(this.variant == OMOPSOVariant.OMOPSO){
-      algorithm = new OMOPSO(problem, evaluator, swarmSize, maxIterations, archiveSize, uniformMutation,
-          nonUniformMutation, eta);
+      algorithm = new OMOPSO(problem, evaluator, swarmSize, maxIterations, archiveSize, uniformMutation, nonUniformMutation, eta);
     }else if(this.variant == OMOPSOVariant.OMOPSOWithSizeLimitedArchive){
-      algorithm = new OMOPSOWithSizeLimitedArchive(problem, evaluator, swarmSize, maxIterations, archiveSize, uniformMutation,
-          nonUniformMutation, eta);
-    }    else if(this.variant == OMOPSOVariant.DirectiveOMOPSO){
-      algorithm = new DirectiveOMOPSO(problem, evaluator, swarmSize, maxIterations, archiveSize, uniformMutation,
-          nonUniformMutation, eta);
+      algorithm = new OMOPSOWithSizeLimitedArchive(problem, evaluator, swarmSize, maxIterations, archiveSize, uniformMutation, nonUniformMutation, eta);
+    }else if(this.variant == OMOPSOVariant.DirectiveOMOPSO){
+      algorithm = new DirectiveOMOPSO(problem, evaluator, swarmSize, maxIterations, archiveSize, uniformMutation, nonUniformMutation, eta);
+/*
+    }else if(this.variant == OMOPSOVariant.OMOPSODE){
+      algorithm = new OMOPSODED(problem, evaluator, swarmSize, maxIterations, archiveSize, uniformMutation, nonUniformMutation, eta);
+*/
+    }else if(this.variant == OMOPSOVariant.OMOPSOCSS){
+      algorithm = new OMOPSOCSS(problem, evaluator, swarmSize, maxIterations, archiveSize, uniformMutation, nonUniformMutation, eta);
+    }else if(this.variant == OMOPSOVariant.OMOPSONDX){
+      algorithm = new OMOPSONDX(problem, evaluator, swarmSize, maxIterations, archiveSize, uniformMutation, nonUniformMutation, eta);
+    }else if(this.variant == OMOPSOVariant.OMOPSOAOP){
+      algorithm = new OMOPSOAOP(problem, evaluator, swarmSize, maxIterations, archiveSize, uniformMutation, nonUniformMutation, eta);
+    }else if(this.variant == OMOPSOVariant.OMOPSOPPS){
+      algorithm = new OMOPSOPPS(problem, evaluator, swarmSize, maxIterations, archiveSize, uniformMutation, nonUniformMutation, eta);
     }
+
     return algorithm ;
   }
 }

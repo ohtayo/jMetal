@@ -35,12 +35,12 @@ public class OMOPSO extends AbstractParticleSwarmOptimization<DoubleSolution, Li
   public int currentIteration;
 
   public DoubleSolution[] localBest;
-  private CrowdingDistanceArchive<DoubleSolution> leaderArchive;
+  public CrowdingDistanceArchive<DoubleSolution> leaderArchive;
   public NonDominatedSolutionListArchive<DoubleSolution> epsilonArchive;
 
   public double[][] speed;
 
-  private Comparator<DoubleSolution> dominanceComparator;
+  public Comparator<DoubleSolution> dominanceComparator;
   public Comparator<DoubleSolution> crowdingDistanceComparator;
 
   private UniformMutation uniformMutation;
