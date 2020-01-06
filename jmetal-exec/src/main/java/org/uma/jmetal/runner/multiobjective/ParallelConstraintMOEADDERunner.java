@@ -1,14 +1,16 @@
 package org.uma.jmetal.runner.multiobjective;
 
+import jp.ohtayo.commons.io.Csv;
+import jp.ohtayo.commons.math.Matrix;
+import jp.ohtayo.commons.util.StringUtility;
+import org.apache.commons.io.FilenameUtils;
 import org.uma.jmetal.algorithm.Algorithm;
 import org.uma.jmetal.algorithm.multiobjective.moead.AbstractMOEAD;
 import org.uma.jmetal.algorithm.multiobjective.moead.MOEADBuilder;
 import org.uma.jmetal.algorithm.multiobjective.moead.MOEADBuilder.Variant;
 import org.uma.jmetal.algorithm.multiobjective.moead.ParallelConstraintMOEAD;
-import org.uma.jmetal.operator.CrossoverOperator;
 import org.uma.jmetal.operator.MutationOperator;
 import org.uma.jmetal.operator.impl.crossover.DifferentialEvolutionCrossover;
-import org.uma.jmetal.operator.impl.crossover.SBXCrossover;
 import org.uma.jmetal.operator.impl.mutation.PolynomialMutation;
 import org.uma.jmetal.problem.DoubleProblem;
 import org.uma.jmetal.solution.DoubleSolution;
@@ -24,17 +26,12 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
-import jp.ohtayo.commons.io.Csv;
-import jp.ohtayo.commons.math.Matrix;
-import jp.ohtayo.commons.util.StringUtility;
-import org.apache.commons.io.FilenameUtils;
-
 /**
  * Class for configuring and running the MOEA/D algorithm
  *
  * @author Antonio J. Nebro <antonio@lcc.uma.es>
  */
-public class ParallelConstraintMOEADRunner extends AbstractAlgorithmRunner {
+public class ParallelConstraintMOEADDERunner extends AbstractAlgorithmRunner {
   /**
    * @param args Command line arguments.
    * @throws SecurityException
@@ -45,7 +42,7 @@ public class ParallelConstraintMOEADRunner extends AbstractAlgorithmRunner {
     DoubleProblem problem;
     Algorithm<List<DoubleSolution>> algorithm;
     MutationOperator<DoubleSolution> mutation;
-    CrossoverOperator<DoubleSolution> crossover;
+    DifferentialEvolutionCrossover crossover;
     SolutionListEvaluator<DoubleSolution> evaluator ;
 
     String problemName ;
@@ -106,9 +103,9 @@ public class ParallelConstraintMOEADRunner extends AbstractAlgorithmRunner {
       evaluator = new ThreadPoolSolutionListEvaluator<DoubleSolution>(numberOfThreads, problem) ;
     }
 
-    double crossoverProbability = 0.9 ;
-    double crossoverDistributionIndex = 20.0 ;
-    crossover = new SBXCrossover(crossoverProbability, crossoverDistributionIndex) ;
+    double cr = 1.0 ;
+    double f = 0.5 ;
+    crossover = new DifferentialEvolutionCrossover(cr, f, "rand/1/bin");
 
     double mutationProbability = 1.0 / problem.getNumberOfVariables();
     double mutationDistributionIndex = 20.0;
@@ -117,7 +114,7 @@ public class ParallelConstraintMOEADRunner extends AbstractAlgorithmRunner {
     int neighborSize = 5;    // default: 20
     int maxEvaluations = numberOfGenerations * numberOfIndividuals;  // default: 50000
 
-    algorithm = new MOEADBuilder(problem, Variant.ParallelConstraintMOEAD)
+    algorithm = new MOEADBuilder(problem, Variant.ParallelConstraintMOEADDE)
             .setCrossover(crossover)
             .setMutation(mutation)
             .setMaxEvaluations(maxEvaluations)
