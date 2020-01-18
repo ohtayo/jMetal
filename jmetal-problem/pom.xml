@@ -87,5 +87,12 @@
             <scope>system</scope>
             <systemPath>${project.basedir}/lib/commons-java.jar</systemPath>
         </dependency>
+        <dependency>
+            <groupId>com.mathworks.engine</groupId>
+            <artifactId>MatlabEngine</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>C:/Program Files/MATLAB/R2018b/extern/engines/java/jar/engine.jar</systemPath>
+        </dependency>
     </dependencies>
 </project>
