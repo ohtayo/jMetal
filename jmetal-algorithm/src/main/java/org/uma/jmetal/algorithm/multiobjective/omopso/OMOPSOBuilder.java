@@ -17,8 +17,10 @@ public class OMOPSOBuilder implements AlgorithmBuilder<OMOPSO> {
     OMOPSODE,
     OMOPSONDX,
     OMOPSOCSS,
+    OMOPSOIBP,
     OMOPSOAOP,
     OMOPSOPPS,
+    OMOPSORV,
   }
 
   protected DoubleProblem problem;
@@ -128,6 +130,10 @@ public class OMOPSOBuilder implements AlgorithmBuilder<OMOPSO> {
       algorithm = new OMOPSOAOP(problem, evaluator, swarmSize, maxIterations, archiveSize, uniformMutation, nonUniformMutation, eta);
     }else if(this.variant == OMOPSOVariant.OMOPSOPPS){
       algorithm = new OMOPSOPPS(problem, evaluator, swarmSize, maxIterations, archiveSize, uniformMutation, nonUniformMutation, eta);
+    } else if(this.variant == OMOPSOVariant.OMOPSORV){
+      algorithm = new OMOPSORV(problem, evaluator, swarmSize, maxIterations, archiveSize, uniformMutation, nonUniformMutation, eta);
+    } else if(this.variant == OMOPSOVariant.OMOPSOIBP){
+      algorithm = new OMOPSOIBP(problem, evaluator, swarmSize, maxIterations, archiveSize, uniformMutation, nonUniformMutation, eta);
     }
 
     return algorithm ;
