@@ -22,6 +22,7 @@ import org.uma.jmetal.util.AlgorithmRunner;
 import org.uma.jmetal.util.JMetalLogger;
 import org.uma.jmetal.util.ProblemUtils;
 import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
+import org.uma.jmetal.util.evaluator.impl.AtOneTimeSolutionListEvaluator;
 import org.uma.jmetal.util.evaluator.impl.SequentialSolutionListEvaluator;
 import org.uma.jmetal.util.evaluator.impl.ThreadPoolSolutionListEvaluator;
 
@@ -46,7 +47,6 @@ public class ParallelConstraintMOEADWithEpsilonArchiveRunner extends AbstractAlg
     Algorithm<List<DoubleSolution>> algorithm;
     MutationOperator<DoubleSolution> mutation;
     CrossoverOperator<DoubleSolution> crossover;
-    SolutionListEvaluator<DoubleSolution> evaluator ;
 
     String problemName ;
     int numberOfIndividuals = 36;  // default: 300
@@ -100,11 +100,12 @@ public class ParallelConstraintMOEADWithEpsilonArchiveRunner extends AbstractAlg
 
     problem = (DoubleProblem)ProblemUtils.<DoubleSolution> loadProblem(problemName);
 
-    if (numberOfThreads == 1) {
-      evaluator = new SequentialSolutionListEvaluator<DoubleSolution>() ;
-    } else {
-//      evaluator = new MultithreadedSolutionListEvaluator<DoubleSolution>(numberOfThreads, problem) ;
-      evaluator = new ThreadPoolSolutionListEvaluator<DoubleSolution>(numberOfThreads, problem) ;
+    // マルチスレッドの評価クラスの設定
+    SolutionListEvaluator<DoubleSolution> evaluator;
+    if(problemName.contains("AtOneTime")) {
+      evaluator = new AtOneTimeSolutionListEvaluator();
+    }else{
+      evaluator = new ThreadPoolSolutionListEvaluator<DoubleSolution>(numberOfThreads, problem);
     }
 
     double crossoverProbability = 0.9 ;

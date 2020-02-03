@@ -48,8 +48,8 @@ public class ParallelNSGAIIWithEpsilonArchiveRunner extends AbstractAlgorithmRun
 
     String problemName ;
     int numberOfIndividuals = 35;
-    int numberOfGenerations = 1000;
-    int numberOfThreads = 4;
+    int numberOfGenerations = 400;
+    int numberOfThreads = 6;
     String referenceParetoFront = "" ;
     String fileNameOfInitialSolutions = "";
     if (args.length == 1) {
@@ -83,8 +83,13 @@ public class ParallelNSGAIIWithEpsilonArchiveRunner extends AbstractAlgorithmRun
       problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelVarDiff4ObjRegretConPMV";
 //      problemName = "org.uma.jmetal.problem.multiobjective.zdt.ZDT1";
 //      referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/ZDT1.pf" ;
-      problemName = "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ1";
-      referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.4D.pf";
+//      problemName = "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ1";
+//      referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.4D.pf";
+      problemName = "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ4";
+      problemName = "org.uma.jmetal.problem.multiobjective.cec2007MOAlgorithmCompetition.R_DTLZ2";
+//      problemName = "org.uma.jmetal.problem.multiobjective.UF.C3_UF11";
+      problemName = "org.uma.jmetal.problem.multiobjective.UF.C3_UF12";
+      referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ4.4D.pf";
     }
 
     int maxEvaluations = numberOfGenerations*numberOfIndividuals;

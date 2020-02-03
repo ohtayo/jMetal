@@ -14,6 +14,7 @@ import org.uma.jmetal.problem.DoubleProblem;
 import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.util.*;
 import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
+import org.uma.jmetal.util.evaluator.impl.AtOneTimeSolutionListEvaluator;
 import org.uma.jmetal.util.evaluator.impl.ThreadPoolSolutionListEvaluator;
 
 import java.io.FileNotFoundException;
@@ -101,7 +102,12 @@ public class ParallelDirectionalOMOPSOWithSizeLimitedArchiveRunner extends Abstr
     double mutationProbability = 1.0 / problem.getNumberOfVariables() ;
 
     // マルチスレッドの評価クラスの設定
-    SolutionListEvaluator<DoubleSolution> evaluator = new ThreadPoolSolutionListEvaluator<DoubleSolution>( numberOfThreads, problem ) ;
+    SolutionListEvaluator<DoubleSolution> evaluator;
+    if(problemName.contains("AtOneTime")) {
+      evaluator = new AtOneTimeSolutionListEvaluator();
+    }else{
+      evaluator = new ThreadPoolSolutionListEvaluator<DoubleSolution>(numberOfThreads, problem);
+    }
 
     // OMOPSOのパラメータ定義
     OMOPSOBuilder builder = new OMOPSOBuilder(problem, evaluator)

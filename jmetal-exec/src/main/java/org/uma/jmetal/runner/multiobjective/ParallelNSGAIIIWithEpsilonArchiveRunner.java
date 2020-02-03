@@ -18,6 +18,7 @@ import org.uma.jmetal.problem.Problem;
 import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.util.*;
 import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
+import org.uma.jmetal.util.evaluator.impl.AtOneTimeSolutionListEvaluator;
 import org.uma.jmetal.util.evaluator.impl.ThreadPoolSolutionListEvaluator;
 import org.uma.jmetal.util.fileoutput.SolutionListOutput;
 import org.uma.jmetal.util.fileoutput.impl.DefaultFileOutputContext;
@@ -108,8 +109,13 @@ public class ParallelNSGAIIIWithEpsilonArchiveRunner extends AbstractAlgorithmRu
     
     selection = new BinaryTournamentSelection<DoubleSolution>();
 
-    // マルチスレッドの評価
-    SolutionListEvaluator<DoubleSolution> evaluator = new ThreadPoolSolutionListEvaluator<DoubleSolution>( numberOfThreads, problem ) ;
+    // マルチスレッドの評価クラスの設定
+    SolutionListEvaluator<DoubleSolution> evaluator;
+    if(problemName.contains("AtOneTime")) {
+      evaluator = new AtOneTimeSolutionListEvaluator();
+    }else{
+      evaluator = new ThreadPoolSolutionListEvaluator<DoubleSolution>(numberOfThreads, problem);
+    }
 
     // NSGAIIIのパラメータ定義
     NSGAIIIBuilder<DoubleSolution> builder = new NSGAIIIBuilder<>(problem)
