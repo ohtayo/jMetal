@@ -20,10 +20,10 @@ import java.util.List;
 @SuppressWarnings("serial")
 public class RosenbrockRastrigin extends AbstractDoubleProblem {
   /**
-   * Creates a default problem (5 variables and 2 objectives)
+   * Creates a default problem (default: 5 variables and 2 objectives)
    */
   public RosenbrockRastrigin() {
-    this(5, 2);
+    this(12, 2);
   }
 
   /**

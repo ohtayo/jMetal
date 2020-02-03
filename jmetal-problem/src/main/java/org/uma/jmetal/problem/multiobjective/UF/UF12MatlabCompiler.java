@@ -32,7 +32,7 @@ public class UF12MatlabCompiler extends AbstractDoubleProblem {
     setNumberOfVariables(numberOfVariables) ;
     setNumberOfObjectives(5) ;
     setNumberOfConstraints(0) ;
-    setName("UF12_Compiler") ;
+    setName("UF12MatlabCompiler") ;
 
     List<Double> lowerLimit = new ArrayList<>(getNumberOfVariables()) ;
     List<Double> upperLimit = new ArrayList<>(getNumberOfVariables()) ;

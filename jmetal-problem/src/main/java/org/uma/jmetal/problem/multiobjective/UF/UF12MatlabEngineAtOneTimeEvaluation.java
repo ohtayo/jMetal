@@ -31,7 +31,7 @@ public class UF12MatlabEngineAtOneTimeEvaluation extends AbstractAtOneTimeEvalua
     setNumberOfVariables(numberOfVariables) ;
     setNumberOfObjectives(5) ;
     setNumberOfConstraints(0) ;
-    setName("UF12") ;
+    setName("UF12MatlabEngineAtOneTimeEvaluation") ;
 
     List<Double> lowerLimit = new ArrayList<>(getNumberOfVariables()) ;
     List<Double> upperLimit = new ArrayList<>(getNumberOfVariables()) ;

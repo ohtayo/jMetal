@@ -26,7 +26,7 @@ public class C3_UF12MatlabEngineAtOneTimeEvaluation extends  UF12MatlabEngineAtO
   */
   public C3_UF12MatlabEngineAtOneTimeEvaluation(int numberOfVariables) {
     super(numberOfVariables);
-    setName("C3_UF12_Engine_AtOneTime") ;
+    setName("C3_UF12MatlabEngineAtOneTimeEvaluation") ;
     setNumberOfConstraints(1);
 
     overallConstraintViolationDegree = new OverallConstraintViolation<DoubleSolution>() ;

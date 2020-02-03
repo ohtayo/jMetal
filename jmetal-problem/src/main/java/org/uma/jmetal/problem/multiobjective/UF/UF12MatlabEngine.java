@@ -31,7 +31,7 @@ public class UF12MatlabEngine extends AbstractDoubleProblem {
     setNumberOfVariables(numberOfVariables) ;
     setNumberOfObjectives(5) ;
     setNumberOfConstraints(0) ;
-    setName("UF12_Engine") ;
+    setName("UF12MatlabEngine") ;
 
     List<Double> lowerLimit = new ArrayList<>(getNumberOfVariables()) ;
     List<Double> upperLimit = new ArrayList<>(getNumberOfVariables()) ;

@@ -21,10 +21,10 @@ public class C_RosenbrockRastrigin extends RosenbrockRastrigin {
   public OverallConstraintViolation<DoubleSolution> overallConstraintViolationDegree ;
   public NumberOfViolatedConstraints<DoubleSolution> numberOfViolatedConstraints ;
   /**
-   * Creates a default problem (5 variables, 2 objectives and 1 constraint)
+   * Creates a default problem (default: 12 variables, 2 objectives and 1 constraint)
    */
   public C_RosenbrockRastrigin() {
-    this(5, 2, 1);
+    this(12, 2, 1);
   }
 
   /**
