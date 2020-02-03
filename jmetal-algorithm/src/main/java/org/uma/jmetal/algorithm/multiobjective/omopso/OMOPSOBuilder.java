@@ -13,14 +13,17 @@ public class OMOPSOBuilder implements AlgorithmBuilder<OMOPSO> {
   public enum OMOPSOVariant {
     OMOPSO,
     OMOPSOWithSizeLimitedArchive,
+    OMOPSORV,
+    OMOPSODBTDFG,
+    OMOPSODBTIBG,
+    OMOPSORVDBTDFG,
+    OMOPSORVDBTIBG,
     DirectiveOMOPSO,
     OMOPSODE,
     OMOPSONDX,
     OMOPSOCSS,
-    OMOPSOIBP,
     OMOPSOAOP,
     OMOPSOPPS,
-    OMOPSORV,
   }
 
   protected DoubleProblem problem;
@@ -132,8 +135,14 @@ public class OMOPSOBuilder implements AlgorithmBuilder<OMOPSO> {
       algorithm = new OMOPSOPPS(problem, evaluator, swarmSize, maxIterations, archiveSize, uniformMutation, nonUniformMutation, eta);
     } else if(this.variant == OMOPSOVariant.OMOPSORV){
       algorithm = new OMOPSORV(problem, evaluator, swarmSize, maxIterations, archiveSize, uniformMutation, nonUniformMutation, eta);
-    } else if(this.variant == OMOPSOVariant.OMOPSOIBP){
-      algorithm = new OMOPSOIBP(problem, evaluator, swarmSize, maxIterations, archiveSize, uniformMutation, nonUniformMutation, eta);
+    } else if(this.variant == OMOPSOVariant.OMOPSODBTDFG){
+      algorithm = new OMOPSODBTDFG(problem, evaluator, swarmSize, maxIterations, archiveSize, uniformMutation, nonUniformMutation, eta);
+    } else if(this.variant == OMOPSOVariant.OMOPSODBTIBG){
+      algorithm = new OMOPSODBTIBG(problem, evaluator, swarmSize, maxIterations, archiveSize, uniformMutation, nonUniformMutation, eta);
+    } else if(this.variant == OMOPSOVariant.OMOPSORVDBTDFG){
+      algorithm = new OMOPSORVDBTDFG(problem, evaluator, swarmSize, maxIterations, archiveSize, uniformMutation, nonUniformMutation, eta);
+    } else if(this.variant == OMOPSOVariant.OMOPSORVDBTIBG){
+      algorithm = new OMOPSORVDBTIBG(problem, evaluator, swarmSize, maxIterations, archiveSize, uniformMutation, nonUniformMutation, eta);
     }
 
     return algorithm ;

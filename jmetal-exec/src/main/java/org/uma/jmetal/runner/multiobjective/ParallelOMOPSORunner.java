@@ -17,6 +17,7 @@ import org.uma.jmetal.util.JMetalException;
 import org.uma.jmetal.util.JMetalLogger;
 import org.uma.jmetal.util.ProblemUtils;
 import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
+import org.uma.jmetal.util.evaluator.impl.AtOneTimeSolutionListEvaluator;
 import org.uma.jmetal.util.evaluator.impl.ThreadPoolSolutionListEvaluator;
 
 import org.apache.commons.io.FilenameUtils;
@@ -84,13 +85,15 @@ public class ParallelOMOPSORunner extends AbstractAlgorithmRunner {
 //      problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelVarDiff4ObjRegretConPMV";
 //      problemName =  "org.uma.jmetal.problem.multiobjective.dtlz.DTLZ1";
 //      problemName =  "org.uma.jmetal.problem.multiobjective.dtlz.DTLZ4";
-      problemName =  "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ1";
+//      problemName =  "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ1";
 //     problemName =  "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ4";
 //      referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.3D.pf";
-     referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.4D.pf";
+//     referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.4D.pf";
 //      referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ4.3D.pf";
- //     referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ4.4D.pf";
-      numberOfThreads = 2;
+//     referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ4.4D.pf";
+      problemName =  "org.uma.jmetal.problem.multiobjective.UF.UF12MatlabEngineAtOneTimeEvaluation";
+      referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/UF12.pf";
+      numberOfThreads = 1;
       numberOfIterations = 200;
       numberOfParticles = 36;
       fileNameOfInitialSolutions = "";
@@ -104,7 +107,12 @@ public class ParallelOMOPSORunner extends AbstractAlgorithmRunner {
     double mutationProbability = 1.0 / problem.getNumberOfVariables() ;
 
     // マルチスレッドの評価クラスの設定
-    SolutionListEvaluator<DoubleSolution> evaluator = new ThreadPoolSolutionListEvaluator<DoubleSolution>( numberOfThreads, problem ) ;
+    SolutionListEvaluator<DoubleSolution> evaluator;
+    if(problemName.contains("AtOneTime")) {
+      evaluator = new AtOneTimeSolutionListEvaluator();
+    }else{
+      evaluator = new ThreadPoolSolutionListEvaluator<DoubleSolution>(numberOfThreads, problem);
+    }
 
     // OMOPSOのパラメータ定義
     OMOPSOBuilder builder = new OMOPSOBuilder(problem, evaluator)

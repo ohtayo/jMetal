@@ -35,7 +35,7 @@ public class IBEA<S extends Solution<?>> implements Algorithm<List<S>> {
   protected MutationOperator<S> mutationOperator;
   protected SelectionOperator<List<S>, S> selectionOperator;
 
-  protected Fitness<S> solutionFitness = new Fitness<S>();
+  public Fitness<S> solutionFitness = new Fitness<S>();
 
   /**
    * Constructor

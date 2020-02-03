@@ -21,6 +21,7 @@ public class AtOneTimeSolutionListEvaluator<S> implements SolutionListEvaluator<
   @Override
   public List<S> evaluate(List<S> solutionList, Problem<S> problem) throws JMetalException {
     AbstractAtOneTimeEvaluableDoubleProblem prob = (AbstractAtOneTimeEvaluableDoubleProblem)problem;
+    JMetalLogger.logger.info("Evaluate solutions at one time.");
     prob.evaluate((List<DoubleSolution>)solutionList);
 
     return solutionList;

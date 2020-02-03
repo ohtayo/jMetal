@@ -25,7 +25,7 @@ import java.util.List;
  * @author ohtayo (ohta.yoshihiro@outlook.jp)
  */
 
-public class ParallelOMOPSONDXRunner extends AbstractAlgorithmRunner {
+public class ParallelOMOPSORVDBTIBGRunner extends AbstractAlgorithmRunner {
   /**
    * @param args Command line arguments.
    * @throws SecurityException
@@ -100,7 +100,7 @@ public class ParallelOMOPSONDXRunner extends AbstractAlgorithmRunner {
             .setSwarmSize(numberOfParticles)
             .setUniformMutation(new UniformMutation(mutationProbability, 0.5))
             .setNonUniformMutation(new NonUniformMutation(mutationProbability, 0.5, numberOfIterations))
-            .setVariant(OMOPSOBuilder.OMOPSOVariant.OMOPSONDX);
+            .setVariant(OMOPSOBuilder.OMOPSOVariant.OMOPSORVDBTIBG);
     algorithm = builder.build();
 
     // 初期値のファイル名の指定があれば初期値を設定

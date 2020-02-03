@@ -25,7 +25,7 @@ import java.util.List;
  * @author ohtayo (ohta.yoshihiro@outlook.jp)
  */
 
-public class ParallelOMOPSONDXRunner extends AbstractAlgorithmRunner {
+public class ParallelOMOPSODBTIBGRunner extends AbstractAlgorithmRunner {
   /**
    * @param args Command line arguments.
    * @throws SecurityException
@@ -73,9 +73,9 @@ public class ParallelOMOPSONDXRunner extends AbstractAlgorithmRunner {
       fileNameOfInitialSolutions = args[5];
     } else {
       problemName =  "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ1";
-     referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.4D.pf";
-      numberOfThreads = 2;
-      numberOfIterations = 200;
+      referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.4D.pf";
+      numberOfThreads = 4;
+      numberOfIterations = 500;
       numberOfParticles = 35;
       fileNameOfInitialSolutions = "";
     }
@@ -100,7 +100,7 @@ public class ParallelOMOPSONDXRunner extends AbstractAlgorithmRunner {
             .setSwarmSize(numberOfParticles)
             .setUniformMutation(new UniformMutation(mutationProbability, 0.5))
             .setNonUniformMutation(new NonUniformMutation(mutationProbability, 0.5, numberOfIterations))
-            .setVariant(OMOPSOBuilder.OMOPSOVariant.OMOPSONDX);
+            .setVariant(OMOPSOBuilder.OMOPSOVariant.OMOPSODBTIBG);
     algorithm = builder.build();
 
     // 初期値のファイル名の指定があれば初期値を設定
