@@ -67,7 +67,7 @@ public class OMOPSODBTDFG extends OMOPSOWithSizeLimitedArchive {
       W = randomGenerator.nextDouble(0.1, 0.5);
 
       // 飛翔させる対象粒子とアーカイブの優越関係を確認
-      List<ParticleSwarmSolution> dominanceArchive = new ArrayList<>(archiveSize);
+      NonDominatedSolutionListArchive<ParticleSwarmSolution> dominanceArchive = new NonDominatedSolutionListArchive<ParticleSwarmSolution>(new DominanceComparator<ParticleSwarmSolution>(this.eta));
       List<ParticleSwarmSolution> sameRankArchive = new ArrayList<>(archiveSize);
       for (int a = 0; a < truncatedArchive.size(); a++) {
         DominanceComparator<ParticleSwarmSolution> comparator = new DominanceComparator<ParticleSwarmSolution>();
@@ -82,7 +82,7 @@ public class OMOPSODBTDFG extends OMOPSOWithSizeLimitedArchive {
       }
       // (1)[DBT] もし対象particleよりもarchiveに優越している個体があれば，その個体からバイナリトーナメント選択でglobalbestを決定する．
       if (dominanceArchive.size() > 0) {
-        updateVelocityUsingDominanceArchive(W, C1, C2, r1, r2, i, particle, dominanceArchive, bestParticle);
+        updateVelocityUsingDominanceArchive(W, C1, C2, r1, r2, i, particle, dominanceArchive.getSolutionList(), bestParticle);
       }
       // (2)[DFG] 対象particleとarchiveが同一ランクであれば，同一ランクarchiveから近い10個体のうちランダムでvelocityを足し合わせる
       else if (sameRankArchive.size() > 0) {
