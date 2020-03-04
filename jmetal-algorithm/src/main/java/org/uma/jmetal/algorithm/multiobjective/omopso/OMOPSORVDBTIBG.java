@@ -241,11 +241,11 @@ public class OMOPSORVDBTIBG extends OMOPSOWithSizeLimitedArchive {
   }
 
   @Override public String getName() {
-    return "OMOPSODBTDFG" ;
+    return "OMOPSODBTIBG" ;
   }
 
   @Override public String getDescription() {
-    return "Optimized MOPSO with Dominated Binary Tournament and Directional Flight gBest" ;
+    return "Optimized MOPSO with Dominated Binary Tournament and Indicator Based gBest" ;
   }
 
 }

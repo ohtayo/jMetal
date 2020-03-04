@@ -18,8 +18,10 @@ public class OMOPSOBuilder implements AlgorithmBuilder<OMOPSO> {
     OMOPSODBTIBG,
     OMOPSORVDBTDFG,
     OMOPSORVDBTIBG,
+    OMOPSORVDBTIBGAOP,
+    OMOPSORVDBTIBGIBP,
+    OMOPSORVDBTIBGPPS,
     DirectiveOMOPSO,
-    OMOPSODE,
     OMOPSONDX,
     OMOPSOCSS,
     OMOPSOAOP,
@@ -121,10 +123,6 @@ public class OMOPSOBuilder implements AlgorithmBuilder<OMOPSO> {
       algorithm = new OMOPSOWithSizeLimitedArchive(problem, evaluator, swarmSize, maxIterations, archiveSize, uniformMutation, nonUniformMutation, eta);
     }else if(this.variant == OMOPSOVariant.DirectiveOMOPSO){
       algorithm = new DirectiveOMOPSO(problem, evaluator, swarmSize, maxIterations, archiveSize, uniformMutation, nonUniformMutation, eta);
-/*
-    }else if(this.variant == OMOPSOVariant.OMOPSODE){
-      algorithm = new OMOPSODED(problem, evaluator, swarmSize, maxIterations, archiveSize, uniformMutation, nonUniformMutation, eta);
-*/
     }else if(this.variant == OMOPSOVariant.OMOPSOCSS){
       algorithm = new OMOPSOCSS(problem, evaluator, swarmSize, maxIterations, archiveSize, uniformMutation, nonUniformMutation, eta);
     }else if(this.variant == OMOPSOVariant.OMOPSONDX){
@@ -143,6 +141,12 @@ public class OMOPSOBuilder implements AlgorithmBuilder<OMOPSO> {
       algorithm = new OMOPSORVDBTDFG(problem, evaluator, swarmSize, maxIterations, archiveSize, uniformMutation, nonUniformMutation, eta);
     } else if(this.variant == OMOPSOVariant.OMOPSORVDBTIBG){
       algorithm = new OMOPSORVDBTIBG(problem, evaluator, swarmSize, maxIterations, archiveSize, uniformMutation, nonUniformMutation, eta);
+    } else if(this.variant == OMOPSOVariant.OMOPSORVDBTIBGAOP){
+      algorithm = new OMOPSORVDBTIBGAOP(problem, evaluator, swarmSize, maxIterations, archiveSize, uniformMutation, nonUniformMutation, eta);
+    } else if(this.variant == OMOPSOVariant.OMOPSORVDBTIBGIBP){
+      algorithm = new OMOPSORVDBTIBGIBP(problem, evaluator, swarmSize, maxIterations, archiveSize, uniformMutation, nonUniformMutation, eta);
+    } else if(this.variant == OMOPSOVariant.OMOPSORVDBTIBGPPS){
+      algorithm = new OMOPSORVDBTIBGPPS(problem, evaluator, swarmSize, maxIterations, archiveSize, uniformMutation, nonUniformMutation, eta);
     }
 
     return algorithm ;
