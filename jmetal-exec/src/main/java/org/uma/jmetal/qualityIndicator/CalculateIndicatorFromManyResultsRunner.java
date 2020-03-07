@@ -80,8 +80,17 @@ public class CalculateIndicatorFromManyResultsRunner {
 //        "ParallelConstraintMOEADWithEpsilonArchive",
 //        "ParallelConstraintMOEADDEWithEpsilonArchive",
         "ParallelOMOPSO",
-//        "ParallelOMOPSOWithSizeLimitedArchive",
+        "ParallelOMOPSOWithSizeLimitedArchive",
         "ParallelOMOPSORV",
+            "ParallelOMOPSORVDBT",
+            "ParallelOMOPSORVDBT2",
+        "ParallelOMOPSORVAOP",
+        "ParallelOMOPSORVIBP",
+        "ParallelOMOPSORVPPS",
+        "ParallelOMOPSODBTDFG",
+        "ParallelOMOPSODBTIBG",
+        "ParallelOMOPSORVDBTDFG",
+        "ParallelOMOPSORVDBTIBG",
 //      "ParallelDirectionalOMOPSOWithSizeLimitedArchive",
     };
 
@@ -210,7 +219,7 @@ public class CalculateIndicatorFromManyResultsRunner {
       Matrix minimumValuesInIterate = new Matrix(problem.getNumberOfObjectives(), numberOfGenerations);
       Matrix maximumValuesInIterate = new Matrix(problem.getNumberOfObjectives(), numberOfGenerations);
       for (int g = 0; g < numberOfGenerations; g++) {
-        //JMetalLogger.logger.info("Generations: "+g);
+        if(g%100==0)  JMetalLogger.logger.info("Generations: "+g);
         // read fitness in each generation
         String archiveFolder = archiveFolderBase + experimentName + "\\" + String.valueOf(repeats) + "\\";
         Matrix fitness = new Matrix(Csv.read(archiveFolder + getFitnessFileName(algorithmName, g)));
@@ -313,7 +322,7 @@ public class CalculateIndicatorFromManyResultsRunner {
       Matrix maximumValues = new Matrix(Csv.read(extremeValueFolder+"maximumValue.csv", 1, 0));
 
       for (int g = 0; g < numberOfGenerations; g++) {
-        //JMetalLogger.logger.info("Generations: "+g);
+        if(g%10==0) JMetalLogger.logger.info("Generations: "+g);
         String archiveFolder = archiveFolderBase + experimentName + "\\" + String.valueOf(repeats) + "\\";
         Matrix fitness = new Matrix(Csv.read(archiveFolder + getFitnessFileName(algorithmName, g)));
         List<DoubleSolution> population = new ArrayList<DoubleSolution>(fitness.length());

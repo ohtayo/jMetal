@@ -73,9 +73,10 @@ public class ParallelOMOPSORVDBTIBGRunner extends AbstractAlgorithmRunner {
       fileNameOfInitialSolutions = args[5];
     } else {
       problemName =  "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ1";
-     referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.4D.pf";
-      numberOfThreads = 2;
-      numberOfIterations = 200;
+      problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelVarDiff4ObjRegretConPMV";
+      referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.4D.pf";
+      numberOfThreads = 6;
+      numberOfIterations = 500;
       numberOfParticles = 35;
       fileNameOfInitialSolutions = "";
     }

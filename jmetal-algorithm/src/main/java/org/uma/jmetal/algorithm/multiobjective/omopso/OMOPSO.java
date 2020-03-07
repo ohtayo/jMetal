@@ -86,6 +86,11 @@ public class OMOPSO extends AbstractParticleSwarmOptimization<DoubleSolution, Li
     crowdingDistance.computeDensityEstimator(leaderArchive.getSolutionList());
     dump(epsilonArchive.getSolutionList(), "epsilon");
     dump(leaderArchive.getSolutionList());
+    dump(getSwarm(), "swarm");
+    // pBestの保存
+    List<DoubleSolution> bestParticle = new ArrayList<>();
+    for(DoubleSolution pbest : localBest) bestParticle.add(pbest);
+    dump(bestParticle, "pBest");
   }
 
   @Override protected void updateProgress() {
@@ -93,6 +98,11 @@ public class OMOPSO extends AbstractParticleSwarmOptimization<DoubleSolution, Li
     crowdingDistance.computeDensityEstimator(leaderArchive.getSolutionList());
     dump(epsilonArchive.getSolutionList(), "epsilon");
     dump(leaderArchive.getSolutionList());
+    dump(getSwarm(), "swarm");
+    // pBestの保存
+    List<DoubleSolution> bestParticle = new ArrayList<>();
+    for(DoubleSolution pbest : localBest) bestParticle.add(pbest);
+    dump(bestParticle, "pBest");
   }
 
   protected void dump(List<? extends Solution<?>> solutionList, String prefix){

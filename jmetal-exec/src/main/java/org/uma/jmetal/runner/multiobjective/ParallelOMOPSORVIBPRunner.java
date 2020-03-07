@@ -1,9 +1,9 @@
 package org.uma.jmetal.runner.multiobjective;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.List;
-
+import jp.ohtayo.commons.io.Csv;
+import jp.ohtayo.commons.math.Matrix;
+import jp.ohtayo.commons.util.StringUtility;
+import org.apache.commons.io.FilenameUtils;
 import org.uma.jmetal.algorithm.Algorithm;
 import org.uma.jmetal.algorithm.multiobjective.omopso.OMOPSO;
 import org.uma.jmetal.algorithm.multiobjective.omopso.OMOPSOBuilder;
@@ -11,20 +11,13 @@ import org.uma.jmetal.operator.impl.mutation.NonUniformMutation;
 import org.uma.jmetal.operator.impl.mutation.UniformMutation;
 import org.uma.jmetal.problem.DoubleProblem;
 import org.uma.jmetal.solution.DoubleSolution;
-import org.uma.jmetal.util.AbstractAlgorithmRunner;
-import org.uma.jmetal.util.AlgorithmRunner;
-import org.uma.jmetal.util.JMetalException;
-import org.uma.jmetal.util.JMetalLogger;
-import org.uma.jmetal.util.ProblemUtils;
+import org.uma.jmetal.util.*;
 import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
 import org.uma.jmetal.util.evaluator.impl.AtOneTimeSolutionListEvaluator;
 import org.uma.jmetal.util.evaluator.impl.ThreadPoolSolutionListEvaluator;
 
-import org.apache.commons.io.FilenameUtils;
-
-import jp.ohtayo.commons.io.Csv;
-import jp.ohtayo.commons.math.Matrix;
-import jp.ohtayo.commons.util.StringUtility;
+import java.io.FileNotFoundException;
+import java.util.List;
 
 /**
  * Class for configuring and running the OMOPSO algorithm (parallel version)
@@ -32,7 +25,7 @@ import jp.ohtayo.commons.util.StringUtility;
  * @author ohtayo (ohta.yoshihiro@outlook.jp)
  */
 
-public class ParallelOMOPSORunner extends AbstractAlgorithmRunner {
+public class ParallelOMOPSORVIBPRunner extends AbstractAlgorithmRunner {
   /**
    * @param args Command line arguments.
    * @throws SecurityException
@@ -79,26 +72,12 @@ public class ParallelOMOPSORunner extends AbstractAlgorithmRunner {
       referenceParetoFront = args[4];
       fileNameOfInitialSolutions = args[5];
     } else {
-//      problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelVarDiff2ObjConPMV";
-      problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelLSTMVarDiff2ObjConPMV";
-      referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.2D.pf";
-//      problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModel4ObjDiffConPMV";
-//      problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelVarDiff4ObjRegretConPMV";
-//      problemName =  "org.uma.jmetal.problem.multiobjective.dtlz.DTLZ1";
-//      problemName =  "org.uma.jmetal.problem.multiobjective.dtlz.DTLZ4";
-//      problemName =  "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ1";
-//     problemName =  "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ4";
-//      referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.3D.pf";
-//     referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.4D.pf";
-//      referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ4.3D.pf";
-//     referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ4.4D.pf";
-//      problemName =  "org.uma.jmetal.problem.multiobjective.UF.UF12MatlabEngineAtOneTimeEvaluation";
-//      referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/UF12.pf";
-      numberOfThreads = 6;
-      numberOfIterations = 500;
+      problemName =  "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ1";
+     referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.4D.pf";
+      numberOfThreads = 2;
+      numberOfIterations = 200;
       numberOfParticles = 35;
       fileNameOfInitialSolutions = "";
-      //fileNameOfInitialSolutions = "C:\\workspace\\jMetal\\initialSolutions.csv";
     }
 
     // 目的関数の定義
@@ -120,7 +99,8 @@ public class ParallelOMOPSORunner extends AbstractAlgorithmRunner {
             .setMaxIterations(numberOfIterations)
             .setSwarmSize(numberOfParticles)
             .setUniformMutation(new UniformMutation(mutationProbability, 0.5))
-            .setNonUniformMutation(new NonUniformMutation(mutationProbability, 0.5, numberOfIterations));
+            .setNonUniformMutation(new NonUniformMutation(mutationProbability, 0.5, numberOfIterations))
+            .setVariant(OMOPSOBuilder.OMOPSOVariant.OMOPSORVIBP);
     algorithm = builder.build();
 
     // 初期値のファイル名の指定があれば初期値を設定

@@ -1,32 +1,23 @@
 package org.uma.jmetal.algorithm.multiobjective.omopso;
 
-import org.uma.jmetal.algorithm.multiobjective.ibea.IBEA;
-import org.uma.jmetal.algorithm.multiobjective.spea2.util.EnvironmentalSelection;
-import org.uma.jmetal.operator.impl.crossover.SBXCrossover;
 import org.uma.jmetal.operator.impl.mutation.NonUniformMutation;
 import org.uma.jmetal.operator.impl.mutation.UniformMutation;
-import org.uma.jmetal.operator.impl.selection.BinaryTournamentSelection;
 import org.uma.jmetal.problem.DoubleProblem;
 import org.uma.jmetal.solution.DoubleSolution;
-import org.uma.jmetal.util.archive.impl.NonDominatedSolutionListArchive;
-import org.uma.jmetal.util.comparator.DominanceComparator;
-import org.uma.jmetal.util.comparator.StrengthFitnessComparator;
 import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
-import org.uma.jmetal.util.solutionattribute.impl.StrengthRawFitness;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /** Class implementing the OMOPSO algorithm with archive using truncation method */
 @SuppressWarnings("serial")
-public class OMOPSORVDBTIBGAOP extends OMOPSORVDBTIBG {
+public class OMOPSORVAOP extends OMOPSORV {
 
   public DoubleSolution[] localBestArchive;
 
   /** Constructor */
-  public OMOPSORVDBTIBGAOP(DoubleProblem problem, SolutionListEvaluator<DoubleSolution> evaluator,
-                           int swarmSize, int maxIterations, int leaderSize, UniformMutation uniformMutation,
-                           NonUniformMutation nonUniformMutation, double eta) {
+  public OMOPSORVAOP(DoubleProblem problem, SolutionListEvaluator<DoubleSolution> evaluator,
+                     int swarmSize, int maxIterations, int leaderSize, UniformMutation uniformMutation,
+                     NonUniformMutation nonUniformMutation, double eta) {
     super(problem, evaluator, swarmSize, maxIterations, leaderSize, uniformMutation, nonUniformMutation, eta);
     localBestArchive = new DoubleSolution[swarmSize];
   }
@@ -57,7 +48,7 @@ public class OMOPSORVDBTIBGAOP extends OMOPSORVDBTIBG {
     }
   }
 
-  // [AOP] updateされたsolutionがpBestと同一ランクの場合にこの関数を実行
+  // [AOP]updateされたsolutionがpBestと同一ランクの場合にこの関数を実行
   // velocityにランク落ちpBestから現在位置までのベクトルを加える
   private void additionOldPbest(List<DoubleSolution> swarm, int i) {
     DoubleSolution particle = swarm.get(i);
@@ -87,7 +78,7 @@ public class OMOPSORVDBTIBGAOP extends OMOPSORVDBTIBG {
   }
 
   @Override public String getName() {
-    return "OMOPSORVDBTIBGAOP" ;
+    return "OMOPSORVAOP" ;
   }
 
   @Override public String getDescription() {
