@@ -8,7 +8,9 @@ import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
 
 import java.util.List;
 
-/** Class implementing the OMOPSO algorithm with archive using truncation method */
+/**
+ * OMOPSOの乱数r1, r2を，スカラー->ベクトルに変更したもの
+ */
 @SuppressWarnings("serial")
 public class OMOPSORV extends OMOPSO {
 
@@ -59,7 +61,7 @@ public class OMOPSORV extends OMOPSO {
   }
 
   @Override public String getName() {
-    return "OMOPSO-RV" ;
+    return "OMOPSORV" ;
   }
 
   @Override public String getDescription() {

@@ -11,29 +11,31 @@ import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
 import java.util.List;
 
 /**
- * 乱数r1, r2をスカラー->ベクトルにしたOMOPSOに，DBTを追加したもの．
+ * OMOPSOにDBTを追加したもの．
  * アーカイブはサイズ制限なしのεアーカイブと混雑距離によるリーダーアーカイブ．
  * DBT：飛翔対象解よりリーダーアーカイブに優越したものがあれば，そのなかからバイナリトーナメントでgBestを選択する手法
  */
 @SuppressWarnings("serial")
-public class OMOPSORVDBT extends OMOPSORV {
+public class OMOPSODBT extends OMOPSO {
   private double eta;
   /** Constructor */
-  public OMOPSORVDBT(DoubleProblem problem, SolutionListEvaluator<DoubleSolution> evaluator,
-                  int swarmSize, int maxIterations, int leaderSize, UniformMutation uniformMutation,
-                  NonUniformMutation nonUniformMutation, double eta) {
+  public OMOPSODBT(DoubleProblem problem, SolutionListEvaluator<DoubleSolution> evaluator,
+                   int swarmSize, int maxIterations, int leaderSize, UniformMutation uniformMutation,
+                   NonUniformMutation nonUniformMutation, double eta) {
     super(problem, evaluator, swarmSize, maxIterations, leaderSize, uniformMutation, nonUniformMutation, eta);
     this.eta = eta;
   }
 
   @Override
   protected void updateVelocity(List<DoubleSolution> swarm)  {
-    double W, C1, C2;
+    double r1, r2, W, C1, C2;
 
     for (int i = 0; i < swarmSize; i++) {
       DoubleSolution particle = swarm.get(i);
       DoubleSolution bestParticle = (DoubleSolution) localBest[i];
       //Parameters for velocity equation
+      r1 = randomGenerator.nextDouble();
+      r2 = randomGenerator.nextDouble();
       C1 = randomGenerator.nextDouble(1.5, 2.0);
       C2 = randomGenerator.nextDouble(1.5, 2.0);
       W = randomGenerator.nextDouble(0.1, 0.5);
@@ -45,27 +47,25 @@ public class OMOPSORVDBT extends OMOPSORV {
         // if particle is dominated by archive
         if (dominated == 1) {
           dominanceArchive.add( leaderArchive.get(a));
-          // if particle is same rank of archive
         }
       }
       // (1)[DBT] もし対象particleよりもarchiveに優越している個体があれば，その個体からバイナリトーナメント選択でglobalbestを決定する．
       if (dominanceArchive.size() > 0) {
-        updateVelocityUsingDominanceArchive(W, C1, C2, i, particle, dominanceArchive.getSolutionList(), bestParticle);
+        updateVelocityUsingDominanceArchive(W, C1, C2, r1, r2, i, particle, dominanceArchive.getSolutionList(), bestParticle);
       }
       // (2)[無印] 対象particleとarchiveが同一ランクであれば，同一ランクarchiveから近い10個体のうちランダムでvelocityを足し合わせる
       else {
-        updateVelocityUsingGlobalBest(W, C1, C2, i, particle, bestParticle);
+        updateVelocityUsingGlobalBest(W, C1, C2, r1, r2, i, particle, bestParticle);
       }
     }
   }
 
   // (1)[DBT] もし対象particleよりもarchiveに優越している個体があれば，その個体からバイナリトーナメント選択でglobalbestを決定する．
   protected void updateVelocityUsingDominanceArchive(
-          double W, double C1, double C2, int i, DoubleSolution particle, List<DoubleSolution> dominanceArchive, DoubleSolution bestParticle
+          double W, double C1, double C2, double r1, double r2, int i, DoubleSolution particle, List<DoubleSolution> dominanceArchive, DoubleSolution bestParticle
   ){
-    double r1, r2;
     DoubleSolution bestGlobal;
-    DoubleSolution one;
+    DoubleSolution one ;
     DoubleSolution two;
 
     if ( dominanceArchive.size()==1 ){
@@ -86,8 +86,6 @@ public class OMOPSORVDBT extends OMOPSORV {
     }
 
     for (int var = 0; var < particle.getNumberOfVariables(); var++) {
-      r1 = randomGenerator.nextDouble();
-      r2 = randomGenerator.nextDouble();
       //Computing the velocity of this particle
       speed[i][var] =
               W * speed[i][var]
@@ -98,9 +96,8 @@ public class OMOPSORVDBT extends OMOPSORV {
 
   // [無印] 通常のOMOPSOの飛翔をする．
   protected void updateVelocityUsingGlobalBest(
-          double W, double C1, double C2, int i, DoubleSolution particle, DoubleSolution bestParticle )
+          double W, double C1, double C2, double r1, double r2, int i, DoubleSolution particle, DoubleSolution bestParticle )
   {
-    double r1, r2;
     DoubleSolution bestGlobal;
     DoubleSolution one ;
     DoubleSolution two;
@@ -118,8 +115,6 @@ public class OMOPSORVDBT extends OMOPSORV {
     }
 
     for (int var = 0; var < particle.getNumberOfVariables(); var++) {
-      r1 = randomGenerator.nextDouble();
-      r2 = randomGenerator.nextDouble();
       //Computing the velocity of this particle
       speed[i][var] = W * speed[i][var] + C1 * r1 * (bestParticle.getVariableValue(var) -
               particle.getVariableValue(var)) +
@@ -128,11 +123,11 @@ public class OMOPSORVDBT extends OMOPSORV {
   }
 
   @Override public String getName() {
-    return "OMOPSORVDBT" ;
+    return "OMOPSODBT";
   }
 
   @Override public String getDescription() {
-    return "Optimized MOPSO using random vector and DBT." ;
+    return "Optimized MOPSO using DBT.";
   }
 
 }

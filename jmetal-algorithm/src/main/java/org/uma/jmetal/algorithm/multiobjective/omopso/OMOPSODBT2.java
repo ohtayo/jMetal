@@ -20,13 +20,14 @@ import java.util.List;
  * DBT：飛翔対象解よりリーダーアーカイブに優越したものがあれば，そのなかからバイナリトーナメントでgBestを選択する手法
  */
 @SuppressWarnings("serial")
-public class OMOPSORVDBT2 extends OMOPSOWithSizeLimitedArchive {
+public class OMOPSODBT2 extends OMOPSOWithSizeLimitedArchive {
 
   private StrengthFitnessComparator<DoubleSolution> strengthFitnessComparator;
+
   /** Constructor */
-  public OMOPSORVDBT2(DoubleProblem problem, SolutionListEvaluator<DoubleSolution> evaluator,
-                      int swarmSize, int maxIterations, int leaderSize, UniformMutation uniformMutation,
-                      NonUniformMutation nonUniformMutation, double eta) {
+  public OMOPSODBT2(DoubleProblem problem, SolutionListEvaluator<DoubleSolution> evaluator,
+                    int swarmSize, int maxIterations, int leaderSize, UniformMutation uniformMutation,
+                    NonUniformMutation nonUniformMutation, double eta) {
     super(problem, evaluator, swarmSize, maxIterations, leaderSize, uniformMutation, nonUniformMutation, eta);
 
     strengthFitnessComparator = new StrengthFitnessComparator<DoubleSolution>();
@@ -56,12 +57,14 @@ public class OMOPSORVDBT2 extends OMOPSOWithSizeLimitedArchive {
 
   @Override
   protected void updateVelocity(List<DoubleSolution> swarm)  {
-    double W, C1, C2;
+    double r1, r2, W, C1, C2;
 
     for (int i = 0; i < swarmSize; i++) {
       DoubleSolution particle = swarm.get(i);
       DoubleSolution bestParticle = (DoubleSolution) localBest[i];
       //Parameters for velocity equation
+      r1 = randomGenerator.nextDouble();
+      r2 = randomGenerator.nextDouble();
       C1 = randomGenerator.nextDouble(1.5, 2.0);
       C2 = randomGenerator.nextDouble(1.5, 2.0);
       W = randomGenerator.nextDouble(0.1, 0.5);
@@ -79,20 +82,19 @@ public class OMOPSORVDBT2 extends OMOPSOWithSizeLimitedArchive {
       }
       // (1)[DBT] もし対象particleよりもarchiveに優越している個体があれば，その個体からバイナリトーナメント選択でglobalbestを決定する．
       if (dominanceArchive.size() > 0) {
-        updateVelocityUsingDominanceArchive(W, C1, C2, i, particle, dominanceArchive.getSolutionList(), bestParticle);
+        updateVelocityUsingDominanceArchive(W, C1, C2, r1, r2, i, particle, dominanceArchive.getSolutionList(), bestParticle);
       }
       // (2)[無印] 対象particleとarchiveが同一ランクであれば，同一ランクarchiveから近い10個体のうちランダムでvelocityを足し合わせる
       else {
-        updateVelocityUsingGlobalBest(W, C1, C2, i, particle, bestParticle);
+        updateVelocityUsingGlobalBest(W, C1, C2, r1, r2, i, particle, bestParticle);
       }
     }
   }
 
   // (1)[DBT] もし対象particleよりもarchiveに優越している個体があれば，その個体からバイナリトーナメント選択でglobalbestを決定する．
   protected void updateVelocityUsingDominanceArchive(
-      double W, double C1, double C2, int i, DoubleSolution particle, List<DoubleSolution> dominanceArchive, DoubleSolution bestParticle
+      double W, double C1, double C2, double r1, double r2, int i, DoubleSolution particle, List<DoubleSolution> dominanceArchive, DoubleSolution bestParticle
   ){
-    double r1, r2;
     DoubleSolution bestGlobal;
     DoubleSolution one;
     DoubleSolution two;
@@ -115,8 +117,6 @@ public class OMOPSORVDBT2 extends OMOPSOWithSizeLimitedArchive {
     }
 
     for (int var = 0; var < particle.getNumberOfVariables(); var++) {
-      r1 = randomGenerator.nextDouble();
-      r2 = randomGenerator.nextDouble();
       //Computing the velocity of this particle
       speed[i][var] =
           W * speed[i][var]
@@ -127,9 +127,8 @@ public class OMOPSORVDBT2 extends OMOPSOWithSizeLimitedArchive {
 
   // [無印] 通常のOMOPSOの飛翔をする．
   protected void updateVelocityUsingGlobalBest(
-      double W, double C1, double C2, int i, DoubleSolution particle, DoubleSolution bestParticle )
+      double W, double C1, double C2, double r1, double r2, int i, DoubleSolution particle, DoubleSolution bestParticle )
   {
-    double r1, r2;
     DoubleSolution bestGlobal;
     DoubleSolution one ;
     DoubleSolution two;
@@ -202,11 +201,11 @@ public class OMOPSORVDBT2 extends OMOPSOWithSizeLimitedArchive {
   }
 
   @Override public String getName() {
-    return "OMOPSORVDBT2" ;
+    return "OMOPSODBT2";
   }
 
   @Override public String getDescription() {
-    return "Optimized MOPSO using random vector and DBT with truncated archive." ;
+    return "Optimized MOPSO using DBT with truncated archive.";
   }
 
 }

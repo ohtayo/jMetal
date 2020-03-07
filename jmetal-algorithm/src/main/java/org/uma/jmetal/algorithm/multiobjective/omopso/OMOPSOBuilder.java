@@ -13,6 +13,8 @@ public class OMOPSOBuilder implements AlgorithmBuilder<OMOPSO> {
   public enum OMOPSOVariant {
     OMOPSO,
     OMOPSOWithSizeLimitedArchive,
+    OMOPSODBT,
+    OMOPSODBT2,
     OMOPSORV,
     OMOPSODBTDFG,
     OMOPSODBTIBG,
@@ -128,6 +130,10 @@ public class OMOPSOBuilder implements AlgorithmBuilder<OMOPSO> {
       algorithm = new OMOPSOWithSizeLimitedArchive(problem, evaluator, swarmSize, maxIterations, archiveSize, uniformMutation, nonUniformMutation, eta);
     }else if(this.variant == OMOPSOVariant.DirectiveOMOPSO){
       algorithm = new DirectiveOMOPSO(problem, evaluator, swarmSize, maxIterations, archiveSize, uniformMutation, nonUniformMutation, eta);
+    } else if(this.variant == OMOPSOVariant.OMOPSODBT){
+      algorithm = new OMOPSODBT(problem, evaluator, swarmSize, maxIterations, archiveSize, uniformMutation, nonUniformMutation, eta);
+    } else if(this.variant == OMOPSOVariant.OMOPSODBT2){
+      algorithm = new OMOPSODBT2(problem, evaluator, swarmSize, maxIterations, archiveSize, uniformMutation, nonUniformMutation, eta);
     }else if(this.variant == OMOPSOVariant.OMOPSOCSS){
       algorithm = new OMOPSOCSS(problem, evaluator, swarmSize, maxIterations, archiveSize, uniformMutation, nonUniformMutation, eta);
     }else if(this.variant == OMOPSOVariant.OMOPSONDX){
