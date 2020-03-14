@@ -73,9 +73,9 @@ public class ParallelOMOPSODBT2Runner extends AbstractAlgorithmRunner {
       fileNameOfInitialSolutions = args[5];
     } else {
       problemName = "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ1";
-      problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelVarDiff4ObjRegretConPMV";
+//      problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelVarDiff4ObjRegretConPMV";
       referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.4D.pf";
-      numberOfThreads = 6;
+      numberOfThreads = 1;
       numberOfIterations = 500;
       numberOfParticles = 35;
       fileNameOfInitialSolutions = "";

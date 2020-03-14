@@ -46,22 +46,40 @@ public class OMOPSOWithSizeLimitedArchive extends OMOPSO {
 
   @Override protected void initProgress() {
     currentIteration = 1;
+    crowdingDistance.computeDensityEstimator(leaderArchive.getSolutionList());
     dump(epsilonArchive.getSolutionList(), "epsilon");
     dump(truncatedArchive, "truncated");
-  }
+    dump(getSwarm(), "swarm");
+    // pBestの保存
+    List<DoubleSolution> bestParticle = new ArrayList<>();
+    for(DoubleSolution pbest : localBest) bestParticle.add(pbest);
+    dump(bestParticle, "pBest");  }
 
   @Override protected void updateProgress() {
     currentIteration += 1;
+    crowdingDistance.computeDensityEstimator(leaderArchive.getSolutionList());
     dump(epsilonArchive.getSolutionList(), "epsilon");
     dump(truncatedArchive, "truncated");
-  }
+    dump(getSwarm(), "swarm");
+    // pBestの保存
+    List<DoubleSolution> bestParticle = new ArrayList<>();
+    for(DoubleSolution pbest : localBest) bestParticle.add(pbest);
+    dump(bestParticle, "pBest");  }
 
   @Override
   protected void initializeLeader(List<DoubleSolution> swarm) {
+    // picup non-dominated solutions
+    temporaryArchive = new NonDominatedSolutionListArchive<DoubleSolution>(new DominanceComparator<DoubleSolution>(this.eta));
     for (DoubleSolution particle : swarm) {
-      epsilonArchive.add((DoubleSolution) particle.copy());
-      truncatedArchive.add((DoubleSolution) particle.copy());
+      temporaryArchive.add( (DoubleSolution) particle.copy() );
     }
+    // add non-dominated solutions to archives
+    for (DoubleSolution particle : temporaryArchive.getSolutionList()){
+      truncatedArchive.add( (DoubleSolution) particle.copy() );
+      epsilonArchive.add( (DoubleSolution) particle.copy() );
+    }
+    strengthRawFitness.computeDensityEstimator(truncatedArchive);
+    truncatedArchive = environmentalSelection.execute(truncatedArchive);
   }
 
   @Override

@@ -19,35 +19,13 @@ import java.util.List;
  * バイナリトーナメント選択には混雑距離を使用
  */
 @SuppressWarnings("serial")
-public class OMOPSODBT3 extends OMOPSOWithSizeLimitedArchive {
+public class OMOPSODBT3 extends OMOPSODBT2 {
 
   /** Constructor */
   public OMOPSODBT3(DoubleProblem problem, SolutionListEvaluator<DoubleSolution> evaluator,
                     int swarmSize, int maxIterations, int leaderSize, UniformMutation uniformMutation,
                     NonUniformMutation nonUniformMutation, double eta) {
     super(problem, evaluator, swarmSize, maxIterations, leaderSize, uniformMutation, nonUniformMutation, eta);
-  }
-
-  @Override protected void initProgress() {
-    currentIteration = 1;
-    dump(epsilonArchive.getSolutionList(), "epsilon");
-    dump(truncatedArchive, "truncated");
-    dump(getSwarm(), "swarm");
-    // pBestの保存
-    List<DoubleSolution> bestParticle = new ArrayList<>();
-    for(DoubleSolution pbest : localBest) bestParticle.add(pbest);
-    dump(bestParticle, "pBest");
-  }
-
-  @Override protected void updateProgress() {
-    currentIteration += 1;
-    dump(epsilonArchive.getSolutionList(), "epsilon");
-    dump(truncatedArchive, "truncated");
-    dump(getSwarm(), "swarm");
-    // pBestの保存
-    List<DoubleSolution> bestParticle = new ArrayList<>();
-    for(DoubleSolution pbest : localBest) bestParticle.add(pbest);
-    dump(bestParticle, "pBest");
   }
 
   @Override
@@ -67,132 +45,23 @@ public class OMOPSODBT3 extends OMOPSOWithSizeLimitedArchive {
       // 飛翔させる対象粒子とアーカイブの優越関係を確認
       NonDominatedSolutionListArchive<DoubleSolution> dominanceArchive = new NonDominatedSolutionListArchive<DoubleSolution>(new DominanceComparator<DoubleSolution>(this.eta));
       for (int a = 0; a < truncatedArchive.size(); a++) {
+        // あえてここで制約を考慮しないで優越かどうか判断させる．
         DominanceComparator<DoubleSolution> comparator = new DominanceComparator<DoubleSolution>();
-        int dominated = comparator.compare(particle, truncatedArchive.get(a));
+        int dominated = comparator.dominanceTest(particle, leaderArchive.get(a));
         // if particle is dominated by archive
         if (dominated == 1) {
           dominanceArchive.add( truncatedArchive.get(a));
-          // if particle is same rank of archive
         }
       }
       // (1)[DBT] もし対象particleよりもarchiveに優越している個体があれば，その個体からバイナリトーナメント選択でglobalbestを決定する．
       if (dominanceArchive.size() > 0) {
-        updateVelocityUsingDominanceArchive(W, C1, C2, r1, r2, i, particle, dominanceArchive.getSolutionList(), bestParticle);
+        OMOPSODBT.updateVelocityUsingGlobalBest(W, C1, C2, r1, r2, i, particle, dominanceArchive.getSolutionList(), bestParticle, speed, strengthFitnessComparator, randomGenerator);
       }
-      // (2)[無印] 対象particleとarchiveが同一ランクであれば，同一ランクarchiveから近い10個体のうちランダムでvelocityを足し合わせる
+      // (2)[無印] 通常のOMOPSOの手法を使う
       else {
-        updateVelocityUsingGlobalBest(W, C1, C2, r1, r2, i, particle, bestParticle);
+        OMOPSODBT.updateVelocityUsingGlobalBest(W, C1, C2, r1, r2, i, particle, truncatedArchive, bestParticle, speed, strengthFitnessComparator, randomGenerator);
       }
     }
-  }
-
-  // (1)[DBT] もし対象particleよりもarchiveに優越している個体があれば，その個体からバイナリトーナメント選択でglobalbestを決定する．
-  protected void updateVelocityUsingDominanceArchive(
-      double W, double C1, double C2, double r1, double r2, int i, DoubleSolution particle, List<DoubleSolution> dominanceArchive, DoubleSolution bestParticle
-  ){
-    DoubleSolution bestGlobal;
-    DoubleSolution one;
-    DoubleSolution two;
-
-    if ( dominanceArchive.size()==1 ){
-      dominanceArchive.add(dominanceArchive.get(0));
-    }
-
-    // random select
-    int pos1 = randomGenerator.nextInt(0, dominanceArchive.size() - 1);
-    int pos2 = randomGenerator.nextInt(0, dominanceArchive.size() - 1);
-    one = dominanceArchive.get(pos1);
-    two = dominanceArchive.get(pos2);
-
-    // binary tournament selection using strength raw fitness
-    if (crowdingDistanceComparator.compare(one, two) < 1) {
-      bestGlobal = one ;
-    } else {
-      bestGlobal = two ;
-    }
-
-    for (int var = 0; var < particle.getNumberOfVariables(); var++) {
-      //Computing the velocity of this particle
-      speed[i][var] =
-          W * speed[i][var]
-              + C1 * r1 * (bestParticle.getVariableValue(var) - particle.getVariableValue(var))
-              + C2 * r2 * (bestGlobal.getVariableValue(var) - particle.getVariableValue(var));
-    }
-  }
-
-  // [無印] 通常のOMOPSOの飛翔をする．
-  protected void updateVelocityUsingGlobalBest(
-      double W, double C1, double C2, double r1, double r2, int i, DoubleSolution particle, DoubleSolution bestParticle )
-  {
-    DoubleSolution bestGlobal;
-    DoubleSolution one ;
-    DoubleSolution two;
-
-    //Select a global localBest for calculate the speed of particle i, bestGlobal
-    int pos1 = randomGenerator.nextInt(0, truncatedArchive.size() - 1);
-    int pos2 = randomGenerator.nextInt(0, truncatedArchive.size() - 1);
-    one = truncatedArchive.get(pos1);
-    two = truncatedArchive.get(pos2);
-
-    if (crowdingDistanceComparator.compare(one, two) < 1) {
-      bestGlobal = one ;
-    } else {
-      bestGlobal = two ;
-    }
-
-    for (int var = 0; var < particle.getNumberOfVariables(); var++) {
-      r1 = randomGenerator.nextDouble();
-      r2 = randomGenerator.nextDouble();
-      //Computing the velocity of this particle
-      speed[i][var] = W * speed[i][var] + C1 * r1 * (bestParticle.getVariableValue(var) -
-              particle.getVariableValue(var)) +
-              C2 * r2 * (bestGlobal.getVariableValue(var) - particle.getVariableValue(var));
-    }
-  }
-
-  @Override
-  protected void initializeLeader(List<DoubleSolution> swarm) {
-    // picup non-dominated solutions
-    temporaryArchive = new NonDominatedSolutionListArchive<DoubleSolution>(new DominanceComparator<DoubleSolution>(this.eta));
-    for (DoubleSolution particle : swarm) {
-      temporaryArchive.add( (DoubleSolution) particle.copy() );
-    }
-    // add non-dominated solutions to archives
-    for (DoubleSolution particle : temporaryArchive.getSolutionList()){
-      truncatedArchive.add( (DoubleSolution) particle.copy() );
-      epsilonArchive.add( (DoubleSolution) particle.copy() );
-    }
-    strengthRawFitness.computeDensityEstimator(truncatedArchive);
-    truncatedArchive = environmentalSelection.execute(truncatedArchive);
-  }
-
-  /**
-   * Update leaders method
-   * @param swarm List of solutions (swarm)
-   */
-  @Override protected void updateLeaders(List<DoubleSolution> swarm) {
-    temporaryArchive = new NonDominatedSolutionListArchive<DoubleSolution>(new DominanceComparator<DoubleSolution>(this.eta));
-    for (int s=0; s<truncatedArchive.size(); s++){
-      temporaryArchive.add( (DoubleSolution) truncatedArchive.get(s).copy() );
-    }
-    for (DoubleSolution particle : swarm) {
-      temporaryArchive.add((DoubleSolution) particle.copy());
-      epsilonArchive.add((DoubleSolution) particle.copy());
-    }
-    List<DoubleSolution> union = temporaryArchive.getSolutionList();
-    if(union.size()<=1) {
-      truncatedArchive.clear();
-      for ( DoubleSolution particle: union){
-        truncatedArchive.add((DoubleSolution) particle.copy());
-      }
-    }else{
-      strengthRawFitness.computeDensityEstimator(union);
-      truncatedArchive = environmentalSelection.execute(union);
-    }
-  }
-
-  @Override public List<DoubleSolution> getResult() {
-    return this.truncatedArchive;
   }
 
   @Override public String getName() {

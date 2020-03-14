@@ -47,7 +47,7 @@ public class OMOPSO extends AbstractParticleSwarmOptimization<DoubleSolution, Li
   private NonUniformMutation nonUniformMutation;
 
   public JMetalRandom randomGenerator;
-  private CrowdingDistance<DoubleSolution> crowdingDistance;
+  public CrowdingDistance<DoubleSolution> crowdingDistance;
 
   private List<DoubleSolution> initialSwarm;
 
