@@ -68,8 +68,10 @@ public class CalculateIndicatorFromManyResultsRunner {
 //    String referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ2.3D.pf";
 //    String problemName = "org.uma.jmetal.problem.multiobjective.coco.C_RosenbrockRastrigin";
 //    String referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.2D.pf";
-    String problemName = "org.uma.jmetal.problem.multiobjective.UF.C3_UF12MatlabEngineAtOneTimeEvaluation";
-    String referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/UF12.pf";
+//    String problemName = "org.uma.jmetal.problem.multiobjective.UF.C3_UF12MatlabEngineAtOneTimeEvaluation";
+//    String referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/UF12.pf";
+    String problemName =  "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelLSTMVarDiff2ObjConPMV";
+    String referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.2D.pf";
 
     String[] algorithms = {
 //        "ParallelNSGAII",
@@ -80,24 +82,29 @@ public class CalculateIndicatorFromManyResultsRunner {
 //        "ParallelConstraintMOEADWithEpsilonArchive",
 //        "ParallelConstraintMOEADDEWithEpsilonArchive",
         "ParallelOMOPSO",
-        "ParallelOMOPSOWithSizeLimitedArchive",
-        "ParallelOMOPSORV",
-            "ParallelOMOPSORVDBT",
-            "ParallelOMOPSORVDBT2",
-        "ParallelOMOPSORVAOP",
-        "ParallelOMOPSORVIBP",
-        "ParallelOMOPSORVPPS",
-        "ParallelOMOPSODBTDFG",
-        "ParallelOMOPSODBTIBG",
-        "ParallelOMOPSORVDBTDFG",
-        "ParallelOMOPSORVDBTIBG",
+//        "ParallelOMOPSOWithSizeLimitedArchive",
+            "ParallelOMOPSODBT",
+            "ParallelOMOPSODBT2",
+            "ParallelOMOPSODBT3",
+            "ParallelOMOPSODBT4",
+            "ParallelOMOPSODBT5",
+//          "ParallelOMOPSORV",
+//          "ParallelOMOPSORVDBT",
+//          "ParallelOMOPSORVDBT2",
+//        "ParallelOMOPSORVAOP",
+//        "ParallelOMOPSORVIBP",
+//        "ParallelOMOPSORVPPS",
+//        "ParallelOMOPSODBTDFG",
+//        "ParallelOMOPSODBTIBG",
+//        "ParallelOMOPSORVDBTDFG",
+//        "ParallelOMOPSORVDBTIBG",
 //      "ParallelDirectionalOMOPSOWithSizeLimitedArchive",
     };
 
     // definition of problem
     int numberOfIndividuals = 35;
     int numberOfGenerations = 500; // 2000
-    int numberOfRepeats = 5;    // 20
+    int numberOfRepeats = 1;    // 20
     int numberOfThreads = 6;
 
     DoubleProblem problem = (DoubleProblem) ProblemUtils.<DoubleSolution> loadProblem(problemName);

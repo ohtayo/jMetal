@@ -33,16 +33,16 @@ public class AlgorithmRunnerRepeater {
 //            "org.uma.jmetal.problem.multiobjective.newDtlz.C3_RosenbrockDTLZ2",
 //            "org.uma.jmetal.problem.multiobjective.UF.C3_UF11",
 //            "org.uma.jmetal.problem.multiobjective.UF.C3_UF12",
-            "org.uma.jmetal.problem.multiobjective.UF.C3_UF12MatlabEngineAtOneTimeEvaluation",
-            "org.uma.jmetal.problem.multiobjective.maf.C3_MaF02",
-            "org.uma.jmetal.problem.multiobjective.coco.C_RosenbrockRastrigin",
+//            "org.uma.jmetal.problem.multiobjective.UF.C3_UF12MatlabEngineAtOneTimeEvaluation",
+//            "org.uma.jmetal.problem.multiobjective.maf.C3_MaF02",
+              "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelLSTMVarDiff2ObjConPMV",
         };
         String[] referenceParetoFronts = {
 //            "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.4D.pf",
 //            "jmetal-problem/src/test/resources/pareto_fronts/DTLZ4.4D.pf",
 //            "jmetal-problem/src/test/resources/pareto_fronts/DTLZ3.5D.pf",
-            "jmetal-problem/src/test/resources/pareto_fronts/UF12.pf",
-            "jmetal-problem/src/test/resources/pareto_fronts/DTLZ2.3D.pf",
+//            "jmetal-problem/src/test/resources/pareto_fronts/UF12.pf",
+//            "jmetal-problem/src/test/resources/pareto_fronts/DTLZ2.3D.pf",
             "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.2D.pf",
         };
         String[] algorithms = {
@@ -57,7 +57,12 @@ public class AlgorithmRunnerRepeater {
 //                "ParallelOMOPSO",
 //                "ParallelOMOPSOWithSizeLimitedArchive",
 //                "ParallelOMOPSORV",
-                "ParallelOMOPSORVDBT",
+//                "ParallelOMOPSODBT",
+//                "ParallelOMOPSODBT2",
+//                "ParallelOMOPSODBT3",
+//                "ParallelOMOPSODBT4",
+                "ParallelOMOPSODBT5",
+//                "ParallelOMOPSORVDBT",
 //                "ParallelOMOPSORVDBT2",
 //                "ParallelOMOPSORVAOP",
 //                "ParallelOMOPSORVIBP",
@@ -74,7 +79,7 @@ public class AlgorithmRunnerRepeater {
 
         int numberOfIndividuals = 35;
         int numberOfGenerations = 500;  //2000
-        int numberOfRepeats = 5;    // 20
+        int numberOfRepeats = 1;    // 20
         int numberOfThreads = 6;
 
         // run each problem and algorithms

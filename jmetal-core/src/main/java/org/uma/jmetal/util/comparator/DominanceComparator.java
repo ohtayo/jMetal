@@ -64,7 +64,7 @@ public class DominanceComparator<S extends Solution<?>> implements Comparator<S>
     return result ;
   }
 
-  private int dominanceTest(S solution1, S solution2) {
+  public int dominanceTest(S solution1, S solution2) {
     int bestIsOne = 0 ;
     int bestIsTwo = 0 ;
     int result ;

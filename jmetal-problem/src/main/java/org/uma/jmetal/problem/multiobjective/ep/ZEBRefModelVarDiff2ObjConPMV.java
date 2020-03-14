@@ -67,7 +67,8 @@ public class ZEBRefModelVarDiff2ObjConPMV extends AbstractDoubleProblem {
 
   @Override
   public void evaluate(DoubleSolution solution)  {
-    // スレッド番号取得
+    long start = System.currentTimeMillis();
+     // スレッド番号取得
     String threadName = Thread.currentThread().getName();
     // 設計変数の変換
     List<Double> variablesList = solution.getVariables();
@@ -98,6 +99,7 @@ public class ZEBRefModelVarDiff2ObjConPMV extends AbstractDoubleProblem {
     constraintViolation = constraints;
 
     this.evaluateConstraints(solution);
+    System.out.println((System.currentTimeMillis()-start)+"ms");
   }
 
   /** EvaluateConstraints() method */
