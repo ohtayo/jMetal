@@ -80,11 +80,11 @@ public class ParallelOMOPSORunner extends AbstractAlgorithmRunner {
       fileNameOfInitialSolutions = args[5];
     } else {
 //      problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelVarDiff2ObjConPMV";
-//      problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelLSTMVarDiff2ObjConPMV";
+      problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelLSTMVarDiff2ObjConPMV";
 //      referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.2D.pf";
 //      problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModel4ObjDiffConPMV";
 //      problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelVarDiff4ObjRegretConPMV";
-      problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelVarDiff4ObjRegretConPMVAtOneTimeEvaluationByManyPCs";
+//      problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelVarDiff4ObjRegretConPMVAtOneTimeEvaluationByManyPCs";
 //      problemName =  "org.uma.jmetal.problem.multiobjective.dtlz.DTLZ1";
 //      problemName =  "org.uma.jmetal.problem.multiobjective.dtlz.DTLZ4";
 //      problemName =  "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ1";
@@ -95,7 +95,7 @@ public class ParallelOMOPSORunner extends AbstractAlgorithmRunner {
      referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ4.4D.pf";
 //      problemName =  "org.uma.jmetal.problem.multiobjective.UF.UF12MatlabEngineAtOneTimeEvaluation";
 //      referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/UF12.pf";
-      numberOfThreads = 1;
+      numberOfThreads = 6;
       numberOfIterations = 500;
       numberOfParticles = 35;
       fileNameOfInitialSolutions = "";

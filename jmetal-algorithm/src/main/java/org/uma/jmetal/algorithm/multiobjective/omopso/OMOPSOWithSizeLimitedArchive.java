@@ -45,26 +45,15 @@ public class OMOPSOWithSizeLimitedArchive extends OMOPSO {
   }
 
   @Override protected void initProgress() {
-    currentIteration = 1;
-    crowdingDistance.computeDensityEstimator(leaderArchive.getSolutionList());
-    dump(epsilonArchive.getSolutionList(), "epsilon");
+    super.initProgress();
     dump(truncatedArchive, "truncated");
-    dump(getSwarm(), "swarm");
-    // pBestの保存
-    List<DoubleSolution> bestParticle = new ArrayList<>();
-    for(DoubleSolution pbest : localBest) bestParticle.add(pbest);
-    dump(bestParticle, "pBest");  }
+  }
 
   @Override protected void updateProgress() {
-    currentIteration += 1;
-    crowdingDistance.computeDensityEstimator(leaderArchive.getSolutionList());
-    dump(epsilonArchive.getSolutionList(), "epsilon");
+    super.updateProgress();
+    removeViolatedSolution(truncatedArchive);
     dump(truncatedArchive, "truncated");
-    dump(getSwarm(), "swarm");
-    // pBestの保存
-    List<DoubleSolution> bestParticle = new ArrayList<>();
-    for(DoubleSolution pbest : localBest) bestParticle.add(pbest);
-    dump(bestParticle, "pBest");  }
+  }
 
   @Override
   protected void initializeLeader(List<DoubleSolution> swarm) {
@@ -76,7 +65,9 @@ public class OMOPSOWithSizeLimitedArchive extends OMOPSO {
     // add non-dominated solutions to archives
     for (DoubleSolution particle : temporaryArchive.getSolutionList()){
       truncatedArchive.add( (DoubleSolution) particle.copy() );
-      epsilonArchive.add( (DoubleSolution) particle.copy() );
+      if (leaderArchive.add((DoubleSolution) particle.copy())) {
+        epsilonArchive.add((DoubleSolution) particle.copy());
+      }
     }
     strengthRawFitness.computeDensityEstimator(truncatedArchive);
     truncatedArchive = environmentalSelection.execute(truncatedArchive);
@@ -137,7 +128,9 @@ public class OMOPSOWithSizeLimitedArchive extends OMOPSO {
     }
     for (DoubleSolution particle : swarm) {
       temporaryArchive.add((DoubleSolution) particle.copy());
-      epsilonArchive.add((DoubleSolution) particle.copy());
+      if (leaderArchive.add((DoubleSolution) particle.copy())) {
+        epsilonArchive.add((DoubleSolution) particle.copy());
+      }
     }
     List<DoubleSolution> union = temporaryArchive.getSolutionList();
     if(union.size()<=1) {

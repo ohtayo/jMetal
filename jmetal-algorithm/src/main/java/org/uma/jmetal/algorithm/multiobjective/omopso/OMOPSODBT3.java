@@ -47,7 +47,7 @@ public class OMOPSODBT3 extends OMOPSODBT2 {
       for (int a = 0; a < truncatedArchive.size(); a++) {
         // あえてここで制約を考慮しないで優越かどうか判断させる．
         DominanceComparator<DoubleSolution> comparator = new DominanceComparator<DoubleSolution>();
-        int dominated = comparator.dominanceTest(particle, leaderArchive.get(a));
+        int dominated = comparator.dominanceTest(particle, truncatedArchive.get(a));
         // if particle is dominated by archive
         if (dominated == 1) {
           dominanceArchive.add( truncatedArchive.get(a));

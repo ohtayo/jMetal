@@ -6,6 +6,7 @@ import org.uma.jmetal.operator.impl.mutation.UniformMutation;
 import org.uma.jmetal.problem.DoubleProblem;
 import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.solution.Solution;
+import org.uma.jmetal.util.archive.Archive;
 import org.uma.jmetal.util.archive.impl.CrowdingDistanceArchive;
 import org.uma.jmetal.util.archive.impl.NonDominatedSolutionListArchive;
 import org.uma.jmetal.util.comparator.CrowdingDistanceComparator;
@@ -16,6 +17,7 @@ import org.uma.jmetal.util.fileoutput.SolutionListOutput;
 import org.uma.jmetal.util.fileoutput.impl.DefaultFileOutputContext;
 import org.uma.jmetal.util.pseudorandom.JMetalRandom;
 import org.uma.jmetal.util.solutionattribute.impl.CrowdingDistance;
+import org.uma.jmetal.util.solutionattribute.impl.OverallConstraintViolation;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -94,6 +96,8 @@ public class OMOPSO extends AbstractParticleSwarmOptimization<DoubleSolution, Li
   }
 
   @Override protected void updateProgress() {
+    removeViolatedSolution(epsilonArchive);
+    removeViolatedSolution(leaderArchive);
     currentIteration += 1;
     crowdingDistance.computeDensityEstimator(leaderArchive.getSolutionList());
     dump(epsilonArchive.getSolutionList(), "epsilon");
@@ -103,6 +107,22 @@ public class OMOPSO extends AbstractParticleSwarmOptimization<DoubleSolution, Li
     List<DoubleSolution> bestParticle = new ArrayList<>();
     for(DoubleSolution pbest : localBest) bestParticle.add(pbest);
     dump(bestParticle, "pBest");
+  }
+
+  public void removeViolatedSolution(Archive archive){
+    removeViolatedSolution(archive.getSolutionList());
+  }
+  public void removeViolatedSolution(List<DoubleSolution> solutionList){
+    for (int s = 0; s < solutionList.size(); s++) {
+      DoubleSolution solution = (DoubleSolution) solutionList.get(s);
+      OverallConstraintViolation<DoubleSolution> overallConstraintViolation = new OverallConstraintViolation<>();
+      double violationDegree = overallConstraintViolation.getAttribute(solution);
+      if (violationDegree > 0) {
+        if(solutionList.size()>1) {
+          solutionList.remove(s);
+        }
+      }
+    }
   }
 
   protected void dump(List<? extends Solution<?>> solutionList, String prefix){

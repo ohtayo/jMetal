@@ -81,14 +81,14 @@ public class CalculateIndicatorFromManyResultsRunner {
 //        "ParallelConstraintMOEAD",
 //        "ParallelConstraintMOEADWithEpsilonArchive",
 //        "ParallelConstraintMOEADDEWithEpsilonArchive",
-        "ParallelOMOPSO",
-//        "ParallelOMOPSOWithSizeLimitedArchive",
+            "ParallelOMOPSO",
+            "ParallelOMOPSORV",
+            "ParallelOMOPSOWithSizeLimitedArchive",
             "ParallelOMOPSODBT",
             "ParallelOMOPSODBT2",
             "ParallelOMOPSODBT3",
-            "ParallelOMOPSODBT4",
-            "ParallelOMOPSODBT5",
-//          "ParallelOMOPSORV",
+//            "ParallelOMOPSODBT4",
+//            "ParallelOMOPSODBT5",
 //          "ParallelOMOPSORVDBT",
 //          "ParallelOMOPSORVDBT2",
 //        "ParallelOMOPSORVAOP",
@@ -103,7 +103,7 @@ public class CalculateIndicatorFromManyResultsRunner {
 
     // definition of problem
     int numberOfIndividuals = 35;
-    int numberOfGenerations = 500; // 2000
+    int numberOfGenerations = 1000; // 2000
     int numberOfRepeats = 1;    // 20
     int numberOfThreads = 6;
 
