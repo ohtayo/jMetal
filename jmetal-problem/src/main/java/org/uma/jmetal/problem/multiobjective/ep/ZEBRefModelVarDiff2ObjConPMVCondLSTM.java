@@ -1,27 +1,27 @@
 package org.uma.jmetal.problem.multiobjective.ep;
 
 import jp.ohtayo.building.energyplus.EnergyPlusObjectives;
+import jp.ohtayo.commons.io.TimeSeries;
+import jp.ohtayo.commons.math.Matrix;
+import jp.ohtayo.commons.math.Vector;
+import jp.ohtayo.commons.util.Cast;
 import org.uma.jmetal.problem.impl.AbstractDoubleProblem;
 import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.util.JMetalLogger;
 import org.uma.jmetal.util.solutionattribute.impl.NumberOfViolatedConstraints;
 import org.uma.jmetal.util.solutionattribute.impl.OverallConstraintViolation;
 
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Multi-objective Problem of air-conditioning setpoint temperature schedule optimization using EnergyPlus building energy simulator.
- * Building model: reference building model in the ZEB design guideline
- * Variable : setpoint temperature schedule between 5:00 and 24:00 using difference (length:20)
- * Objective 1: power consumption
- * Objective 2: thermal comfort level
- * Constraint 1: exceedance of comfort level
+ * EnergyPlusを用いLSTMサロゲート評価器と同じ条件(1hourサンプル)で評価する関数
  *
  * @author ohtayo (ohta.yoshihiro@outlook.jp)
  */
 @SuppressWarnings("serial")
-public class ZEBRefModelVarDiff2ObjConPMV extends AbstractDoubleProblem {
+public class ZEBRefModelVarDiff2ObjConPMVCondLSTM extends AbstractDoubleProblem {
   public OverallConstraintViolation<DoubleSolution> overallConstraintViolationDegree ;
   public NumberOfViolatedConstraints<DoubleSolution> numberOfViolatedConstraints ;
   public double[] constraintViolation ;
@@ -30,12 +30,12 @@ public class ZEBRefModelVarDiff2ObjConPMV extends AbstractDoubleProblem {
   /**
    * Constructor.
    */
-  public ZEBRefModelVarDiff2ObjConPMV() {
+  public ZEBRefModelVarDiff2ObjConPMVCondLSTM() {
 
     setNumberOfVariables(19);
     setNumberOfObjectives(2);
     setNumberOfConstraints(1);
-    setName("ZEBRefModelVarDiff2ObjConPMV") ;
+    setName("ZEBRefModelVarDiff2ObjConPMVCondLSTM") ;
 
     // set limit of variables
     List<Double> lowerLimit = new ArrayList<>(getNumberOfVariables()) ;
@@ -82,9 +82,15 @@ public class ZEBRefModelVarDiff2ObjConPMV extends AbstractDoubleProblem {
     double[] fitness = new double[getNumberOfObjectives()];
     double[] constraints = new double[getNumberOfConstraints()];
     EnergyPlusObjectives energyPlusObjectives = new EnergyPlusObjectives(variables);
-    fitness[0] = Math.abs( energyPlusObjectives.calculateAveragePMV() );
-    fitness[1] = energyPlusObjectives.calculateTotalElectricEnergy();
-    constraints[0] = energyPlusObjectives.countConstraintExceededTimesOfPMV();
+    TimeSeries allData = new TimeSeries( energyPlusObjectives.get() );
+    Vector temp = new Vector(5,6, allData.length()-1);
+    Vector index = temp.add(new Vector(1,0));
+    index.sort();
+    Vector thinPmv = allData.getColumn(11).get(Cast.doubleToInt(index.get()));
+    Vector targetPmv = thinPmv.get(6, 19);
+    fitness[0] = Math.abs( targetPmv.mean() );
+    fitness[1] = allData.getColumn(13).sum();
+    constraints[0] = targetPmv.abs().round().sum(); // 0.5を超過した
 
     // Normalize objective values
     double[] normalizedFitness = new double[getNumberOfObjectives()];
