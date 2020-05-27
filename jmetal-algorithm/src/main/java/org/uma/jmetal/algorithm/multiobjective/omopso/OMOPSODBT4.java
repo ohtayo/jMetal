@@ -8,6 +8,7 @@ import org.uma.jmetal.util.archive.impl.NonDominatedSolutionListArchive;
 import org.uma.jmetal.util.comparator.DominanceComparator;
 import org.uma.jmetal.util.comparator.StrengthFitnessComparator;
 import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
+import org.uma.jmetal.util.solutionattribute.impl.StrengthRawFitness;
 
 import java.util.List;
 
@@ -17,17 +18,14 @@ import java.util.List;
  * DBT：飛翔対象解よりリーダーアーカイブに優越したものがあれば，そのなかからバイナリトーナメントでgBestを選択する手法
  */
 @SuppressWarnings("serial")
-public class OMOPSODBT4 extends OMOPSO {
-  private double eta;
-  private StrengthFitnessComparator<DoubleSolution> strengthFitnessComparator;
+public class OMOPSODBT4 extends OMOPSODBT3 {
   /** Constructor */
   public OMOPSODBT4(DoubleProblem problem, SolutionListEvaluator<DoubleSolution> evaluator,
                     int swarmSize, int maxIterations, int leaderSize, UniformMutation uniformMutation,
                     NonUniformMutation nonUniformMutation, double eta) {
     super(problem, evaluator, swarmSize, maxIterations, leaderSize, uniformMutation, nonUniformMutation, eta);
-    this.eta = eta;
-    strengthFitnessComparator = new StrengthFitnessComparator<DoubleSolution>();
   }
+
 
   @Override
   protected void updateVelocity(List<DoubleSolution> swarm)  {
@@ -42,11 +40,13 @@ public class OMOPSODBT4 extends OMOPSO {
       C1 = randomGenerator.nextDouble(1.5, 2.0);
       C2 = randomGenerator.nextDouble(1.5, 2.0);
       W = randomGenerator.nextDouble(0.1, 0.5);
+
       // 飛翔させる対象粒子とアーカイブの優越関係を確認
       NonDominatedSolutionListArchive<DoubleSolution> dominanceArchive = new NonDominatedSolutionListArchive<DoubleSolution>(new DominanceComparator<DoubleSolution>(this.eta));
       for (int a = 0; a < leaderArchive.size(); a++) {
+        // あえてここで制約を考慮しないで優越かどうか判断させる．
         DominanceComparator<DoubleSolution> comparator = new DominanceComparator<DoubleSolution>();
-        int dominated = comparator.compare(particle, leaderArchive.get(a));
+        int dominated = comparator.dominanceTest(particle, leaderArchive.get(a));
         // if particle is dominated by archive
         if (dominated == 1) {
           dominanceArchive.add( leaderArchive.get(a));
@@ -54,79 +54,17 @@ public class OMOPSODBT4 extends OMOPSO {
       }
       // (1)[DBT] もし対象particleよりもarchiveに優越している個体があれば，その個体からバイナリトーナメント選択でglobalbestを決定する．
       if (dominanceArchive.size() > 0) {
-        updateVelocityUsingDominanceArchive(W, C1, C2, r1, r2, i, particle, dominanceArchive.getSolutionList(), bestParticle);
+        OMOPSODBT.updateVelocityUsingGlobalBest(W, C1, C2, r1, r2, i, particle, dominanceArchive.getSolutionList(), bestParticle, speed, crowdingDistanceComparator, randomGenerator);
       }
-      // (2)[無印] 対象particleとarchiveが同一ランクであれば，通常のOMOPSOの飛翔をする．
+      // (2)[無印] 通常のOMOPSOの手法を使う
       else {
-        updateVelocityUsingGlobalBest(W, C1, C2, r1, r2, i, particle, bestParticle);
+        OMOPSODBT.updateVelocityUsingGlobalBest(W, C1, C2, r1, r2, i, particle, leaderArchive.getSolutionList(), bestParticle, speed, crowdingDistanceComparator, randomGenerator);
       }
-    }
-  }
-
-  // (1)[DBT] もし対象particleよりもarchiveに優越している個体があれば，その個体からバイナリトーナメント選択でglobalbestを決定する．
-  protected void updateVelocityUsingDominanceArchive(
-          double W, double C1, double C2, double r1, double r2, int i, DoubleSolution particle, List<DoubleSolution> dominanceArchive, DoubleSolution bestParticle
-  ){
-    DoubleSolution bestGlobal;
-    DoubleSolution one ;
-    DoubleSolution two;
-
-    if ( dominanceArchive.size()==1 ){
-      dominanceArchive.add(dominanceArchive.get(0));
-    }
-
-    // random select
-    int pos1 = randomGenerator.nextInt(0, dominanceArchive.size() - 1);
-    int pos2 = randomGenerator.nextInt(0, dominanceArchive.size() - 1);
-    one = dominanceArchive.get(pos1);
-    two = dominanceArchive.get(pos2);
-
-    // binary tournament selection using strength raw fitness
-    if (strengthFitnessComparator.compare(one, two) < 1) {
-      bestGlobal = one ;
-    } else {
-      bestGlobal = two ;
-    }
-
-    for (int var = 0; var < particle.getNumberOfVariables(); var++) {
-      //Computing the velocity of this particle
-      speed[i][var] =
-              W * speed[i][var]
-                      + C1 * r1 * (bestParticle.getVariableValue(var) - particle.getVariableValue(var))
-                      + C2 * r2 * (bestGlobal.getVariableValue(var) - particle.getVariableValue(var));
-    }
-  }
-
-  // [無印] 通常のOMOPSOの飛翔をする．
-  protected void updateVelocityUsingGlobalBest(
-          double W, double C1, double C2, double r1, double r2, int i, DoubleSolution particle, DoubleSolution bestParticle )
-  {
-    DoubleSolution bestGlobal;
-    DoubleSolution one ;
-    DoubleSolution two;
-
-    //Select a global localBest for calculate the speed of particle i, bestGlobal
-    int pos1 = randomGenerator.nextInt(0, leaderArchive.size() - 1);
-    int pos2 = randomGenerator.nextInt(0, leaderArchive.size() - 1);
-    one = leaderArchive.get(pos1);
-    two = leaderArchive.get(pos2);
-
-    if (strengthFitnessComparator.compare(one, two) < 1) {
-      bestGlobal = one ;
-    } else {
-      bestGlobal = two ;
-    }
-
-    for (int var = 0; var < particle.getNumberOfVariables(); var++) {
-      //Computing the velocity of this particle
-      speed[i][var] = W * speed[i][var] + C1 * r1 * (bestParticle.getVariableValue(var) -
-              particle.getVariableValue(var)) +
-              C2 * r2 * (bestGlobal.getVariableValue(var) - particle.getVariableValue(var));
     }
   }
 
   @Override public String getName() {
-    return "OMOPSODBT";
+    return "OMOPSODBT4";
   }
 
   @Override public String getDescription() {
