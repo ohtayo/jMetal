@@ -3,6 +3,7 @@ package org.uma.jmetal.runner.multiobjective;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.List;
+import java.util.Objects;
 
 import org.uma.jmetal.algorithm.Algorithm;
 import org.uma.jmetal.algorithm.multiobjective.omopso.OMOPSO;
@@ -51,6 +52,7 @@ public class ParallelOMOPSORunner extends AbstractAlgorithmRunner {
     int numberOfThreads = 1;
     String referenceParetoFront = "";
     String fileNameOfInitialSolutions = "";
+    OMOPSOBuilder.OMOPSOVariant variant = null;
     if (args.length == 1) {
       problemName = args[0];
     } else if (args.length == 2) {
@@ -78,24 +80,19 @@ public class ParallelOMOPSORunner extends AbstractAlgorithmRunner {
       numberOfThreads = Integer.valueOf(args[3]);
       referenceParetoFront = args[4];
       fileNameOfInitialSolutions = args[5];
+    } else if (args.length == 7){
+      problemName = args[0];
+      numberOfParticles = Integer.valueOf(args[1]);
+      numberOfIterations = Integer.valueOf(args[2]);
+      numberOfThreads = Integer.valueOf(args[3]);
+      referenceParetoFront = args[4];
+      fileNameOfInitialSolutions = args[5];
+      variant = OMOPSOBuilder.OMOPSOVariant.valueOf(args[6]);
     } else {
 //      problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelVarDiff2ObjConPMV";
-      problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelLSTMVarDiff2ObjConPMV";
-//      referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.2D.pf";
-//      problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModel4ObjDiffConPMV";
-//      problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelVarDiff4ObjRegretConPMV";
-//      problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelVarDiff4ObjRegretConPMVAtOneTimeEvaluationByManyPCs";
-//      problemName =  "org.uma.jmetal.problem.multiobjective.dtlz.DTLZ1";
-//      problemName =  "org.uma.jmetal.problem.multiobjective.dtlz.DTLZ4";
-//      problemName =  "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ1";
-//     problemName =  "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ4";
-//      referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.3D.pf";
-//     referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.4D.pf";
-//      referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ4.3D.pf";
-     referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ4.4D.pf";
-//      problemName =  "org.uma.jmetal.problem.multiobjective.UF.UF12MatlabEngineAtOneTimeEvaluation";
-//      referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/UF12.pf";
-      numberOfThreads = 6;
+      problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelLSTMVarDiff4ObjRegretConPMVUDP";
+      referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ4.4D.pf";
+      numberOfThreads = 1;
       numberOfIterations = 500;
       numberOfParticles = 35;
       fileNameOfInitialSolutions = "";
@@ -122,6 +119,12 @@ public class ParallelOMOPSORunner extends AbstractAlgorithmRunner {
             .setSwarmSize(numberOfParticles)
             .setUniformMutation(new UniformMutation(mutationProbability, 0.5))
             .setNonUniformMutation(new NonUniformMutation(mutationProbability, 0.5, numberOfIterations));
+
+    // OMOPSO拡張アルゴリズムの指定
+    if( Objects.nonNull(variant) ){
+      builder = builder.setVariant(variant);
+    }
+
     algorithm = builder.build();
 
     // 初期値のファイル名の指定があれば初期値を設定
