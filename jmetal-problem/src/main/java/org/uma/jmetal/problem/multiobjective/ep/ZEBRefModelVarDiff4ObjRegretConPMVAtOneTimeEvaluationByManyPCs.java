@@ -69,12 +69,10 @@ public class ZEBRefModelVarDiff4ObjRegretConPMVAtOneTimeEvaluationByManyPCs exte
     overallConstraintViolationDegree = new OverallConstraintViolation<DoubleSolution>() ; // 制約違反の総量
     numberOfViolatedConstraints = new NumberOfViolatedConstraints<DoubleSolution>() ; // 制約違反数
 
-    allocation = new ArrayList<>();
     readProperties();
   }
 
   private PC[] PCs;
-  private List<Integer> allocation;
   private int totalNumberOfThreads;
   private String workFolder;
   private final String propertiesFile = "manypcs.properties";
@@ -105,7 +103,6 @@ public class ZEBRefModelVarDiff4ObjRegretConPMVAtOneTimeEvaluationByManyPCs exte
         PCs[pc].baseFolder = properties.getProperty("baseFolder"+pc);
         PCs[pc].numberOfThreads = Integer.valueOf(properties.getProperty("numberOfThreads"+pc));
         totalNumberOfThreads+=PCs[pc].numberOfThreads;
-        for(int i=0; i<PCs[pc].numberOfThreads; i++) allocation.add(pc);
       }
     } catch (FileNotFoundException e){
       e.printStackTrace();
@@ -124,19 +121,31 @@ public class ZEBRefModelVarDiff4ObjRegretConPMVAtOneTimeEvaluationByManyPCs exte
 
     // 各実行スレッドを作成する．
     ThreadPoolExecutor executor;
-    executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(totalNumberOfThreads); //スレッドプールを用意
-    executor.setCorePoolSize(totalNumberOfThreads);		//コア数のプールサイズを指定
-    executor.setMaximumPoolSize(totalNumberOfThreads);	//最大プールサイズを指定
+    executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(PCs.length); //スレッドプールを用意
+    executor.setCorePoolSize(PCs.length);		//コア数のプールサイズを指定
+    executor.setMaximumPoolSize(PCs.length);	//最大プールサイズを指定
 
     List<Future<?>> futureList = new ArrayList<Future<?>>();
     Future<?> future;
     try{
-      for(int i=0; i<solutionList.size(); i++)
+      int pc=0;
+      for(int i=0; i<solutionList.size(); i+=PCs[pc].numberOfThreads)
       {
-        JMetalLogger.logger.info("Running evaluation for solution "+i);
-        future = executor.submit(new ZEBRefModelVarDiff4ObjRegretConPMVAtOneTimeEvaluationByManyPCs.EvaluateOne(solutionList.get(i), PCs[allocation.get(i%totalNumberOfThreads)]));
+        // 評価対象の解番号
+        int startSolution = i;
+        int endSolution = i+PCs[pc].numberOfThreads;
+        if(endSolution>=solutionList.size())  endSolution = solutionList.size()-1;
+
+        // 解を抽出する
+        List<DoubleSolution> solutions = new ArrayList<>();
+        for(int s=startSolution; s<=endSolution; s++) solutions.add(solutionList.get(s));
+
+        // 抽出した解をPC番号のpcで評価
+        JMetalLogger.logger.info("Running evaluation for solution "+startSolution+" to solution"+endSolution);
+        future = executor.submit(new ZEBRefModelVarDiff4ObjRegretConPMVAtOneTimeEvaluationByManyPCs.EvaluateOne(solutions, PCs[pc]));
         futureList.add(future);
         sleep(1000);
+        pc++;
       }
     } catch (RejectedExecutionException e){
       e.printStackTrace();
@@ -158,24 +167,24 @@ public class ZEBRefModelVarDiff4ObjRegretConPMVAtOneTimeEvaluationByManyPCs exte
    * implements Runnable<br>
    */
   public class EvaluateOne implements Runnable{
-    private DoubleSolution solution;
+    private List<DoubleSolution> solutions;
     private PC pc;
 
-    public EvaluateOne(DoubleSolution solution, PC pc){
-      this.solution = solution;
+    public EvaluateOne(List<DoubleSolution> solutions, PC pc){
+      this.solutions = solutions;
       this.pc = pc;
     }
 
     public void run(){
-      sleep(1000);
       // スレッド名の取得
       String threadName = Thread.currentThread().getName().split("thread")[1];
-
-      // 変数を文字列に変換
-      String variableString = "";
-      for(Double variable : solution.getVariables()) variableString+=String.format("%.3f,",variable);
       String commandFileName = workFolder + "\\psexec" + threadName + ".cmd";
-      String outFileName = workFolder + "\\psexec" + threadName + ".out";
+      String objectivesFileName = workFolder + "\\psexec" + threadName + ".obj";
+      String variablesFileName = workFolder + "\\psexec" + threadName + ".var";
+
+      // 変数をファイルに保存
+      writeVariables(variablesFileName, solutions);
+
       // psexecのコマンドを作成
       String command = "cd " + workFolder + " &" +
           " psexec64 -s" +
@@ -186,9 +195,9 @@ public class ZEBRefModelVarDiff4ObjRegretConPMVAtOneTimeEvaluationByManyPCs exte
           " \"" +
             "cd "+ pc.baseFolder + " & jmetal.cmd" +
             " \"" + threadName + "\"" +
-            " \"" + variableString + "\"" +
-          "\"" +
-          " > " + outFileName;
+            " \"" + variablesFileName + "\"" +
+            " \"" + objectivesFileName + "\"" +
+          "\"";
       System.out.println(command);
 
       // コマンドをpsexec_スレッド名.cmdで保存
@@ -211,31 +220,16 @@ public class ZEBRefModelVarDiff4ObjRegretConPMVAtOneTimeEvaluationByManyPCs exte
         Process process = runtime.exec(execute);
         ret = process.waitFor();
         System.out.println(ret);
-        if(ret!=0)	JMetalLogger.logger.severe("EnergyPlus occurred error(s).");
+        if(ret!=0)	JMetalLogger.logger.severe("psexec occurred error(s).");
       }catch(Exception e){
         e.printStackTrace();
       }
 
       // 出力を読み込み
-      double[] f = new double[getNumberOfObjectives()];
-      double overallConstraintViolation = 0.0;
-      int violatedConstraints = 0;
-      try{
-        Path path = Paths.get(outFileName);
-        List<String> lines = Files.readAllLines(path);
-        System.out.println( lines.get(lines.size()-1) );
-        String[] result = lines.get(lines.size()-1).split(",");
-        for(int i=0; i<f.length; i++) f[i] = Double.valueOf(result[i]);
-        overallConstraintViolation = Double.valueOf(result[getNumberOfObjectives()]);
-        violatedConstraints = Integer.valueOf(result[getNumberOfObjectives()+1]);
-      }catch(IOException e){
-        e.printStackTrace();
-      }
+      readObjectives(objectivesFileName, solutions);
 
-      // 出力をSolutionに反映
-      for (int o = 0; o < getNumberOfObjectives(); o++) solution.setObjective(o, f[o]);
-      overallConstraintViolationDegree.setAttribute(solution, overallConstraintViolation);
-      numberOfViolatedConstraints.setAttribute(solution, violatedConstraints);
+      // 処理待ち
+      sleep(1000);
     }
   }
 
@@ -266,4 +260,53 @@ public class ZEBRefModelVarDiff4ObjRegretConPMVAtOneTimeEvaluationByManyPCs exte
     }
     return lines;
   }
+
+
+  /**
+   * テキストファイルに設計関数を書き込む
+   * @param variablesFileName 目的関数ファイル名
+   * @param solutionList 解集合
+   */
+  private static void writeVariables(String variablesFileName, List<DoubleSolution> solutionList){
+    double degree;
+    double constraints;
+    try{
+      Path path = Paths.get(variablesFileName);
+      if (!Files.exists(path)) Files.createFile(path);  // ファイルがなければ作成
+      String variablesString = "";
+      List<String> lines = new ArrayList<>();
+      for(int s=0; s<solutionList.size(); s++) {
+        for (Double variables : solutionList.get(s).getVariables()) variablesString += String.format("%.3f,", variables);
+        lines.add(variablesString);
+      }
+      Files.write(path, lines, StandardOpenOption.WRITE);
+    }catch(IOException e){
+      e.printStackTrace();
+    }
+  }
+  /**
+   * テキストファイルから目的関数を読み取る
+   * @param objectivesFileName 設計変数ファイル名
+   * @param solutionList 解集合
+   */
+  private static void readObjectives(String objectivesFileName, List<DoubleSolution> solutionList){
+    OverallConstraintViolation<DoubleSolution> overallConstraintViolationDegree = new OverallConstraintViolation<DoubleSolution>() ; // 制約違反の総量
+    NumberOfViolatedConstraints<DoubleSolution> numberOfViolatedConstraints = new NumberOfViolatedConstraints<DoubleSolution>() ; // 制約違反数
+    try{
+      Path path = Paths.get(objectivesFileName);
+      List<String> lines = Files.readAllLines(path);
+      for(int line=0; line<lines.size(); line++) {
+        String[] result = lines.get(line).split(",");
+        for(int o=0; o<solutionList.get(line).getNumberOfObjectives(); o++)
+          solutionList.get(line).setObjective(o, Double.valueOf(result[o]));
+        double degree = Double.valueOf(result[solutionList.get(line).getNumberOfObjectives()]);
+        double constraints = Integer.valueOf(result[solutionList.get(line).getNumberOfObjectives()+1]);
+        overallConstraintViolationDegree.setAttribute(solutionList.get(line), degree);
+        numberOfViolatedConstraints.setAttribute(solutionList.get(line), (int)constraints);
+      }
+    }catch(IOException e){
+      e.printStackTrace();
+    }
+  }
+
 }
