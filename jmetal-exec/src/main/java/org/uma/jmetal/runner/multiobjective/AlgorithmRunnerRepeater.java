@@ -35,7 +35,9 @@ public class AlgorithmRunnerRepeater {
 //            "org.uma.jmetal.problem.multiobjective.UF.C3_UF12",
 //            "org.uma.jmetal.problem.multiobjective.UF.C3_UF12MatlabEngineAtOneTimeEvaluation",
 //            "org.uma.jmetal.problem.multiobjective.maf.C3_MaF02",
-              "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelLSTMVarDiff2ObjConPMV",
+//            "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelLSTMVarDiff2ObjConPMV",
+//            "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelLSTMVarDiff2ObjConPMVUDP",
+            "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelVarDiff2ObjConPMV",
         };
         String[] referenceParetoFronts = {
 //            "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.4D.pf",
@@ -46,20 +48,20 @@ public class AlgorithmRunnerRepeater {
             "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.2D.pf",
         };
         String[] algorithms = {
-//            "ParallelNSGAII",
-//            "ParallelNSGAIIWithEpsilonArchive",
-//            "ParallelNSGAIII",
-//            "ParallelNSGAIIIWithEpsilonArchive",
-//            "ParallelConstraintMOEAD",
-//            "ParallelConstraintMOEADDE",
-//            "ParallelConstraintMOEADWithEpsilonArchive",
-//            "ParallelConstraintMOEADDEWithEpsilonArchive",
+//                "ParallelNSGAII",
+//                "ParallelNSGAIIWithEpsilonArchive",
+//                "ParallelNSGAIII",
+//                "ParallelNSGAIIIWithEpsilonArchive",
+//                "ParallelConstraintMOEAD",
+//                "ParallelConstraintMOEADDE",
+//                "ParallelConstraintMOEADWithEpsilonArchive",
+//                "ParallelConstraintMOEADDEWithEpsilonArchive",
                 "ParallelOMOPSO",
-                "ParallelOMOPSOWithSizeLimitedArchive",
-                "ParallelOMOPSORV",
+//                "ParallelOMOPSOWithSizeLimitedArchive",
+//                "ParallelOMOPSORV",
                 "ParallelOMOPSODBT",
-                "ParallelOMOPSODBT2",
-                "ParallelOMOPSODBT3",
+//                "ParallelOMOPSODBT2",
+//                "ParallelOMOPSODBT3",
 //                "ParallelOMOPSODBT4",
 //                "ParallelOMOPSODBT5",
 //                "ParallelOMOPSORVDBT",
@@ -71,10 +73,18 @@ public class AlgorithmRunnerRepeater {
 //                "ParallelOMOPSODBTIBG",
 //                "ParallelOMOPSORVDBTDFG",
 //                "ParallelOMOPSORVDBTIBG",
-//              "ParallelOMOPSOCSS",
-//              "ParallelOMOPSONDX",
-//              "ParallelOMOPSOPPS",
-//              "ParallelDirectionalOMOPSOWithSizeLimitedArchive",
+//                "ParallelOMOPSOCSS",
+//                "ParallelOMOPSONDX",
+//                "ParallelOMOPSOPPS",
+//                "ParallelDirectionalOMOPSOWithSizeLimitedArchive",
+                "ParallelOMOPSODegradeLeader",
+                "ParallelOMOPSODegradeMutation",
+                "ParallelOMOPSODegradeArchiveSize",
+                "ParallelOMOPSODegradeSelection",
+        };
+        // file names of initial solutions
+        String[] initialSolutions = {
+                "",
         };
 
         int numberOfIndividuals = 35;
@@ -87,6 +97,7 @@ public class AlgorithmRunnerRepeater {
             // define problem
             String problemName = problems[problemNumber];
             String referenceParetoFront = referenceParetoFronts[problemNumber];
+            String initialSolution = initialSolutions[problemNumber];
 
             // check population size for MOEA/D
             DoubleProblem problem = (DoubleProblem) ProblemUtils.<DoubleSolution> loadProblem(problemName);
@@ -96,18 +107,25 @@ public class AlgorithmRunnerRepeater {
                 numberOfIndividuals = 35;
             }
 
-            // arguments
-            args = new String[5];
-            args[0] = problemName;
-            args[1] = String.valueOf(numberOfIndividuals);
-            args[2] = String.valueOf(numberOfGenerations);
-            args[3] = String.valueOf(numberOfThreads);
-            args[4] = referenceParetoFront;
-
             for(int algorithmNumber=0; algorithmNumber<algorithms.length; algorithmNumber++) {
                 // make experiment name
                 String algorithmName = algorithms[algorithmNumber];
                 String experimentName = problem.getName() + "_"+algorithmName+"_pop" + numberOfIndividuals + "_gen" + numberOfGenerations;
+
+                // make arguments
+                if( algorithms[algorithmNumber].contains("ParallelOMOPSO") ) {
+                    algorithmName = "ParallelOMOPSO";
+                    args = new String[7];
+                    args[6] = algorithms[algorithmNumber].replace("Parallel","");
+                }else{
+                    args = new String[6];
+                }
+                args[0] = problemName;
+                args[1] = String.valueOf(numberOfIndividuals);
+                args[2] = String.valueOf(numberOfGenerations);
+                args[3] = String.valueOf(numberOfThreads);
+                args[4] = referenceParetoFront;
+                args[5] = initialSolution;
 
                 // run algorithm "numberOfRepeats" times
                 for( int i=0; i<numberOfRepeats; i++) {

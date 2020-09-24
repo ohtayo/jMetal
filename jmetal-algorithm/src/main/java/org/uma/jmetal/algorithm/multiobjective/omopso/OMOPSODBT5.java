@@ -10,6 +10,7 @@ import org.uma.jmetal.util.comparator.FitnessComparator;
 import org.uma.jmetal.util.comparator.StrengthFitnessComparator;
 import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
 import org.uma.jmetal.util.solutionattribute.impl.Fitness;
+import org.uma.jmetal.util.solutionattribute.impl.StrengthRawFitness;
 
 import java.util.List;
 
@@ -21,6 +22,7 @@ import java.util.List;
 @SuppressWarnings("serial")
 public class OMOPSODBT5 extends OMOPSO {
   private double eta;
+  private StrengthRawFitness<DoubleSolution> strengthRawFitness; // SPEA2の適合度
   private StrengthFitnessComparator<DoubleSolution> strengthFitnessComparator;
   /** Constructor */
   public OMOPSODBT5(DoubleProblem problem, SolutionListEvaluator<DoubleSolution> evaluator,
@@ -29,6 +31,7 @@ public class OMOPSODBT5 extends OMOPSO {
     super(problem, evaluator, swarmSize, maxIterations, leaderSize, uniformMutation, nonUniformMutation, eta);
     this.eta = eta;
     strengthFitnessComparator = new StrengthFitnessComparator<DoubleSolution>();
+    strengthRawFitness = new StrengthRawFitness<DoubleSolution>();
   }
 
   @Override
@@ -126,6 +129,15 @@ public class OMOPSODBT5 extends OMOPSO {
               particle.getVariableValue(var)) +
               C2 * r2 * (bestGlobal.getVariableValue(var) - particle.getVariableValue(var));
     }
+  }
+
+  /**
+   * Update leaders method
+   * @param swarm List of solutions (swarm)
+   */
+  @Override protected void updateLeaders(List<DoubleSolution> swarm) {
+    super.updateLeaders(swarm);
+    strengthRawFitness.computeDensityEstimator(leaderArchive.getSolutionList());
   }
 
   @Override public String getName() {

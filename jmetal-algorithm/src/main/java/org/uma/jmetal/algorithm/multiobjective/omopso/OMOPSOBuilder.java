@@ -36,6 +36,10 @@ public class OMOPSOBuilder implements AlgorithmBuilder<OMOPSO> {
     OMOPSOCSS,
     OMOPSOAOP,
     OMOPSOPPS,
+    OMOPSODegradeLeader,
+    OMOPSODegradeMutation,
+    OMOPSODegradeArchiveSize,
+    OMOPSODegradeSelection,
   }
 
   protected DoubleProblem problem;
@@ -177,6 +181,17 @@ public class OMOPSOBuilder implements AlgorithmBuilder<OMOPSO> {
       algorithm = new OMOPSORVDBTIBGIBP(problem, evaluator, swarmSize, maxIterations, archiveSize, uniformMutation, nonUniformMutation, eta);
     } else if(this.variant == OMOPSOVariant.OMOPSORVDBTIBGPPS){
       algorithm = new OMOPSORVDBTIBGPPS(problem, evaluator, swarmSize, maxIterations, archiveSize, uniformMutation, nonUniformMutation, eta);
+    }
+
+    // OMOPSOの機能を落としたもの
+    else if(this.variant == OMOPSOVariant.OMOPSODegradeLeader){
+      algorithm = new OMOPSODegradeLeader(problem, evaluator, swarmSize, maxIterations, archiveSize, uniformMutation, nonUniformMutation, eta);
+    } else if(this.variant == OMOPSOVariant.OMOPSODegradeMutation){
+      algorithm = new OMOPSODegradeMutation(problem, evaluator, swarmSize, maxIterations, archiveSize, uniformMutation, nonUniformMutation, eta);
+    } else if(this.variant == OMOPSOVariant.OMOPSODegradeArchiveSize){
+      algorithm = new OMOPSODegradeArchiveSize(problem, evaluator, swarmSize, maxIterations, archiveSize, uniformMutation, nonUniformMutation, eta);
+    } else if(this.variant == OMOPSOVariant.OMOPSODegradeSelection){
+      algorithm = new OMOPSODegradeSelection(problem, evaluator, swarmSize, maxIterations, archiveSize, uniformMutation, nonUniformMutation, eta);
     }
 
     return algorithm ;

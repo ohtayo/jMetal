@@ -63,7 +63,7 @@ public class OMOPSODBT2 extends OMOPSOWithSizeLimitedArchive {
       }
       // (2)[無印] 通常のOMOPSOの手法を使う
       else {
-        OMOPSODBT.updateVelocityUsingGlobalBest(W, C1, C2, r1, r2, i, particle, truncatedArchive, bestParticle, speed, strengthFitnessComparator, randomGenerator);
+        OMOPSODBT.updateVelocityUsingGlobalBest(W, C1, C2, r1, r2, i, particle, truncatedArchive, bestParticle, speed, crowdingDistanceComparator, randomGenerator);
       }
     }
   }

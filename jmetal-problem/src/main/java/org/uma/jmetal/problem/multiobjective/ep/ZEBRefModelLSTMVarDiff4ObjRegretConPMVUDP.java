@@ -1,10 +1,6 @@
 package org.uma.jmetal.problem.multiobjective.ep;
 
 import jp.ohtayo.building.energyplus.EnergyPlusObjectives;
-import jp.ohtayo.commons.io.Csv;
-import jp.ohtayo.commons.log.Logging;
-import jp.ohtayo.commons.math.Matrix;
-import org.uma.jmetal.problem.DoubleProblem;
 import org.uma.jmetal.problem.impl.AbstractDoubleProblem;
 import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.util.JMetalLogger;
@@ -24,17 +20,12 @@ import java.util.List;
 import java.util.Properties;
 
 /**
- * Multi-objective Problem of air-conditioning setpoint temperature schedule optimization using EnergyPlus building energy simulator.
- * Building model: reference building model in the ZEB design guideline
- * Variable : setpoint temperature schedule between 5:00 and 24:00 using difference (length:20)
- * Objective 1: power consumption
- * Objective 2: thermal comfort level
- * Constraint 1: exceedance of comfort level
+ * LSTMサロゲート評価器を用いて4目的ロバスト最適化を行うための評価関数
  *
  * @author ohtayo (ohta.yoshihiro@outlook.jp)
  */
 @SuppressWarnings("serial")
-public class ZEBRefModelLSTMVarDiff2ObjConPMVUDP extends AbstractDoubleProblem {
+public class ZEBRefModelLSTMVarDiff4ObjRegretConPMVUDP extends AbstractDoubleProblem {
   public OverallConstraintViolation<DoubleSolution> overallConstraintViolationDegree ;
   public NumberOfViolatedConstraints<DoubleSolution> numberOfViolatedConstraints ;
   public double[] constraintViolation ;
@@ -48,12 +39,12 @@ public class ZEBRefModelLSTMVarDiff2ObjConPMVUDP extends AbstractDoubleProblem {
   /**
    * Constructor.
    */
-  public ZEBRefModelLSTMVarDiff2ObjConPMVUDP() {
+  public ZEBRefModelLSTMVarDiff4ObjRegretConPMVUDP() {
 
     setNumberOfVariables(19);
-    setNumberOfObjectives(2);
+    setNumberOfObjectives(4);
     setNumberOfConstraints(1);
-    setName("ZEBRefModelLSTMVarDiff2ObjConPMVUDP") ;
+    setName("ZEBRefModelLSTMVarDiff4ObjRegretConPMVUDP") ;
 
     // set limit of variables
     List<Double> lowerLimit = new ArrayList<>(getNumberOfVariables()) ;
@@ -74,6 +65,12 @@ public class ZEBRefModelLSTMVarDiff2ObjConPMVUDP extends AbstractDoubleProblem {
     // objective2
     minValue.add(1.0e9);
     maxValue.add(9.0e9);
+    // objective3
+    minValue.add(0.0);
+    maxValue.add(2.0);
+    // objective4
+    minValue.add(0.0);
+    maxValue.add(7.0e9);
 
     constraintViolation = new double[getNumberOfConstraints()];
     for(int i=0; i< getNumberOfConstraints(); i++){
@@ -102,27 +99,37 @@ public class ZEBRefModelLSTMVarDiff2ObjConPMVUDP extends AbstractDoubleProblem {
     double[] variables = new double[variablesList.size()];
     for (int i = 0; i < variablesList.size(); i++)  variables[i] = variablesList.get(i);
     double[] temperature = EnergyPlusObjectives.variableToTemperatureSettingUsingDifference(variables, 25, 6,25);
+    int numberOfTrials=3;
     String sendData = "";
-    String receivedData = "";
+    String[] receivedData = new String[numberOfTrials];
     for(double temp : temperature) sendData+= temp +",";
     try {
-      // 受信の準備
-      DatagramSocket socketReceive = new DatagramSocket(receivePort);//UDP受信用ソケット構築
-      byte[] dataReceive = new byte[1024];//受信最大バッファ
-      DatagramPacket packetReceive = new DatagramPacket(dataReceive, dataReceive.length);//受信用パケットを構築
+      DatagramSocket[] socketReceive = new DatagramSocket[numberOfTrials];
+      byte[][] dataReceive = new byte[numberOfTrials][1024];  //受信最大バッファ
+      DatagramPacket[] packetReceive = new DatagramPacket[numberOfTrials];
+      for(int trial=0; trial<numberOfTrials; trial++) {
+        // 受信の準備
+        socketReceive[trial] = new DatagramSocket(receivePort+trial*2);//UDP受信用ソケット構築
+        packetReceive[trial] = new DatagramPacket(dataReceive[trial], dataReceive[trial].length);//受信用パケットを構築
+      }
 
       // 設定温度スケジュールの送信
       byte[] dataSend = sendData.getBytes(StandardCharsets.UTF_8);//UTF-8バイト配列の作成
       DatagramSocket socketSend = new DatagramSocket();//UDP送信用ソケットの構築
-      DatagramPacket packetSend = new DatagramPacket(dataSend, dataSend.length, new InetSocketAddress(address, sendPort));//指定アドレス、ポートへ送信するパケットを構築
-      socketSend.send(packetSend);//パケットの送信
-      //System.out.println("UDP送信:" + sendData);  // for debug
+      DatagramPacket[] packetSend = new DatagramPacket[numberOfTrials];
+      for(int trial=0; trial<numberOfTrials; trial++) {
+        packetSend[trial] = new DatagramPacket(dataSend, dataSend.length, new InetSocketAddress(address, sendPort+trial*2));//指定アドレス、ポートへ送信するパケットを構築
+        socketSend.send(packetSend[trial]);//パケットの送信
+        System.out.println("UDP送信 To:"+ (sendPort+trial*2) + ": " + sendData);  //送信データの表示
+      }
 
       // 目的関数値と制約値の受信
-      socketReceive.receive(packetReceive);
-      receivedData = new String(Arrays.copyOf(packetReceive.getData(),packetReceive.getLength()), StandardCharsets.UTF_8);
-      System.out.println("UDP受信:"+receivedData);//受信データの表示
-      socketReceive.close();//ソケットのクローズ
+      for(int trial=0; trial<numberOfTrials; trial++) {
+        socketReceive[trial].receive(packetReceive[trial]);
+        receivedData[trial] = new String(Arrays.copyOf(packetReceive[trial].getData(), packetReceive[trial].getLength()), StandardCharsets.UTF_8);
+        System.out.println("UDP受信 No."+ trial + ":" + receivedData[trial]);//受信データの表示
+        socketReceive[trial].close();//ソケットのクローズ
+      }
       socketSend.close();//ソケットのクローズ
     }catch(IOException e){
       e.printStackTrace();
@@ -130,10 +137,19 @@ public class ZEBRefModelLSTMVarDiff2ObjConPMVUDP extends AbstractDoubleProblem {
 
     double[] fitness = new double[getNumberOfObjectives()];
     double[] constraints = new double[getNumberOfConstraints()];
-    String[] result = receivedData.split(",");
-    fitness[0] = Double.valueOf(result[0]);  // 対象時刻の中間階PMVを取得して平均の絶対値とる
-    fitness[1] = Double.valueOf(result[1]); // 3列目(消費電力)データを取得して合計値を取る．6回に1回間引かれているので6倍する．
-    constraints[0] = Double.valueOf(result[2]); //対象時刻の中間階PMVが±0.5をはみ出ている回数を積算する
+    double[] pmv = new double[3];
+    double[] power = new double[3];
+    String[][] result = new String[numberOfTrials][];
+    for(int trial=0; trial<numberOfTrials; trial++) {
+      result[trial] = receivedData[trial].split(",");
+      pmv[trial] =  Double.valueOf(result[trial][0]);
+      power[trial] = Double.valueOf(result[trial][1]);
+    }
+    fitness[0] = pmv[0];
+    fitness[1] = power[0];
+    fitness[2] = Math.max( Math.abs(pmv[1]-pmv[0]), Math.abs(pmv[2]-pmv[0]) );
+    fitness[3] = Math.max( Math.abs(power[1]-power[0]), Math.abs(power[2]-power[0]) );
+    constraints[0] = Double.valueOf(result[0][2]); //対象時刻の中間階PMVが±0.5をはみ出ている回数を積算する
 
     // Normalize objective values
     double[] normalizedFitness = new double[getNumberOfObjectives()];
@@ -153,8 +169,8 @@ public class ZEBRefModelLSTMVarDiff2ObjConPMVUDP extends AbstractDoubleProblem {
     overallConstraintViolation = new OverallConstraintViolation<DoubleSolution>() ;
     double violation = overallConstraintViolation.getAttribute(solution);
     double comfort = solution.getObjectives()[0]*2;
-    double power = solution.getObjectives()[1];
-    if( (violation==0) && ((comfort>0.5)||(power<0.25)) ){
+    double energy = solution.getObjectives()[1];
+    if( (violation==0) && ((comfort>0.5)||(energy<0.25)) ){
       JMetalLogger.logger.severe("illegal objective values.");
       overallConstraintViolationDegree.setAttribute(solution, 100.0);
       numberOfViolatedConstraints.setAttribute(solution, 1);
