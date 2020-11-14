@@ -84,10 +84,11 @@ public class ParallelNSGAIIIRunner extends AbstractAlgorithmRunner {
     } else {
 //      problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModel2ObjDiffConPMV";
       problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelVarDiff4ObjRegretConPMV";
+      problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelLSTMVarDiff2ObjConPMVUDP";
 //      problemName = "org.uma.jmetal.problem.multiobjective.zdt.ZDT1";
-      numberOfThreads = 6;
-      numberOfGenerations = 10;
-      numberOfIndividuals = 10;
+      numberOfThreads = 1;
+      numberOfGenerations = 500;
+      numberOfIndividuals = 35;
       fileNameOfInitialSolutions = "";
       //fileNameOfInitialSolutions = "C:\\workspace\\jMetal\\initialSolutions.csv";
     }
