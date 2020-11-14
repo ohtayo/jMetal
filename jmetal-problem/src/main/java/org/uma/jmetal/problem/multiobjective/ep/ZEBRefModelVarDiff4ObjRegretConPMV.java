@@ -86,11 +86,11 @@ public class ZEBRefModelVarDiff4ObjRegretConPMV extends AbstractDoubleProblem {
     JMetalLogger.logger.info("energy plus execution at thread:"+threadName);
 
     // 予報通りの場合を計算
-    EnergyPlusObjectives objectivesWithoutError = new EnergyPlusObjectives(variables, ".\\xml\\energyplus.xml");
+    EnergyPlusObjectives objectivesWithoutError = new EnergyPlusObjectives(variables).setXmlFile(".\\xml\\energyplus.xml").calculate();
 
     // 予報誤差のある場合を計算
-    EnergyPlusObjectives objectivesWithUpwardError = new EnergyPlusObjectives(variables, ".\\xml\\energyplus_upward.xml");
-    EnergyPlusObjectives objectivesWithDownwardError = new EnergyPlusObjectives(variables, ".\\xml\\energyplus_downward.xml");
+    EnergyPlusObjectives objectivesWithUpwardError = new EnergyPlusObjectives(variables).setXmlFile(".\\xml\\energyplus_upward.xml").calculate();
+    EnergyPlusObjectives objectivesWithDownwardError = new EnergyPlusObjectives(variables).setXmlFile(".\\xml\\energyplus_downward.xml").calculate();
 
     // 目的関数を計算して代入
     double[] fitness = new double[getNumberOfObjectives()];
