@@ -89,10 +89,12 @@ public class ParallelOMOPSORunner extends AbstractAlgorithmRunner {
       fileNameOfInitialSolutions = args[5];
       variant = OMOPSOBuilder.OMOPSOVariant.valueOf(args[6]);
     } else {
-//      problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelVarDiff2ObjConPMV";
-      problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelLSTMVarDiff4ObjRegretConPMVUDP";
+//      problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelVarDiff2ObjConPMVf104";
+      problemName = "org.uma.jmetal.problem.multiobjective.ep.VRF5ZoneModelVarDiff2ObjConPMV";
+//      problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelLSTMVarDiff2ObjConPMVUDPAdjusted";
+//      problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelLSTMVarDiff4ObjRegretConPMVUDPAdjusted";
       referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ4.4D.pf";
-      numberOfThreads = 1;
+      numberOfThreads = 3;
       numberOfIterations = 500;
       numberOfParticles = 35;
       fileNameOfInitialSolutions = "";
@@ -100,8 +102,12 @@ public class ParallelOMOPSORunner extends AbstractAlgorithmRunner {
     }
 
     // 目的関数の定義
-    problem = (DoubleProblem) ProblemUtils.<DoubleSolution> loadProblem(problemName);
-
+    if(problemName.contains("DTLZ")) {
+      Object[] problemArguments = {12, 4};
+      problem = (DoubleProblem) ProblemUtils.<DoubleSolution>loadProblem(problemName, problemArguments);
+    }else{
+      problem = (DoubleProblem) ProblemUtils.<DoubleSolution>loadProblem(problemName);
+    }
     // 突然変異確率
     double mutationProbability = 1.0 / problem.getNumberOfVariables() ;
 
