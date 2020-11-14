@@ -1,6 +1,7 @@
 package org.uma.jmetal.problem.multiobjective.ep;
 
 import jp.ohtayo.building.energyplus.EnergyPlusObjectives;
+import jp.ohtayo.commons.math.Matrix;
 import org.uma.jmetal.problem.impl.AbstractDoubleProblem;
 import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.util.JMetalLogger;
@@ -21,7 +22,7 @@ import java.util.List;
  * @author ohtayo (ohta.yoshihiro@outlook.jp)
  */
 @SuppressWarnings("serial")
-public class ZEBRefModelVarDiff2ObjConPMV extends AbstractDoubleProblem {
+public class ZEBRefModelVarDiff2ObjConPMVf104 extends AbstractDoubleProblem {
   public OverallConstraintViolation<DoubleSolution> overallConstraintViolationDegree ;
   public NumberOfViolatedConstraints<DoubleSolution> numberOfViolatedConstraints ;
   public double[] constraintViolation ;
@@ -30,12 +31,12 @@ public class ZEBRefModelVarDiff2ObjConPMV extends AbstractDoubleProblem {
   /**
    * Constructor.
    */
-  public ZEBRefModelVarDiff2ObjConPMV() {
+  public ZEBRefModelVarDiff2ObjConPMVf104() {
 
     setNumberOfVariables(19);
     setNumberOfObjectives(2);
-    setNumberOfConstraints(1);
-    setName("ZEBRefModelVarDiff2ObjConPMV") ;
+    setNumberOfConstraints(2);
+    setName("ZEBRefModelVarDiff2ObjConPMVf104") ;
 
     // set limit of variables
     List<Double> lowerLimit = new ArrayList<>(getNumberOfVariables()) ;
@@ -85,6 +86,13 @@ public class ZEBRefModelVarDiff2ObjConPMV extends AbstractDoubleProblem {
     fitness[0] = Math.abs( energyPlusObjectives.calculateAveragePMV() );
     fitness[1] = energyPlusObjectives.calculateTotalElectricEnergy();
     constraints[0] = energyPlusObjectives.countConstraintExceededTimesOfPMV();
+
+    // f1が0.4以下を制約に追加
+    if(fitness[0] > 0.3){
+      constraints[1] = fitness[0]-0.3;
+    }else{
+      constraints[1] = 0.0;
+    }
 
     // Normalize objective values
     double[] normalizedFitness = new double[getNumberOfObjectives()];

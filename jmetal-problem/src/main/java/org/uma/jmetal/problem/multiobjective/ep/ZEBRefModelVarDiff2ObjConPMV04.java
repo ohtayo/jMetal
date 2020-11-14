@@ -1,6 +1,7 @@
 package org.uma.jmetal.problem.multiobjective.ep;
 
 import jp.ohtayo.building.energyplus.EnergyPlusObjectives;
+import jp.ohtayo.commons.math.Matrix;
 import org.uma.jmetal.problem.impl.AbstractDoubleProblem;
 import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.util.JMetalLogger;
@@ -21,7 +22,7 @@ import java.util.List;
  * @author ohtayo (ohta.yoshihiro@outlook.jp)
  */
 @SuppressWarnings("serial")
-public class ZEBRefModelVarDiff2ObjConPMV extends AbstractDoubleProblem {
+public class ZEBRefModelVarDiff2ObjConPMV04 extends AbstractDoubleProblem {
   public OverallConstraintViolation<DoubleSolution> overallConstraintViolationDegree ;
   public NumberOfViolatedConstraints<DoubleSolution> numberOfViolatedConstraints ;
   public double[] constraintViolation ;
@@ -30,12 +31,12 @@ public class ZEBRefModelVarDiff2ObjConPMV extends AbstractDoubleProblem {
   /**
    * Constructor.
    */
-  public ZEBRefModelVarDiff2ObjConPMV() {
+  public ZEBRefModelVarDiff2ObjConPMV04() {
 
     setNumberOfVariables(19);
     setNumberOfObjectives(2);
     setNumberOfConstraints(1);
-    setName("ZEBRefModelVarDiff2ObjConPMV") ;
+    setName("ZEBRefModelVarDiff2ObjConPMV04") ;
 
     // set limit of variables
     List<Double> lowerLimit = new ArrayList<>(getNumberOfVariables()) ;
@@ -84,7 +85,17 @@ public class ZEBRefModelVarDiff2ObjConPMV extends AbstractDoubleProblem {
     EnergyPlusObjectives energyPlusObjectives = new EnergyPlusObjectives(variables).calculate();
     fitness[0] = Math.abs( energyPlusObjectives.calculateAveragePMV() );
     fitness[1] = energyPlusObjectives.calculateTotalElectricEnergy();
-    constraints[0] = energyPlusObjectives.countConstraintExceededTimesOfPMV();
+
+    // 制約を0.4以下に絞ってみる
+    Matrix pmvData = new Matrix(energyPlusObjectives.getPMVData());
+    Matrix absolutePmvData = pmvData.abs().minus(0.4);
+    double exceededValue = 0.0;
+    for(int r=0; r<absolutePmvData.length(); r++){
+      for(int c=0; c<absolutePmvData.columnLength(); c++){
+        if(absolutePmvData.get(r,c)>0){exceededValue += absolutePmvData.get(r,c);}
+      }
+    }
+    constraints[0] = exceededValue;
 
     // Normalize objective values
     double[] normalizedFitness = new double[getNumberOfObjectives()];
@@ -105,7 +116,7 @@ public class ZEBRefModelVarDiff2ObjConPMV extends AbstractDoubleProblem {
     double violation = overallConstraintViolation.getAttribute(solution);
     double comfort = solution.getObjectives()[0]*2;
     double power = solution.getObjectives()[1];
-    if( (violation==0) && ((comfort>0.5)||(power<0.18)) ){
+    if( (violation==0) && ((comfort>0.4)||(power<0.18)) ){
       JMetalLogger.logger.severe("illegal objective values.");
       for(int o=0; o<getNumberOfObjectives(); o++) {
         solution.setObjective(o, maxValue.get(o));
