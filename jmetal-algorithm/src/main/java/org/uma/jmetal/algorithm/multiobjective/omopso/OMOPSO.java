@@ -110,7 +110,7 @@ public class OMOPSO extends AbstractParticleSwarmOptimization<DoubleSolution, Li
   }
 
   public void removeViolatedSolution(Archive archive){
-    removeViolatedSolution(archive.getSolutionList());
+    //removeViolatedSolution(archive.getSolutionList());
   }
   public void removeViolatedSolution(List<DoubleSolution> solutionList){
     for (int s = 0; s < solutionList.size(); s++) {

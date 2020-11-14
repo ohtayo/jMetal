@@ -1,6 +1,7 @@
 package org.uma.jmetal.problem.multiobjective.ep;
 
 import jp.ohtayo.building.energyplus.EnergyPlusObjectives;
+import jp.ohtayo.commons.io.Csv;
 import jp.ohtayo.commons.io.TimeSeries;
 import jp.ohtayo.commons.math.Matrix;
 import jp.ohtayo.commons.math.Vector;
@@ -12,6 +13,8 @@ import org.uma.jmetal.util.solutionattribute.impl.NumberOfViolatedConstraints;
 import org.uma.jmetal.util.solutionattribute.impl.OverallConstraintViolation;
 
 import java.sql.Time;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -83,13 +86,20 @@ public class ZEBRefModelVarDiff2ObjConPMVCondLSTM extends AbstractDoubleProblem 
     double[] constraints = new double[getNumberOfConstraints()];
     EnergyPlusObjectives energyPlusObjectives = new EnergyPlusObjectives(variables);
     TimeSeries allData = new TimeSeries( energyPlusObjectives.get() );
+    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss_SSS");
+    String dateTime = dateTimeFormatter.format(LocalDateTime.now());
+    String header = "time, outdoortemp, outdoorhumi, settemp, groundtemp, groundhumi, middletem, middlehumi, toptemp, tophumi, groundpmv, middlepmv, toppmv, electricenergy, coolingenergy";
+    allData.write("eplusout_"+dateTime+".csv", header);
+
     Vector temp = new Vector(5,6, allData.length()-1);
     Vector index = temp.add(new Vector(1,0));
     index.sort();
     Vector thinPmv = allData.getColumn(11).get(Cast.doubleToInt(index.get()));
-    Vector targetPmv = thinPmv.get(6, 19);
+    Vector targetPmv = thinPmv.get(7, 15);
+    Vector thinEnergy = allData.getColumn(13).get(Cast.doubleToInt(index.get()));
     fitness[0] = Math.abs( targetPmv.mean() );
-    fitness[1] = allData.getColumn(13).sum();
+//    fitness[1] = allData.getColumn(13).sum();
+    fitness[1] = thinEnergy.sum() * 6;
     constraints[0] = targetPmv.abs().round().sum(); // 0.5を超過した
 
     // Normalize objective values
