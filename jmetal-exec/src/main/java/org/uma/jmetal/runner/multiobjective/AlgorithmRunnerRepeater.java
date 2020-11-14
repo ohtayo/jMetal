@@ -4,6 +4,7 @@ import org.apache.commons.io.FileUtils;
 import org.uma.jmetal.problem.DoubleProblem;
 import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.util.JMetalException;
+import org.uma.jmetal.util.JMetalLogger;
 import org.uma.jmetal.util.ProblemUtils;
 
 import java.io.File;
@@ -20,32 +21,54 @@ import java.util.regex.Pattern;
 public class AlgorithmRunnerRepeater {
     public static void main(String[] args) throws JMetalException, IOException, FileNotFoundException {
         // folders
-        String resultFolder = "C:\\workspace\\jMetal\\result\\";
-        String archiveFolderBase = "C:\\workspace\\jMetal\\archive\\";
+        String resultFolder = ".\\result\\";
+        String archiveFolderBase = ".\\archive\\";
 
         // problem and search settings
         String[] problems = {
-//            "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ1",
-//            "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ4",
-//            "org.uma.jmetal.problem.multiobjective.cec2007MOAlgorithmCompetition.C3_S_DTLZ2",
-//            "org.uma.jmetal.problem.multiobjective.cec2007MOAlgorithmCompetition.C3_S_DTLZ3",
-//            "org.uma.jmetal.problem.multiobjective.cec2007MOAlgorithmCompetition.C3_R_DTLZ2",
-//            "org.uma.jmetal.problem.multiobjective.newDtlz.C3_RosenbrockDTLZ2",
-//            "org.uma.jmetal.problem.multiobjective.UF.C3_UF11",
-//            "org.uma.jmetal.problem.multiobjective.UF.C3_UF12",
-//            "org.uma.jmetal.problem.multiobjective.UF.C3_UF12MatlabEngineAtOneTimeEvaluation",
-//            "org.uma.jmetal.problem.multiobjective.maf.C3_MaF02",
-//            "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelLSTMVarDiff2ObjConPMV",
-//            "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelLSTMVarDiff2ObjConPMVUDP",
-            "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelVarDiff2ObjConPMV",
+//                "org.uma.jmetal.problem.multiobjective.dtlz.DTLZ1",
+//                "org.uma.jmetal.problem.multiobjective.dtlz.DTLZ2",
+//                "org.uma.jmetal.problem.multiobjective.dtlz.DTLZ3",
+//                "org.uma.jmetal.problem.multiobjective.dtlz.DTLZ4",
+//                "org.uma.jmetal.problem.multiobjective.dtlz.DTLZ5",
+//                "org.uma.jmetal.problem.multiobjective.dtlz.DTLZ6",
+//                "org.uma.jmetal.problem.multiobjective.dtlz.DTLZ7",
+//                "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ1",
+//                "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ4",
+//                "org.uma.jmetal.problem.multiobjective.cec2007MOAlgorithmCompetition.C3_S_DTLZ2",
+//                "org.uma.jmetal.problem.multiobjective.cec2007MOAlgorithmCompetition.C3_S_DTLZ3",
+//                "org.uma.jmetal.problem.multiobjective.cec2007MOAlgorithmCompetition.C3_R_DTLZ2",
+//                "org.uma.jmetal.problem.multiobjective.newDtlz.C3_RosenbrockDTLZ2",
+//                "org.uma.jmetal.problem.multiobjective.UF.C3_UF11",
+//                "org.uma.jmetal.problem.multiobjective.UF.C3_UF12",
+//                "org.uma.jmetal.problem.multiobjective.UF.C3_UF12MatlabEngineAtOneTimeEvaluation",
+//                "org.uma.jmetal.problem.multiobjective.UF.UF12MatlabEngineAtOneTimeEvaluation",
+//                "org.uma.jmetal.problem.multiobjective.maf.C3_MaF02",
+//                "org.uma.jmetal.problem.multiobjective.maf.MaF08",
+//                "org.uma.jmetal.problem.multiobjective.Water",
+//                "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelLSTMVarDiff2ObjConPMV",
+//                "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelLSTMVarDiff2ObjConPMVUDP",
+//                "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelLSTMVarDiff2ObjConPMVUDPAdjusted",
+                "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelVarDiff2ObjConPMV",
         };
         String[] referenceParetoFronts = {
-//            "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.4D.pf",
+//                "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.4D.pf",
+//                "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.4D.pf",
+//                "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.4D.pf",
+//                "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.4D.pf",
+//                "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.4D.pf",
+//                "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.4D.pf",
+//                "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.4D.pf",
+//                "jmetal-problem/src/test/resources/pareto_fronts/UF12.pf",
+                "",
+                "",
+//                "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.10D.pf",
+//                "jmetal-problem/src/test/resources/pareto_fronts/Water.pf",
 //            "jmetal-problem/src/test/resources/pareto_fronts/DTLZ4.4D.pf",
 //            "jmetal-problem/src/test/resources/pareto_fronts/DTLZ3.5D.pf",
 //            "jmetal-problem/src/test/resources/pareto_fronts/UF12.pf",
 //            "jmetal-problem/src/test/resources/pareto_fronts/DTLZ2.3D.pf",
-            "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.2D.pf",
+//            "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.2D.pf",
         };
         String[] algorithms = {
 //                "ParallelNSGAII",
@@ -77,20 +100,47 @@ public class AlgorithmRunnerRepeater {
 //                "ParallelOMOPSONDX",
 //                "ParallelOMOPSOPPS",
 //                "ParallelDirectionalOMOPSOWithSizeLimitedArchive",
-                "ParallelOMOPSODegradeLeader",
-                "ParallelOMOPSODegradeMutation",
-                "ParallelOMOPSODegradeArchiveSize",
-                "ParallelOMOPSODegradeSelection",
+//                "ParallelOMOPSODegradeLeader",
+//                "ParallelOMOPSODegradeMutation",
+//                "ParallelOMOPSODegradeArchiveSize",
+//                "ParallelOMOPSODegradeSelection",
         };
         // file names of initial solutions
         String[] initialSolutions = {
                 "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
+                "",
         };
-
         int numberOfIndividuals = 35;
         int numberOfGenerations = 500;  //2000
-        int numberOfRepeats = 1;    // 20
-        int numberOfThreads = 6;
+        int numberOfRepeats = 20;    // 20
+        int numberOfThreads = 1;
+
+        // arguments
+        if (args.length >= 1) {
+            algorithms = new String[1];
+            algorithms[0] = args[0];
+            JMetalLogger.logger.info("algorithms="+algorithms[0]);
+        }
+        if (args.length >= 2) {
+            numberOfGenerations = Integer.valueOf(args[1]);
+            JMetalLogger.logger.info("generations="+args[1]);
+        }
+        if (args.length >= 3){
+            numberOfRepeats = Integer.valueOf(args[2]);
+            JMetalLogger.logger.info("repeats="+args[2]);
+        }
+        if (args.length >= 4) {
+            numberOfThreads = Integer.valueOf(args[3]);
+            JMetalLogger.logger.info("threads="+args[3]);
+        }
 
         // run each problem and algorithms
         for (int problemNumber=0; problemNumber<problems.length; problemNumber++){
@@ -99,8 +149,16 @@ public class AlgorithmRunnerRepeater {
             String referenceParetoFront = referenceParetoFronts[problemNumber];
             String initialSolution = initialSolutions[problemNumber];
 
+            // check number of objectives for DTLZ functions
+            DoubleProblem problem;
+            if(problemName.contains("DTLZ")) {
+                Object[] problemArguments = {12, 4};
+                problem = (DoubleProblem) ProblemUtils.<DoubleSolution>loadProblem(problemName, problemArguments);
+            }else{
+                problem = (DoubleProblem) ProblemUtils.<DoubleSolution>loadProblem(problemName);
+            }
+
             // check population size for MOEA/D
-            DoubleProblem problem = (DoubleProblem) ProblemUtils.<DoubleSolution> loadProblem(problemName);
             if( problem.getNumberOfObjectives()==3 || problem.getNumberOfObjectives()==8 ) {
                 numberOfIndividuals = 36;
             }else{

@@ -70,41 +70,51 @@ public class CalculateIndicatorFromManyResultsRunner {
 //    String referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.2D.pf";
 //    String problemName = "org.uma.jmetal.problem.multiobjective.UF.C3_UF12MatlabEngineAtOneTimeEvaluation";
 //    String referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/UF12.pf";
-    String problemName =  "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelLSTMVarDiff2ObjConPMV";
+//    String problemName =  "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelLSTMVarDiff2ObjConPMV";
+//    String problemName =  "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelLSTMVarDiff2ObjConPMVUDP";
+    String problemName =  "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelVarDiff2ObjConPMV";
+//    String problemName =  "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelVarDiff2ObjConPMVCondLSTM";
+//    String problemName =  "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelLSTMVarDiff2ObjConPMVUDPAdjusted";
     String referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.2D.pf";
 
     String[] algorithms = {
-//        "ParallelNSGAII",
-//        "ParallelNSGAIIWithEpsilonArchive",
-//        "ParallelNSGAIII",
-//        "ParallelNSGAIIIWithEpsilonArchive",
-//        "ParallelConstraintMOEAD",
-//        "ParallelConstraintMOEADWithEpsilonArchive",
-//        "ParallelConstraintMOEADDEWithEpsilonArchive",
+//            "ParallelNSGAII",
+//            "ParallelNSGAIIWithEpsilonArchive",
+//            "ParallelNSGAIII",
+//            "ParallelNSGAIIIWithEpsilonArchive",
+//            "ParallelConstraintMOEAD",
+//            "ParallelConstraintMOEADDE",
+//            "ParallelConstraintMOEADWithEpsilonArchive",
+//            "ParallelConstraintMOEADDEWithEpsilonArchive",
             "ParallelOMOPSO",
-            "ParallelOMOPSORV",
-            "ParallelOMOPSOWithSizeLimitedArchive",
+//            "ParallelOMOPSO4obj",
+//            "ParallelOMOPSORV",
+//            "ParallelOMOPSOWithSizeLimitedArchive",
             "ParallelOMOPSODBT",
-            "ParallelOMOPSODBT2",
-            "ParallelOMOPSODBT3",
+//            "ParallelOMOPSODBT2",
+//            "ParallelOMOPSODBT3",
 //            "ParallelOMOPSODBT4",
 //            "ParallelOMOPSODBT5",
-//          "ParallelOMOPSORVDBT",
-//          "ParallelOMOPSORVDBT2",
-//        "ParallelOMOPSORVAOP",
-//        "ParallelOMOPSORVIBP",
-//        "ParallelOMOPSORVPPS",
-//        "ParallelOMOPSODBTDFG",
-//        "ParallelOMOPSODBTIBG",
-//        "ParallelOMOPSORVDBTDFG",
-//        "ParallelOMOPSORVDBTIBG",
-//      "ParallelDirectionalOMOPSOWithSizeLimitedArchive",
+//            "ParallelOMOPSORVDBT",
+//            "ParallelOMOPSORVDBT2",
+//            "ParallelOMOPSORVAOP",
+//            "ParallelOMOPSORVIBP",
+//            "ParallelOMOPSORVPPS",
+//            "ParallelOMOPSODBTDFG",
+//            "ParallelOMOPSODBTIBG",
+//            "ParallelOMOPSORVDBTDFG",
+//            "ParallelOMOPSORVDBTIBG",
+//            "ParallelDirectionalOMOPSOWithSizeLimitedArchive",
+//            "ParallelOMOPSODegradeLeader",
+ //           "ParallelOMOPSODegradeMutation",
+ //           "ParallelOMOPSODegradeArchiveSize",
+//            "ParallelOMOPSODegradeSelection",
     };
 
     // definition of problem
-    int numberOfIndividuals = 35;
+    int numberOfIndividuals = 35; // 35;
     int numberOfGenerations = 1000; // 2000
-    int numberOfRepeats = 1;    // 20
+    int numberOfRepeats = 20;    // 20
     int numberOfThreads = 6;
 
     DoubleProblem problem = (DoubleProblem) ProblemUtils.<DoubleSolution> loadProblem(problemName);
@@ -122,7 +132,7 @@ public class CalculateIndicatorFromManyResultsRunner {
   private String getFitnessFileName(String algorithmName, int generation)
   {
     String fileName = "fitness"+(generation+1) +".csv";
-    if(algorithmName.contains("Archive")){
+    if(algorithmName.contains("Archive") && !algorithmName.contains("Degrade")){
       fileName = "truncated" + fileName;
     }else if(algorithmName.contains("OMOPSO")){
       fileName = "epsilon" + fileName;
@@ -161,10 +171,12 @@ public class CalculateIndicatorFromManyResultsRunner {
       maximumValues.setColumn(algorithmNumber, maximumValuesOfAlgorithm.min(Matrix.DIRECTION_ROW));
     }
     // 問題に対するすべてのアルゴリズムの最大値・最小値のセットを保存
-    String extremeValueFolder = archiveFolderBase + problem.getName() +"\\";
+    String extremeValueFolder = archiveFolderBase + problem.getName();
     new File(extremeValueFolder).mkdir();
-    Csv.write(extremeValueFolder+"minimumValue.csv", minimumValues.get(), String.join(",",algorithms));
-    Csv.write(extremeValueFolder+"maximumValue.csv", maximumValues.get(), String.join(",",algorithms));
+    if( !new File(extremeValueFolder+"\\minimumValues.csv").exists() ) {  // すでにminimumValues.csvが存在したら更新しない．
+      Csv.write(extremeValueFolder + "\\minimumValues.csv", minimumValues.get(), String.join(",", algorithms));
+      Csv.write(extremeValueFolder + "\\maximumValues.csv", maximumValues.get(), String.join(",", algorithms));
+    }
   }
 
   private void calculateExtremeValuesInIterate(Matrix minimumValuesOfAlgorithm, Matrix maximumValuesOfAlgorithm, DoubleProblem problem,
@@ -267,7 +279,11 @@ public class CalculateIndicatorFromManyResultsRunner {
       }
       averagedHypervolumes.setColumn(algorithmNumber, normalizedHypervolumes.mean(Matrix.DIRECTION_ROW));
     }
-    Csv.write(hypervolumesFolder+"HV(averaged)_"+ problem.getName()+"_pop" + numberOfIndividuals + "_gen" + numberOfGenerations+".csv"  , averagedHypervolumes.get(), String.join(",", algorithms));
+    // save total experiment's Hypervolumes
+    Matrix hypervolumes = new Matrix(numberOfGenerations, 1);
+    hypervolumes.setColumn(0, new Vector(0,1, numberOfGenerations-1));
+    hypervolumes = hypervolumes.add(averagedHypervolumes, Matrix.DIRECTION_ADD_RIGHT);
+    Csv.write(hypervolumesFolder+"HV(averaged)_"+ problem.getName()+"_pop" + numberOfIndividuals + "_gen" + numberOfGenerations+".csv"  , hypervolumes.get(), ("Generation,"+String.join(",", algorithms)) );
   }
 
 
@@ -325,8 +341,8 @@ public class CalculateIndicatorFromManyResultsRunner {
       JMetalLogger.logger.info("Repeats: "+repeats);
 
       String extremeValueFolder = archiveFolderBase + problem.getName() +"\\";
-      Matrix minimumValues = new Matrix(Csv.read(extremeValueFolder+"minimumValue.csv", 1, 0));
-      Matrix maximumValues = new Matrix(Csv.read(extremeValueFolder+"maximumValue.csv", 1, 0));
+      Matrix minimumValues = new Matrix(Csv.read(extremeValueFolder+"minimumValues.csv", 1, 0));
+      Matrix maximumValues = new Matrix(Csv.read(extremeValueFolder+"maximumValues.csv", 1, 0));
 
       for (int g = 0; g < numberOfGenerations; g++) {
         if(g%10==0) JMetalLogger.logger.info("Generations: "+g);
