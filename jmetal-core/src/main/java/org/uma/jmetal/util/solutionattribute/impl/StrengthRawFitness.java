@@ -55,7 +55,11 @@ public class StrengthRawFitness <S extends Solution<?>>
     // http://www.tik.ee.ethz.ch/pisa/selectors/spea2/spea2_documentation.txt
     for (int i = 0; i < distance.length; i++) {
       Arrays.sort(distance[i]);
-      kDistance = 1.0 / (distance[i][k] + 2.0);
+      if(distance.length>1) {
+        kDistance = 1.0 / (distance[i][k] + 2.0);
+      }else{
+        kDistance = 0.0;
+      }
       solutionSet.get(i).setAttribute(getAttributeIdentifier(), rawFitness[i] + kDistance);
     }
   }

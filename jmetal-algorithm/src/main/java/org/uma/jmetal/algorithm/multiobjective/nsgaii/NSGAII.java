@@ -6,6 +6,7 @@ import org.uma.jmetal.operator.MutationOperator;
 import org.uma.jmetal.operator.SelectionOperator;
 import org.uma.jmetal.operator.impl.selection.RankingAndCrowdingSelection;
 import org.uma.jmetal.problem.Problem;
+import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.solution.Solution;
 import org.uma.jmetal.util.SolutionListUtils;
 import org.uma.jmetal.util.comparator.DominanceComparator;
@@ -28,7 +29,7 @@ public class NSGAII<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, L
   protected final SolutionListEvaluator<S> evaluator;
 
   protected int evaluations;
-  private int currentGeneration;
+  public int currentGeneration;
   protected Comparator<S> dominanceComparator ;
 
   protected int matingPoolSize;
@@ -41,8 +42,8 @@ public class NSGAII<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, L
    */
   public NSGAII(Problem<S> problem, int maxEvaluations, int populationSize,
                 int matingPoolSize, int offspringPopulationSize,
-      CrossoverOperator<S> crossoverOperator, MutationOperator<S> mutationOperator,
-      SelectionOperator<List<S>, S> selectionOperator, SolutionListEvaluator<S> evaluator) {
+                CrossoverOperator<S> crossoverOperator, MutationOperator<S> mutationOperator,
+                SelectionOperator<List<S>, S> selectionOperator, SolutionListEvaluator<S> evaluator) {
     this(problem, maxEvaluations, populationSize, matingPoolSize, offspringPopulationSize,
             crossoverOperator, mutationOperator, selectionOperator, new DominanceComparator<S>(), evaluator);
   }
@@ -52,7 +53,7 @@ public class NSGAII<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, L
   public NSGAII(Problem<S> problem, int maxEvaluations, int populationSize,
                 int matingPoolSize, int offspringPopulationSize,
                 CrossoverOperator<S> crossoverOperator, MutationOperator<S> mutationOperator,
-      SelectionOperator<List<S>, S> selectionOperator, Comparator<S> dominanceComparator,
+                SelectionOperator<List<S>, S> selectionOperator, Comparator<S> dominanceComparator,
                 SolutionListEvaluator<S> evaluator) {
     super(problem);
     this.maxEvaluations = maxEvaluations;
@@ -91,26 +92,29 @@ public class NSGAII<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, L
   @Override protected void initProgress() {
     currentGeneration = 1;
     evaluations = getMaxPopulationSize();
-    dump();
+    dump(getResult());
   }
 
   @Override protected void updateProgress() {
     currentGeneration += 1;
     evaluations += offspringPopulationSize ;
-    dump();
+    dump(getResult());
   }
 
-  protected void dump(){
-    List<S> population = getResult();
-    new SolutionListOutput(population)
-            .setVarFileOutputContext(new DefaultFileOutputContext("./result/variable" + currentGeneration + ".csv"))
-            .setFunFileOutputContext(new DefaultFileOutputContext("./result/fitness" + currentGeneration + ".csv"))
+  protected void dump(List<S> solutionList, String prefix){
+    // dump solution list in the searching
+    new SolutionListOutput(solutionList)
+            .setVarFileOutputContext(new DefaultFileOutputContext("./result/"+prefix+"variable" + currentGeneration + ".csv"))
+            .setFunFileOutputContext(new DefaultFileOutputContext("./result/"+prefix+"fitness" + currentGeneration + ".csv"))
             .setSeparator(",")
             .print();
-    new ConstraintListOutput<S>(population)
-            .setConFileOutputContext(new DefaultFileOutputContext("./result/constraint" + currentGeneration + ".csv"))
+    new ConstraintListOutput<S>(solutionList)
+            .setConFileOutputContext(new DefaultFileOutputContext("./result/"+prefix+"constraint" + currentGeneration + ".csv"))
             .setSeparator(",")
             .print();
+  }
+  protected void dump(List<S> solutionList){
+    dump(solutionList,"");
   }
 
   @Override protected boolean isStoppingConditionReached() {
@@ -155,10 +159,8 @@ public class NSGAII<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, L
   protected List<S> reproduction(List<S> matingPool) {
     int numberOfParents = crossoverOperator.getNumberOfRequiredParents() ;
 
-    checkNumberOfParents(matingPool, numberOfParents);
-
     List<S> offspringPopulation = new ArrayList<>(offspringPopulationSize);
-    for (int i = 0; i < matingPool.size(); i += numberOfParents) {
+    for (int i = 0; i < matingPool.size()-1; i += numberOfParents) {
       List<S> parents = new ArrayList<>(numberOfParents);
       for (int j = 0; j < numberOfParents; j++) {
         parents.add(population.get(i+j));

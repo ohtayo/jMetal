@@ -35,7 +35,7 @@ public class ZEBRefModelVarDiff2ObjConPMV extends AbstractDoubleProblem {
     setNumberOfVariables(19);
     setNumberOfObjectives(2);
     setNumberOfConstraints(1);
-    setName("ZEBRefModel2ObjDiffConPMV") ;
+    setName("ZEBRefModelVarDiff2ObjConPMV") ;
 
     // set limit of variables
     List<Double> lowerLimit = new ArrayList<>(getNumberOfVariables()) ;
@@ -67,7 +67,8 @@ public class ZEBRefModelVarDiff2ObjConPMV extends AbstractDoubleProblem {
 
   @Override
   public void evaluate(DoubleSolution solution)  {
-    // スレッド番号取得
+    long start = System.currentTimeMillis();
+     // スレッド番号取得
     String threadName = Thread.currentThread().getName();
     // 設計変数の変換
     List<Double> variablesList = solution.getVariables();
@@ -80,7 +81,7 @@ public class ZEBRefModelVarDiff2ObjConPMV extends AbstractDoubleProblem {
     // 快適度に制約がある問題を計算
     double[] fitness = new double[getNumberOfObjectives()];
     double[] constraints = new double[getNumberOfConstraints()];
-    EnergyPlusObjectives energyPlusObjectives = new EnergyPlusObjectives(variables);
+    EnergyPlusObjectives energyPlusObjectives = new EnergyPlusObjectives(variables).calculate();
     fitness[0] = Math.abs( energyPlusObjectives.calculateAveragePMV() );
     fitness[1] = energyPlusObjectives.calculateTotalElectricEnergy();
     constraints[0] = energyPlusObjectives.countConstraintExceededTimesOfPMV();
@@ -96,8 +97,25 @@ public class ZEBRefModelVarDiff2ObjConPMV extends AbstractDoubleProblem {
       solution.setObjective(o, normalizedFitness[o]);
     }
     constraintViolation = constraints;
-
     this.evaluateConstraints(solution);
+
+    // for debug 制約がAttributeに反映されない場合があるので，反映されていなければ無理やり値を入れる
+    OverallConstraintViolation<DoubleSolution> overallConstraintViolation;
+    overallConstraintViolation = new OverallConstraintViolation<DoubleSolution>() ;
+    double violation = overallConstraintViolation.getAttribute(solution);
+    double comfort = solution.getObjectives()[0]*2;
+    double power = solution.getObjectives()[1];
+    if( (violation==0) && ((comfort>0.5)||(power<0.18)) ){
+      JMetalLogger.logger.severe("illegal objective values.");
+      for(int o=0; o<getNumberOfObjectives(); o++) {
+        solution.setObjective(o, maxValue.get(o));
+      }
+      overallConstraintViolationDegree.setAttribute(solution, 100.0);
+      numberOfViolatedConstraints.setAttribute(solution, 1);
+
+    }
+
+    System.out.println((System.currentTimeMillis()-start)+"ms");
   }
 
   /** EvaluateConstraints() method */

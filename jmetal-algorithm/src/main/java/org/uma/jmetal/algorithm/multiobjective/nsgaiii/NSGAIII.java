@@ -50,8 +50,8 @@ public class NSGAIII<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, 
     /// NSGAIII
     numberOfDivisions = new Vector<>(1) ;
     //numberOfDivisions.add(12) ; // Default value for 3D problems
-    //numberOfDivisions.add(47) ; // test setting for 2 objective problem
-    numberOfDivisions.add(4) ; // test setting for 4 objective problem
+    numberOfDivisions.add(34) ; // test setting for 2 objective problem
+    //numberOfDivisions.add(4) ; // test setting for 4 objective problem
 
     (new ReferencePoint<S>()).generateReferencePoints(referencePoints,getProblem().getNumberOfObjectives() , numberOfDivisions);
 
@@ -87,37 +87,31 @@ public class NSGAIII<S extends Solution<?>> extends AbstractGeneticAlgorithm<S, 
   @Override
   protected void initProgress() {
     iterations = 1 ;
-    dump();
+    dump(getPopulation());
+    dump(getResult(), "nonDominated");
   }
 
   @Override
   protected void updateProgress() {
     iterations++ ;
-    dump();
+    dump(getPopulation());
+    dump(getResult(), "nonDominated");
   }
 
-  protected void dump(){
+  protected void dump(List<S> solutionList, String prefix){
     // dump solution list in the searching
-    List<S> result = getResult();
-    new SolutionListOutput(result)
-            .setVarFileOutputContext(new DefaultFileOutputContext("./result/variable" + iterations + ".csv"))
-            .setFunFileOutputContext(new DefaultFileOutputContext("./result/fitness" + iterations + ".csv"))
+    new SolutionListOutput(solutionList)
+            .setVarFileOutputContext(new DefaultFileOutputContext("./result/"+prefix+"variable" + iterations + ".csv"))
+            .setFunFileOutputContext(new DefaultFileOutputContext("./result/"+prefix+"fitness" + iterations + ".csv"))
             .setSeparator(",")
             .print();
-    new ConstraintListOutput<S>(result)
-            .setConFileOutputContext(new DefaultFileOutputContext("./result/constraint" + iterations + ".csv"))
+    new ConstraintListOutput<S>(solutionList)
+            .setConFileOutputContext(new DefaultFileOutputContext("./result/"+prefix+"constraint" + iterations + ".csv"))
             .setSeparator(",")
             .print();
-    List<S> allPopulation = getPopulation();
-    new SolutionListOutput(allPopulation)
-            .setVarFileOutputContext(new DefaultFileOutputContext("./result/variableall" + iterations + ".csv"))
-            .setFunFileOutputContext(new DefaultFileOutputContext("./result/fitnessall" + iterations + ".csv"))
-            .setSeparator(",")
-            .print();
-    new ConstraintListOutput<S>(result)
-            .setConFileOutputContext(new DefaultFileOutputContext("./result/constraintall" + iterations + ".csv"))
-            .setSeparator(",")
-            .print();
+  }
+  protected void dump(List<S> solutionList){
+    dump(solutionList,"");
   }
 
   @Override

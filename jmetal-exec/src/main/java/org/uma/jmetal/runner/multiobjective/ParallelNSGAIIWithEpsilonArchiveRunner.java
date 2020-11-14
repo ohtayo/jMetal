@@ -1,7 +1,13 @@
 package org.uma.jmetal.runner.multiobjective;
 
+import jp.ohtayo.commons.io.Csv;
+import jp.ohtayo.commons.math.Matrix;
+import jp.ohtayo.commons.util.StringUtility;
+import org.apache.commons.io.FilenameUtils;
 import org.uma.jmetal.algorithm.Algorithm;
 import org.uma.jmetal.algorithm.multiobjective.nsgaii.NSGAIIBuilder;
+import org.uma.jmetal.algorithm.multiobjective.nsgaii.NSGAIIWithEpsilonArchive;
+import org.uma.jmetal.algorithm.multiobjective.nsgaiii.NSGAIII;
 import org.uma.jmetal.operator.CrossoverOperator;
 import org.uma.jmetal.operator.MutationOperator;
 import org.uma.jmetal.operator.SelectionOperator;
@@ -40,22 +46,54 @@ public class ParallelNSGAIIWithEpsilonArchiveRunner extends AbstractAlgorithmRun
     MutationOperator<DoubleSolution> mutation;
     SelectionOperator<List<DoubleSolution>, DoubleSolution> selection;
 
-    String referenceParetoFront = "" ;
-    int numberOfThreads = 8;
-    int populationSize = 30;
-    int generationSize = 500;
-    int maxEvaluations = generationSize*populationSize;
     String problemName ;
+    int numberOfIndividuals = 35;
+    int numberOfGenerations = 400;
+    int numberOfThreads = 6;
+    String referenceParetoFront = "" ;
+    String fileNameOfInitialSolutions = "";
     if (args.length == 1) {
       problemName = args[0];
     } else if (args.length == 2) {
-      problemName = args[0] ;
-      referenceParetoFront = args[1] ;
+      problemName = args[0];
+      numberOfIndividuals = Integer.valueOf(args[1]);
+    } else if (args.length == 3){
+      problemName = args[0];
+      numberOfIndividuals = Integer.valueOf(args[1]);
+      numberOfGenerations = Integer.valueOf(args[2]);
+    } else if (args.length == 4){
+      problemName = args[0];
+      numberOfIndividuals = Integer.valueOf(args[1]);
+      numberOfGenerations = Integer.valueOf(args[2]);
+      numberOfThreads = Integer.valueOf(args[3]);
+    } else if (args.length == 5){
+      problemName = args[0];
+      numberOfIndividuals = Integer.valueOf(args[1]);
+      numberOfGenerations = Integer.valueOf(args[2]);
+      numberOfThreads = Integer.valueOf(args[3]);
+      referenceParetoFront = args[4];
+    } else if (args.length == 6){
+      problemName = args[0];
+      numberOfIndividuals = Integer.valueOf(args[1]);
+      numberOfGenerations = Integer.valueOf(args[2]);
+      numberOfThreads = Integer.valueOf(args[3]);
+      referenceParetoFront = args[4];
+      fileNameOfInitialSolutions = args[5];
     } else {
       problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelVarDiff4ObjRegretConPMV";
 //      problemName = "org.uma.jmetal.problem.multiobjective.zdt.ZDT1";
 //      referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/ZDT1.pf" ;
+//      problemName = "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ1";
+//      referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ1.4D.pf";
+      problemName = "org.uma.jmetal.problem.multiobjective.cdtlz.C3_DTLZ4";
+      problemName = "org.uma.jmetal.problem.multiobjective.cec2007MOAlgorithmCompetition.R_DTLZ2";
+//      problemName = "org.uma.jmetal.problem.multiobjective.UF.C3_UF11";
+      problemName = "org.uma.jmetal.problem.multiobjective.UF.C3_UF12";
+      referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ4.4D.pf";
     }
+
+    int maxEvaluations = numberOfGenerations*numberOfIndividuals;
+    int archiveSize = 400;
 
     problem = (DoubleProblem) ProblemUtils.<DoubleSolution> loadProblem(problemName);
 
@@ -71,12 +109,26 @@ public class ParallelNSGAIIWithEpsilonArchiveRunner extends AbstractAlgorithmRun
 
     SolutionListEvaluator<DoubleSolution> evaluator = new ThreadPoolSolutionListEvaluator<DoubleSolution>( numberOfThreads, problem ) ;
 
-    NSGAIIBuilder<DoubleSolution> builder = new NSGAIIBuilder<DoubleSolution>(problem, crossover, mutation, populationSize)
+    NSGAIIBuilder<DoubleSolution> builder = new NSGAIIBuilder<DoubleSolution>(problem, crossover, mutation, numberOfIndividuals)
         .setSelectionOperator(selection)
         .setMaxEvaluations(maxEvaluations)
         .setSolutionListEvaluator(evaluator)
+        .setArchiveSize(archiveSize)
         .setVariant(NSGAIIBuilder.NSGAIIVariant.NSGAIIWithEpsilonArchive);
     algorithm = builder.build() ;
+
+    // 初期値のファイル名の指定があれば初期値を設定
+    if(!StringUtility.isNullOrEmpty(fileNameOfInitialSolutions)) {
+      List<DoubleSolution> initialPopulation = ((NSGAIIWithEpsilonArchive<DoubleSolution>) algorithm).createInitialPopulation();
+      Matrix data = new Matrix(Csv.read(fileNameOfInitialSolutions));
+      for (int r = 0; r < initialPopulation.size(); r++) {
+        for (int c = 0; c < data.columnLength(); c++) {
+          initialPopulation.get(r).setVariableValue(c, data.get(r, c));
+        }
+      }
+      ((NSGAIIWithEpsilonArchive<DoubleSolution>) algorithm).setInitialPopulation(initialPopulation);
+      JMetalLogger.logger.info("Use initial population: "+ FilenameUtils.getName(fileNameOfInitialSolutions));
+    }
 
     AlgorithmRunner algorithmRunner = new AlgorithmRunner.Executor(algorithm)
             .execute() ;
@@ -91,7 +143,9 @@ public class ParallelNSGAIIWithEpsilonArchiveRunner extends AbstractAlgorithmRun
             .setFunFileOutputContext(new DefaultFileOutputContext("FUN.tsv"))
             .print() ;
 
-    evaluator.shutdown();
+    if (!referenceParetoFront.equals("")) {
+      printQualityIndicators(population, referenceParetoFront) ;
+    }
 
     JMetalLogger.logger.info("Total execution time: " + computingTime + "ms");
   }

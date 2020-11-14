@@ -5,6 +5,8 @@ import org.uma.jmetal.operator.impl.mutation.NonUniformMutation;
 import org.uma.jmetal.operator.impl.mutation.UniformMutation;
 import org.uma.jmetal.problem.DoubleProblem;
 import org.uma.jmetal.solution.DoubleSolution;
+import org.uma.jmetal.solution.Solution;
+import org.uma.jmetal.util.archive.Archive;
 import org.uma.jmetal.util.archive.impl.CrowdingDistanceArchive;
 import org.uma.jmetal.util.archive.impl.NonDominatedSolutionListArchive;
 import org.uma.jmetal.util.comparator.CrowdingDistanceComparator;
@@ -15,6 +17,7 @@ import org.uma.jmetal.util.fileoutput.SolutionListOutput;
 import org.uma.jmetal.util.fileoutput.impl.DefaultFileOutputContext;
 import org.uma.jmetal.util.pseudorandom.JMetalRandom;
 import org.uma.jmetal.util.solutionattribute.impl.CrowdingDistance;
+import org.uma.jmetal.util.solutionattribute.impl.OverallConstraintViolation;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -24,29 +27,29 @@ import java.util.List;
 @SuppressWarnings("serial")
 public class OMOPSO extends AbstractParticleSwarmOptimization<DoubleSolution, List<DoubleSolution>> {
 
-  private DoubleProblem problem;
+  public DoubleProblem problem;
 
   SolutionListEvaluator<DoubleSolution> evaluator;
 
-  private int swarmSize;
-  private int archiveSize;
-  private int maxIterations;
-  private int currentIteration;
+  public int swarmSize;
+  public int archiveSize;
+  public int maxIterations;
+  public int currentIteration;
 
-  private DoubleSolution[] localBest;
-  private CrowdingDistanceArchive<DoubleSolution> leaderArchive;
-  private NonDominatedSolutionListArchive<DoubleSolution> epsilonArchive;
+  public DoubleSolution[] localBest;
+  public CrowdingDistanceArchive<DoubleSolution> leaderArchive;
+  public NonDominatedSolutionListArchive<DoubleSolution> epsilonArchive;
 
-  private double[][] speed;
+  public double[][] speed;
 
-  private Comparator<DoubleSolution> dominanceComparator;
-  private Comparator<DoubleSolution> crowdingDistanceComparator;
+  public Comparator<DoubleSolution> dominanceComparator;
+  public Comparator<DoubleSolution> crowdingDistanceComparator;
 
-  private UniformMutation uniformMutation;
+  public UniformMutation uniformMutation;
   private NonUniformMutation nonUniformMutation;
 
-  private JMetalRandom randomGenerator;
-  private CrowdingDistance<DoubleSolution> crowdingDistance;
+  public JMetalRandom randomGenerator;
+  public CrowdingDistance<DoubleSolution> crowdingDistance;
 
   private List<DoubleSolution> initialSwarm;
 
@@ -83,37 +86,59 @@ public class OMOPSO extends AbstractParticleSwarmOptimization<DoubleSolution, Li
   @Override protected void initProgress() {
     currentIteration = 1;
     crowdingDistance.computeDensityEstimator(leaderArchive.getSolutionList());
-    dump();
+    dump(epsilonArchive.getSolutionList(), "epsilon");
+    dump(leaderArchive.getSolutionList());
+    dump(getSwarm(), "swarm");
+    // pBestの保存
+    List<DoubleSolution> bestParticle = new ArrayList<>();
+    for(DoubleSolution pbest : localBest) bestParticle.add(pbest);
+    dump(bestParticle, "pBest");
   }
 
   @Override protected void updateProgress() {
+    removeViolatedSolution(epsilonArchive);
+    removeViolatedSolution(leaderArchive);
     currentIteration += 1;
     crowdingDistance.computeDensityEstimator(leaderArchive.getSolutionList());
-    dump();
+    dump(epsilonArchive.getSolutionList(), "epsilon");
+    dump(leaderArchive.getSolutionList());
+    dump(getSwarm(), "swarm");
+    // pBestの保存
+    List<DoubleSolution> bestParticle = new ArrayList<>();
+    for(DoubleSolution pbest : localBest) bestParticle.add(pbest);
+    dump(bestParticle, "pBest");
   }
 
-  protected void dump(){
+  public void removeViolatedSolution(Archive archive){
+    //removeViolatedSolution(archive.getSolutionList());
+  }
+  public void removeViolatedSolution(List<DoubleSolution> solutionList){
+    for (int s = 0; s < solutionList.size(); s++) {
+      DoubleSolution solution = (DoubleSolution) solutionList.get(s);
+      OverallConstraintViolation<DoubleSolution> overallConstraintViolation = new OverallConstraintViolation<>();
+      double violationDegree = overallConstraintViolation.getAttribute(solution);
+      if (violationDegree > 0) {
+        if(solutionList.size()>1) {
+          solutionList.remove(s);
+        }
+      }
+    }
+  }
+
+  protected void dump(List<? extends Solution<?>> solutionList, String prefix){
     // dump solution list in the searching
-    List<DoubleSolution> epsilon = getResult();
-    new SolutionListOutput(epsilon)
-            .setVarFileOutputContext(new DefaultFileOutputContext("./result/epsilonPosition" + currentIteration + ".csv"))
-            .setFunFileOutputContext(new DefaultFileOutputContext("./result/epsilonFitness" + currentIteration + ".csv"))
+    new SolutionListOutput(solutionList)
+            .setVarFileOutputContext(new DefaultFileOutputContext("./result/"+prefix+"variable" + currentIteration + ".csv"))
+            .setFunFileOutputContext(new DefaultFileOutputContext("./result/"+prefix+"fitness" + currentIteration + ".csv"))
             .setSeparator(",")
             .print();
-    new ConstraintListOutput<DoubleSolution>(epsilon)
-            .setConFileOutputContext(new DefaultFileOutputContext("./result/epsilonConstraint" + currentIteration + ".csv"))
+    new ConstraintListOutput<>(solutionList)
+            .setConFileOutputContext(new DefaultFileOutputContext("./result/"+prefix+"constraint" + currentIteration + ".csv"))
             .setSeparator(",")
             .print();
-    List<DoubleSolution> leader = this.leaderArchive.getSolutionList();
-    new SolutionListOutput(leader)
-            .setVarFileOutputContext(new DefaultFileOutputContext("./result/leaderPosition" + currentIteration + ".csv"))
-            .setFunFileOutputContext(new DefaultFileOutputContext("./result/leaderFitness" + currentIteration + ".csv"))
-            .setSeparator(",")
-            .print();
-    new ConstraintListOutput<DoubleSolution>(leader)
-            .setConFileOutputContext(new DefaultFileOutputContext("./result/leaderConstraint" + currentIteration + ".csv"))
-            .setSeparator(",")
-            .print();
+  }
+  protected void dump(List<DoubleSolution> solutionList){
+    dump(solutionList,"");
   }
 
   @Override protected boolean isStoppingConditionReached() {
@@ -144,7 +169,6 @@ public class OMOPSO extends AbstractParticleSwarmOptimization<DoubleSolution, Li
   }
 
   @Override public List<DoubleSolution> getResult() {
-    //return this.leaderArchive.getSolutionList();
       return this.epsilonArchive.getSolutionList();
   }
 

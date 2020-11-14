@@ -30,6 +30,13 @@ public class C1_DTLZ3 extends DTLZ3 {
     rValue.put(8, 12.5) ;
     rValue.put(10, 15.0) ;
     rValue.put(15, 15.0) ;
+    rValue.put(2, 6.0);
+  }
+  /**
+   * Creates a default C1_DTLZ3 problem (n=13 variables (M+9) and M=4 objectives)
+   */
+  public C1_DTLZ3() {
+    this(13, 4);
   }
 
   /**
@@ -37,8 +44,9 @@ public class C1_DTLZ3 extends DTLZ3 {
    * @param numberOfVariables
    * @param numberOfObjectives
    */
-  public C1_DTLZ3(int numberOfVariables, int numberOfObjectives) {
+  public C1_DTLZ3(Integer numberOfVariables, Integer numberOfObjectives) {
     super(numberOfVariables, numberOfObjectives) ;
+    setName("C1_DTLZ3");
 
     setNumberOfConstraints(1);
 
@@ -55,13 +63,15 @@ public class C1_DTLZ3 extends DTLZ3 {
   private void evaluateConstraints(DoubleSolution solution) {
     double[] constraint = new double[this.getNumberOfConstraints()];
 
-    double sum1 = 0 ;
-    double sum2 = 0 ;
-    for (int i = 0; i < getNumberOfObjectives(); i++) {
-      double v = Math.pow(solution.getObjective(i), 2) ;
-      sum1 += v - 16.0 ;
-      sum2 += v - Math.pow(rValue.get(getNumberOfObjectives()), 2.0) ;
-    }
+        double sum1 = 0;
+        double sum2 = 0;
+        for (int i = 0; i < getNumberOfObjectives(); i++) {
+            double v = Math.pow(solution.getObjective(i), 2);
+            sum1 += v;
+            sum2 += v;
+        }
+        sum1 -= 16.0;
+        sum2 -= Math.pow(rValue.get(getNumberOfObjectives()), 2.0);
 
     constraint[0] = sum1 * sum2;
 

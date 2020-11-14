@@ -4,6 +4,7 @@ import org.uma.jmetal.algorithm.multiobjective.moead.util.MOEADUtils;
 import org.uma.jmetal.operator.CrossoverOperator;
 import org.uma.jmetal.operator.MutationOperator;
 import org.uma.jmetal.operator.impl.crossover.DifferentialEvolutionCrossover;
+import org.uma.jmetal.operator.impl.crossover.SBXCrossover;
 import org.uma.jmetal.problem.Problem;
 import org.uma.jmetal.solution.DoubleSolution;
 import org.uma.jmetal.util.comparator.impl.ViolationThresholdComparator;
@@ -16,14 +17,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This class implements a parallel version of the MOEAD algorithm.
+ * This class implements a parallel version of the MOEA/D-DE algorithm.
 
  * @author ohtayo <ohta.yoshihiro@outlook.jp>
  */
 @SuppressWarnings("serial")
 public class ParallelConstraintMOEAD extends AbstractMOEAD<DoubleSolution>  {
 
-  protected DifferentialEvolutionCrossover differentialEvolutionCrossover ;
+  protected SBXCrossover sbxCrossover ;
   protected ViolationThresholdComparator<DoubleSolution> violationThresholdComparator ;
   protected SolutionListEvaluator<DoubleSolution> evaluator;
   protected List<DoubleSolution> initialPopulation;
@@ -44,7 +45,7 @@ public class ParallelConstraintMOEAD extends AbstractMOEAD<DoubleSolution>  {
         dataDirectory, neighborhoodSelectionProbability, maximumNumberOfReplacedSolutions,
         neighborSize);
 
-    differentialEvolutionCrossover = (DifferentialEvolutionCrossover)crossoverOperator ;
+    sbxCrossover = (SBXCrossover)crossoverOperator ;
     violationThresholdComparator = new ViolationThresholdComparator<DoubleSolution>() ;
     this.evaluator = evaluator;
     this.initialPopulation = null;
@@ -55,11 +56,11 @@ public class ParallelConstraintMOEAD extends AbstractMOEAD<DoubleSolution>  {
     initializeNeighborhood();
     initializePopulation();
     idealPoint.update(population);
-    dump();
 
     violationThresholdComparator.updateThreshold(population);
 
     evaluations = populationSize ;
+    dump(getResult());
 
     do {
       int[] permutation = new int[populationSize];
@@ -76,9 +77,9 @@ public class ParallelConstraintMOEAD extends AbstractMOEAD<DoubleSolution>  {
         NeighborType neighborType = chooseNeighborType();
         neighborTypes.add(neighborType);
         List<DoubleSolution> parents = parentSelection(subProblemId, neighborType);
+        parents.remove(parents.size()-1); // 末尾の要素を削除
 
-        differentialEvolutionCrossover.setCurrentSolution(population.get(subProblemId));
-        List<DoubleSolution> children = differentialEvolutionCrossover.execute(parents);
+        List<DoubleSolution> children = sbxCrossover.execute(parents);
 
         DoubleSolution child = children.get(0);
         mutationOperator.execute(child);
@@ -96,7 +97,7 @@ public class ParallelConstraintMOEAD extends AbstractMOEAD<DoubleSolution>  {
       }
 
       violationThresholdComparator.updateThreshold(population);
-      dump();
+      dump(getResult());
 
     } while (evaluations < maxEvaluations);
   }
@@ -108,19 +109,20 @@ public class ParallelConstraintMOEAD extends AbstractMOEAD<DoubleSolution>  {
     return children;
   }
 
-  protected void dump()
-  {
+  protected void dump(List<DoubleSolution> solutionList, String prefix){
     // dump solution list in the searching
-    List<DoubleSolution> result = getResult();
-    new SolutionListOutput(result)
-            .setVarFileOutputContext(new DefaultFileOutputContext("./result/variable" + Integer.valueOf(evaluations/populationSize) + ".csv"))
-            .setFunFileOutputContext(new DefaultFileOutputContext("./result/fitness" + Integer.valueOf(evaluations/populationSize) + ".csv"))
-            .setSeparator(",")
-            .print();
-    new ConstraintListOutput<DoubleSolution>(result)
-            .setConFileOutputContext(new DefaultFileOutputContext("./result/constraint" + Integer.valueOf(evaluations/populationSize)  + ".csv"))
-            .setSeparator(",")
-            .print();
+    new SolutionListOutput(solutionList)
+        .setVarFileOutputContext(new DefaultFileOutputContext("./result/"+prefix+"variable" + Integer.valueOf(evaluations/populationSize)  + ".csv"))
+        .setFunFileOutputContext(new DefaultFileOutputContext("./result/"+prefix+"fitness" + Integer.valueOf(evaluations/populationSize)  + ".csv"))
+        .setSeparator(",")
+        .print();
+    new ConstraintListOutput<DoubleSolution>(solutionList)
+        .setConFileOutputContext(new DefaultFileOutputContext("./result/"+prefix+"constraint" + Integer.valueOf(evaluations/populationSize)  + ".csv"))
+        .setSeparator(",")
+        .print();
+  }
+  protected void dump(List<DoubleSolution> solutionList){
+    dump(solutionList,"");
   }
 
   public void setInitialPopulation(List<DoubleSolution> initialPopulation) {

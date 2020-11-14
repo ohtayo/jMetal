@@ -69,7 +69,20 @@ public class PISAHypervolume<S extends Solution<?>> extends Hypervolume<S> {
       throw new JMetalException("The pareto front approximation is null") ;
     }
 
-    return hypervolume(new ArrayFront(paretoFrontApproximation), referenceParetoFront);  }
+    return hypervolume(new ArrayFront(paretoFrontApproximation), referenceParetoFront);
+  }
+  /**
+   * Evaluate() method
+   * @param paretoFrontApproximation
+   * @return
+   */
+  public Double evaluate(List<S> paretoFrontApproximation, int numberOfObjectives) {
+    if (paretoFrontApproximation == null) {
+      throw new JMetalException("The pareto front approximation is null") ;
+    }
+
+    return hypervolume(new ArrayFront(paretoFrontApproximation), numberOfObjectives);
+  }
 
   /*
    returns true if 'point1' dominates 'points2' with respect to the
@@ -212,6 +225,21 @@ public class PISAHypervolume<S extends Solution<?>> extends Hypervolume<S> {
     invertedFront = FrontUtils.getInvertedFront(front);
 
     int numberOfObjectives = referenceFront.getPoint(0).getDimension() ;
+
+    // STEP4. The hypervolume (control is passed to the Java version of Zitzler code)
+    return this.calculateHypervolume(FrontUtils.convertFrontToArray(invertedFront),
+        invertedFront.getNumberOfPoints(), numberOfObjectives);
+  }
+  /**
+   * Returns the hypervolume value of a front of points
+   *
+   * @param front        The front
+   * @param numberOfObjectives    The true pareto front
+   */
+  private double hypervolume(Front front, int numberOfObjectives) {
+
+    Front invertedFront;
+    invertedFront = FrontUtils.getInvertedFront(front);
 
     // STEP4. The hypervolume (control is passed to the Java version of Zitzler code)
     return this.calculateHypervolume(FrontUtils.convertFrontToArray(invertedFront),

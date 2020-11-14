@@ -17,14 +17,21 @@ import org.uma.jmetal.util.solutionattribute.impl.OverallConstraintViolation;
 public class C3_DTLZ1 extends DTLZ1 {
   public OverallConstraintViolation<DoubleSolution> overallConstraintViolationDegree ;
   public NumberOfViolatedConstraints<DoubleSolution> numberOfViolatedConstraints ;
+  /**
+   * Creates a default C3_DTLZ1 problem (n=8 variables (M+4), M=4 objectives and 1 constraints)
+   */
+  public C3_DTLZ1() {
+    this(8, 4, 1);
+  }
 
   /**
    * Constructor
    * @param numberOfVariables
    * @param numberOfObjectives
    */
-  public C3_DTLZ1(int numberOfVariables, int numberOfObjectives, int numberOfConstraints) {
+  public C3_DTLZ1(Integer numberOfVariables, Integer numberOfObjectives, Integer numberOfConstraints) {
     super(numberOfVariables, numberOfObjectives) ;
+    setName("C3_DTLZ1");
 
     setNumberOfConstraints(numberOfConstraints);
 
@@ -42,13 +49,12 @@ public class C3_DTLZ1 extends DTLZ1 {
     double[] constraint = new double[this.getNumberOfConstraints()];
 
     for (int j = 0; j < getNumberOfConstraints(); j++) {
-      double sum = 0 ;
-      constraint[j] = 0.0 ;
+      constraint[j] = 0.0;
       for (int i = 0; i < getNumberOfObjectives(); i++) {
         if (i != j) {
-          sum += solution.getObjective(j) ;
+          constraint[j] += solution.getObjective(j) + solution.getObjective(i) / 0.5 - 1.0;
         }
-        constraint[j]+= sum + solution.getObjective(i)/0.5 - 1.0 ;
+
       }
     }
 

@@ -17,14 +17,21 @@ import org.uma.jmetal.util.solutionattribute.impl.OverallConstraintViolation;
 public class C3_DTLZ4 extends DTLZ4 {
   public OverallConstraintViolation<DoubleSolution> overallConstraintViolationDegree ;
   public NumberOfViolatedConstraints<DoubleSolution> numberOfViolatedConstraints ;
+  /**
+   * Creates a default C3_DTLZ4 problem (n=8 variables (M+4), M=4 objectives and 1 constraints)
+   */
+  public C3_DTLZ4() {
+    this(8, 4, 1);
+  }
 
   /**
    * Constructor
    * @param numberOfVariables
    * @param numberOfObjectives
    */
-  public C3_DTLZ4(int numberOfVariables, int numberOfObjectives, int numberOfConstraints) {
+  public C3_DTLZ4(Integer numberOfVariables, Integer numberOfObjectives, Integer numberOfConstraints) {
     super(numberOfVariables, numberOfObjectives) ;
+    setName("C3_DTLZ4");
 
     setNumberOfConstraints(numberOfConstraints);
 
@@ -48,7 +55,7 @@ public class C3_DTLZ4 extends DTLZ4 {
         if (i != j) {
           sum += Math.pow(solution.getObjective(j), 2.0) ;
         }
-        constraint[j ]+= sum ;
+        constraint[j]+= sum ;
       }
     }
 

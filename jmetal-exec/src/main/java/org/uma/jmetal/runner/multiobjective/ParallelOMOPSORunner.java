@@ -1,6 +1,9 @@
 package org.uma.jmetal.runner.multiobjective;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.List;
+import java.util.Objects;
 
 import org.uma.jmetal.algorithm.Algorithm;
 import org.uma.jmetal.algorithm.multiobjective.omopso.OMOPSO;
@@ -15,6 +18,7 @@ import org.uma.jmetal.util.JMetalException;
 import org.uma.jmetal.util.JMetalLogger;
 import org.uma.jmetal.util.ProblemUtils;
 import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
+import org.uma.jmetal.util.evaluator.impl.AtOneTimeSolutionListEvaluator;
 import org.uma.jmetal.util.evaluator.impl.ThreadPoolSolutionListEvaluator;
 
 import org.apache.commons.io.FilenameUtils;
@@ -36,65 +40,97 @@ public class ParallelOMOPSORunner extends AbstractAlgorithmRunner {
    * Invoking command:
   java org.uma.jmetal.runner.multiobjective.ParallelOMOPSORunner problemName [referenceFront]
    */
-  public static void main(String[] args) throws JMetalException {
+  public static void main(String[] args) throws JMetalException, FileNotFoundException {
     // 変数定義
     DoubleProblem problem;
     Algorithm<List<DoubleSolution>> algorithm;
 
     // 引数処理：目的関数，参照パレートフロント，スレッド数の決定
     String problemName;
+    int numberOfParticles = 100;
+    int numberOfIterations = 100;
     int numberOfThreads = 1;
-    int iterations = 100;
-    int particles = 100;
+    String referenceParetoFront = "";
     String fileNameOfInitialSolutions = "";
+    OMOPSOBuilder.OMOPSOVariant variant = null;
     if (args.length == 1) {
       problemName = args[0];
     } else if (args.length == 2) {
       problemName = args[0];
-      numberOfThreads = Integer.valueOf(args[1]);
+      numberOfParticles = Integer.valueOf(args[1]);
     } else if (args.length == 3){
       problemName = args[0];
-      numberOfThreads = Integer.valueOf(args[1]);
-      iterations = Integer.valueOf(args[2]);
+      numberOfParticles = Integer.valueOf(args[1]);
+      numberOfIterations = Integer.valueOf(args[2]);
     } else if (args.length == 4){
       problemName = args[0];
-      numberOfThreads = Integer.valueOf(args[1]);
-      iterations = Integer.valueOf(args[2]);
-      particles = Integer.valueOf(args[3]);
+      numberOfParticles = Integer.valueOf(args[1]);
+      numberOfIterations = Integer.valueOf(args[2]);
+      numberOfThreads = Integer.valueOf(args[3]);
     } else if (args.length == 5){
       problemName = args[0];
-      numberOfThreads = Integer.valueOf(args[1]);
-      iterations = Integer.valueOf(args[2]);
-      particles = Integer.valueOf(args[3]);
-      fileNameOfInitialSolutions = args[4];
+      numberOfParticles = Integer.valueOf(args[1]);
+      numberOfIterations = Integer.valueOf(args[2]);
+      numberOfThreads = Integer.valueOf(args[3]);
+      referenceParetoFront = args[4];
+    } else if (args.length == 6){
+      problemName = args[0];
+      numberOfParticles = Integer.valueOf(args[1]);
+      numberOfIterations = Integer.valueOf(args[2]);
+      numberOfThreads = Integer.valueOf(args[3]);
+      referenceParetoFront = args[4];
+      fileNameOfInitialSolutions = args[5];
+    } else if (args.length == 7){
+      problemName = args[0];
+      numberOfParticles = Integer.valueOf(args[1]);
+      numberOfIterations = Integer.valueOf(args[2]);
+      numberOfThreads = Integer.valueOf(args[3]);
+      referenceParetoFront = args[4];
+      fileNameOfInitialSolutions = args[5];
+      variant = OMOPSOBuilder.OMOPSOVariant.valueOf(args[6]);
     } else {
-      problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelVarDiff2ObjConPMV";
-//      problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelLSTMVarDiff2ObjConPMV";
-//      problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModel4ObjDiffConPMV";
-//      problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelVarDiff4ObjRegretConPMV";
-//      problemName = "org.uma.jmetal.problem.multiobjective.zdt.ZDT1";
-      numberOfThreads = 6;
-      iterations = 500;
-      particles = 30;
+//      problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelVarDiff2ObjConPMVf104";
+      problemName = "org.uma.jmetal.problem.multiobjective.ep.VRF5ZoneModelVarDiff2ObjConPMV";
+//      problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelLSTMVarDiff2ObjConPMVUDPAdjusted";
+//      problemName = "org.uma.jmetal.problem.multiobjective.ep.ZEBRefModelLSTMVarDiff4ObjRegretConPMVUDPAdjusted";
+      referenceParetoFront = "jmetal-problem/src/test/resources/pareto_fronts/DTLZ4.4D.pf";
+      numberOfThreads = 3;
+      numberOfIterations = 500;
+      numberOfParticles = 35;
       fileNameOfInitialSolutions = "";
       //fileNameOfInitialSolutions = "C:\\workspace\\jMetal\\initialSolutions.csv";
     }
 
     // 目的関数の定義
-    problem = (DoubleProblem) ProblemUtils.<DoubleSolution> loadProblem(problemName);
-
+    if(problemName.contains("DTLZ")) {
+      Object[] problemArguments = {12, 4};
+      problem = (DoubleProblem) ProblemUtils.<DoubleSolution>loadProblem(problemName, problemArguments);
+    }else{
+      problem = (DoubleProblem) ProblemUtils.<DoubleSolution>loadProblem(problemName);
+    }
     // 突然変異確率
     double mutationProbability = 1.0 / problem.getNumberOfVariables() ;
 
     // マルチスレッドの評価クラスの設定
-    SolutionListEvaluator<DoubleSolution> evaluator = new ThreadPoolSolutionListEvaluator<DoubleSolution>( numberOfThreads, problem ) ;
+    SolutionListEvaluator<DoubleSolution> evaluator;
+    if(problemName.contains("AtOneTime")) {
+      evaluator = new AtOneTimeSolutionListEvaluator();
+    }else{
+      evaluator = new ThreadPoolSolutionListEvaluator<DoubleSolution>(numberOfThreads, problem);
+    }
 
     // OMOPSOのパラメータ定義
     OMOPSOBuilder builder = new OMOPSOBuilder(problem, evaluator)
-            .setMaxIterations(iterations)
-            .setSwarmSize(particles)
+            .setMaxIterations(numberOfIterations)
+            .setSwarmSize(numberOfParticles)
             .setUniformMutation(new UniformMutation(mutationProbability, 0.5))
-            .setNonUniformMutation(new NonUniformMutation(mutationProbability, 0.5, iterations));
+            .setNonUniformMutation(new NonUniformMutation(mutationProbability, 0.5, numberOfIterations));
+
+    // OMOPSO拡張アルゴリズムの指定
+    if( Objects.nonNull(variant) ){
+      builder = builder.setVariant(variant);
+    }
+
     algorithm = builder.build();
 
     // 初期値のファイル名の指定があれば初期値を設定
@@ -125,5 +161,8 @@ public class ParallelOMOPSORunner extends AbstractAlgorithmRunner {
 
     // 最終解の出力
     printFinalSolutionSet(population);
+    if (!referenceParetoFront.equals("")) {
+      printQualityIndicators(population, referenceParetoFront);
+    }
   }
 }

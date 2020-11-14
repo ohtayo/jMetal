@@ -3,6 +3,7 @@ package org.uma.jmetal.util;
 import org.uma.jmetal.problem.Problem;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Objects;
 
 /**
  * @author Antonio J. Nebro <antonio@lcc.uma.es>
@@ -15,10 +16,18 @@ public class ProblemUtils {
    * @return An instance of the problem
    */
   @SuppressWarnings("unchecked")
-  public static <S> Problem<S> loadProblem(String problemName) {
+  public static <S> Problem<S> loadProblem(String problemName, Object[] args) {
     Problem<S> problem ;
     try {
-      problem = (Problem<S>)Class.forName(problemName).getConstructor().newInstance() ;
+      if(Objects.isNull(args)) {
+        problem = (Problem<S>) Class.forName(problemName).getConstructor().newInstance();
+      }else {
+        Class[] classes = new Class[args.length];
+        for (int i = 0; i < args.length; i++) {
+          classes[i] = args[i].getClass();
+        }
+        problem = (Problem<S>) Class.forName(problemName).getConstructor(classes).newInstance(args);
+      }
     } catch (InstantiationException e) {
       throw new JMetalException("newInstance() cannot instantiate (abstract class)", e) ;
     } catch (IllegalAccessException e) {
@@ -33,4 +42,10 @@ public class ProblemUtils {
 
     return problem ;
   }
+
+  public static <S> Problem<S> loadProblem(String problemName) {
+    return loadProblem(problemName, null);
+  }
+
+
 }

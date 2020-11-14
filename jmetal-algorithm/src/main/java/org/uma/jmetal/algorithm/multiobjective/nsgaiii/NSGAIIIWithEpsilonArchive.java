@@ -1,97 +1,77 @@
 package org.uma.jmetal.algorithm.multiobjective.nsgaiii;
 
-import org.uma.jmetal.algorithm.impl.AbstractGeneticAlgorithm;
 import org.uma.jmetal.algorithm.multiobjective.nsgaiii.util.EnvironmentalSelection;
-import org.uma.jmetal.algorithm.multiobjective.nsgaiii.util.ReferencePoint;
 import org.uma.jmetal.solution.Solution;
-import org.uma.jmetal.util.JMetalLogger;
-import org.uma.jmetal.util.SolutionListUtils;
 import org.uma.jmetal.util.archive.impl.NonDominatedSolutionListArchive;
 import org.uma.jmetal.util.comparator.DominanceComparator;
-import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
-import org.uma.jmetal.util.fileoutput.ConstraintListOutput;
-import org.uma.jmetal.util.fileoutput.SolutionListOutput;
-import org.uma.jmetal.util.fileoutput.impl.DefaultFileOutputContext;
 import org.uma.jmetal.util.solutionattribute.Ranking;
-import org.uma.jmetal.util.solutionattribute.impl.DominanceRanking;
+import org.uma.jmetal.util.solutionattribute.impl.StrengthRawFitness;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 /**
  * @author ohtayo <ohta.yoshihiro@outlook.jp>
  */
 @SuppressWarnings("serial")
 public class NSGAIIIWithEpsilonArchive<S extends Solution<?>> extends NSGAIII<S> {
-  private NonDominatedSolutionListArchive<S> epsilonArchive;
   private double eta = 0.0075;
+  private NonDominatedSolutionListArchive<S> epsilonArchive;  // epsilon archive
+  private NonDominatedSolutionListArchive<S> temporaryArchive;  // 一時アーカイブ
+  private List<S> truncatedArchive; // SPEA2の端切りアーカイブ
+  private StrengthRawFitness<S> strengthRawFitness; // SPEA2の適合度
+  private org.uma.jmetal.algorithm.multiobjective.spea2.util.EnvironmentalSelection<S> environmentalSelection; // SPEA2の環境選択
 
   /** Constructor */
   public NSGAIIIWithEpsilonArchive(NSGAIIIBuilder<S> builder) { // can be created from the NSGAIIIBuilder within the same package
-    super(builder) ;
+    super(builder);
     epsilonArchive = new NonDominatedSolutionListArchive<S>(new DominanceComparator<S>(eta));
+    truncatedArchive = new ArrayList<>(builder.getArchiveSize());
+    strengthRawFitness = new StrengthRawFitness<S>();
+    environmentalSelection = new org.uma.jmetal.algorithm.multiobjective.spea2.util.EnvironmentalSelection<S>(builder.getArchiveSize());
   }
+
   public void setEta(double eta) {
     this.eta = eta ;
     epsilonArchive = new NonDominatedSolutionListArchive<S>(new DominanceComparator<S>(eta));
   }
+
   public double getEta(){
     return eta;
   }
-
 
   @Override
   protected void initProgress() {
     iterations = 1 ;
     updateArchive(population);
-    dump();
+    dump(getPopulation());
+    dump(getResult(), "nonDominated");
+    dump(epsilonArchive.getSolutionList(), "epsilon");
+    dump(truncatedArchive, "truncated");
   }
 
   @Override
   protected void updateProgress() {
     iterations++ ;
-    dump();
-  }
-  protected void updateArchive(List<S> population)
-  {
-    for (S solution : population){
-      epsilonArchive.add((S) solution.copy());
-    }
+    dump(getPopulation());
+    dump(getResult(), "nonDominated");
+    dump(epsilonArchive.getSolutionList(), "epsilon");
+    dump(truncatedArchive, "truncated");
   }
 
-  protected void dump(){
-    // dump solution list in the searching
-    List<S> result = getResult();
-    new SolutionListOutput(result)
-            .setVarFileOutputContext(new DefaultFileOutputContext("./result/variable" + iterations + ".csv"))
-            .setFunFileOutputContext(new DefaultFileOutputContext("./result/fitness" + iterations + ".csv"))
-            .setSeparator(",")
-            .print();
-    new ConstraintListOutput<S>(result)
-            .setConFileOutputContext(new DefaultFileOutputContext("./result/constraint" + iterations + ".csv"))
-            .setSeparator(",")
-            .print();
-    List<S> allPopulation = getPopulation();
-    new SolutionListOutput(allPopulation)
-            .setVarFileOutputContext(new DefaultFileOutputContext("./result/variableall" + iterations + ".csv"))
-            .setFunFileOutputContext(new DefaultFileOutputContext("./result/fitnessall" + iterations + ".csv"))
-            .setSeparator(",")
-            .print();
-    new ConstraintListOutput<S>(result)
-            .setConFileOutputContext(new DefaultFileOutputContext("./result/constraintall" + iterations + ".csv"))
-            .setSeparator(",")
-            .print();
-    List<S> epsilon = epsilonArchive.getSolutionList();
-    new SolutionListOutput(epsilon)
-        .setVarFileOutputContext(new DefaultFileOutputContext("./result/epsilonVariable" + iterations + ".csv"))
-        .setFunFileOutputContext(new DefaultFileOutputContext("./result/epsilonFitness" + iterations + ".csv"))
-        .setSeparator(",")
-        .print();
-    new ConstraintListOutput<S>(epsilon)
-        .setConFileOutputContext(new DefaultFileOutputContext("./result/epsilonConstraint" + iterations + ".csv"))
-        .setSeparator(",")
-        .print();
+  protected void updateArchive(List<S> population)
+  {
+    temporaryArchive = new NonDominatedSolutionListArchive<S>(new DominanceComparator<S>(eta));
+    for (S solution : truncatedArchive){
+      temporaryArchive.add((S) solution.copy());
+    }
+    for (S solution : population){
+      temporaryArchive.add((S) solution.copy());
+      epsilonArchive.add((S) solution.copy());
+    }
+    List<S> union = temporaryArchive.getSolutionList();
+    strengthRawFitness.computeDensityEstimator(union);
+    truncatedArchive = environmentalSelection.execute(union);
   }
 
   @Override

@@ -1,6 +1,7 @@
 package org.uma.jmetal.algorithm.multiobjective.moead;
 
 import org.uma.jmetal.algorithm.multiobjective.moead.util.MOEADUtils;
+import org.uma.jmetal.algorithm.multiobjective.spea2.util.EnvironmentalSelection;
 import org.uma.jmetal.operator.CrossoverOperator;
 import org.uma.jmetal.operator.MutationOperator;
 import org.uma.jmetal.operator.impl.crossover.DifferentialEvolutionCrossover;
@@ -13,24 +14,30 @@ import org.uma.jmetal.util.evaluator.SolutionListEvaluator;
 import org.uma.jmetal.util.fileoutput.ConstraintListOutput;
 import org.uma.jmetal.util.fileoutput.SolutionListOutput;
 import org.uma.jmetal.util.fileoutput.impl.DefaultFileOutputContext;
+import org.uma.jmetal.util.solutionattribute.impl.StrengthRawFitness;
 
 import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This class implements a parallel version of the MOEAD algorithm.
+ * This class implements a parallel version of the MOEA/D-DE algorithm.
 
  * @author ohtayo <ohta.yoshihiro@outlook.jp>
  */
 @SuppressWarnings("serial")
 public class ParallelConstraintMOEADWithEpsilonArchive extends ParallelConstraintMOEAD  {
-  private NonDominatedSolutionListArchive<DoubleSolution> epsilonArchive;
   private double eta = 0.0075;
+  private NonDominatedSolutionListArchive<DoubleSolution> epsilonArchive;
+  private NonDominatedSolutionListArchive<DoubleSolution> temporaryArchive;
+  private List<DoubleSolution> truncatedArchive;
+  private StrengthRawFitness<DoubleSolution> strengthRawFitness;
+  private EnvironmentalSelection<DoubleSolution> environmentalSelection;
 
   public ParallelConstraintMOEADWithEpsilonArchive(Problem<DoubleSolution> problem,
                                                    int populationSize,
                                                    int resultPopulationSize,
+                                                   int archiveSize,
                                                    int maxEvaluations,
                                                    MutationOperator<DoubleSolution> mutation,
                                                    CrossoverOperator<DoubleSolution> crossover,
@@ -44,32 +51,48 @@ public class ParallelConstraintMOEADWithEpsilonArchive extends ParallelConstrain
         dataDirectory, neighborhoodSelectionProbability, maximumNumberOfReplacedSolutions,
         neighborSize, evaluator);
     epsilonArchive = new NonDominatedSolutionListArchive<DoubleSolution>(new DominanceComparator<DoubleSolution>(eta));
+    truncatedArchive = new ArrayList<>(archiveSize);
+    strengthRawFitness = new StrengthRawFitness<DoubleSolution>();
+    environmentalSelection = new EnvironmentalSelection<DoubleSolution>(archiveSize);
   }
 
   public void setEta(double eta) {
     this.eta = eta ;
     epsilonArchive = new NonDominatedSolutionListArchive<DoubleSolution>(new DominanceComparator<DoubleSolution>(eta));
   }
+
   public double getEta(){
     return eta;
   }
+
   protected void updateArchive(List<DoubleSolution> population)
   {
+    temporaryArchive = new NonDominatedSolutionListArchive<DoubleSolution>(new DominanceComparator<DoubleSolution>(eta));
+    for (DoubleSolution solution : truncatedArchive){
+      temporaryArchive.add((DoubleSolution) solution.copy());
+    }
     for (DoubleSolution solution : population){
+      temporaryArchive.add((DoubleSolution) solution.copy());
       epsilonArchive.add((DoubleSolution) solution.copy());
     }
+    List<DoubleSolution> union = temporaryArchive.getSolutionList();
+    strengthRawFitness.computeDensityEstimator(union);
+    truncatedArchive = environmentalSelection.execute(union);
   }
+
   @Override public void run() {
     initializeUniformWeight();
     initializeNeighborhood();
     initializePopulation();
     idealPoint.update(population);
     updateArchive(population);
-    dump();
 
     violationThresholdComparator.updateThreshold(population);
 
     evaluations = populationSize ;
+    dump(getResult());
+    dump(epsilonArchive.getSolutionList(), "epsilon");
+    dump(truncatedArchive, "truncated");
 
     do {
       int[] permutation = new int[populationSize];
@@ -85,10 +108,10 @@ public class ParallelConstraintMOEADWithEpsilonArchive extends ParallelConstrain
 
         NeighborType neighborType = chooseNeighborType();
         neighborTypes.add(neighborType);
-        List<DoubleSolution> parents = parentSelection(subProblemId, neighborType);
+        List<DoubleSolution> parents = parentSelection(subProblemId, neighborType); // MOEA/Dは3つの親を生成する．SBXは2つ親を必要とするので要素を1つ削除する．
+        parents.remove(parents.size()-1); // 末尾の要素を削除
 
-        differentialEvolutionCrossover.setCurrentSolution(population.get(subProblemId));
-        List<DoubleSolution> children = differentialEvolutionCrossover.execute(parents);
+        List<DoubleSolution> children = sbxCrossover.execute(parents);
 
         DoubleSolution child = children.get(0);
         mutationOperator.execute(child);
@@ -107,35 +130,11 @@ public class ParallelConstraintMOEADWithEpsilonArchive extends ParallelConstrain
 
       violationThresholdComparator.updateThreshold(population);
       updateArchive(childrenPool);
-      dump();
+      dump(getResult());
+      dump(epsilonArchive.getSolutionList(), "epsilon");
+      dump(truncatedArchive, "truncated");
 
     } while (evaluations < maxEvaluations);
-  }
-
-  @Override
-  protected void dump()
-  {
-    // dump solution list in the searching
-    List<DoubleSolution> result = getResult();
-    new SolutionListOutput(result)
-            .setVarFileOutputContext(new DefaultFileOutputContext("./result/variable" + Integer.valueOf(evaluations/populationSize) + ".csv"))
-            .setFunFileOutputContext(new DefaultFileOutputContext("./result/fitness" + Integer.valueOf(evaluations/populationSize) + ".csv"))
-            .setSeparator(",")
-            .print();
-    new ConstraintListOutput<DoubleSolution>(result)
-            .setConFileOutputContext(new DefaultFileOutputContext("./result/constraint" + Integer.valueOf(evaluations/populationSize)  + ".csv"))
-            .setSeparator(",")
-            .print();
-    List<DoubleSolution> epsilon = epsilonArchive.getSolutionList();
-    new SolutionListOutput(epsilon)
-            .setVarFileOutputContext(new DefaultFileOutputContext("./result/epsilonVariable" + Integer.valueOf(evaluations/populationSize) + ".csv"))
-            .setFunFileOutputContext(new DefaultFileOutputContext("./result/epsilonFitness" + Integer.valueOf(evaluations/populationSize) + ".csv"))
-            .setSeparator(",")
-            .print();
-    new ConstraintListOutput<DoubleSolution>(epsilon)
-            .setConFileOutputContext(new DefaultFileOutputContext("./result/epsilonConstraint" + Integer.valueOf(evaluations/populationSize) + ".csv"))
-            .setSeparator(",")
-            .print();
   }
 
   @Override public String getName() {
